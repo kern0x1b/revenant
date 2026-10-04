@@ -672,12 +672,24 @@ class JumpTables {
     if (!width || width > 8) {
       return;
     }
-    bool accepted = false;
     for (uint64_t i = 0; i < limit; ++i) {
-      // Stop once the index leaves the domain the guards admit — the table only covers the
-      // range the range check lets through; reads past it are unrelated memory. The domain is
-      // contiguous, so before entering it (a switch whose normalised index starts above 0) we
-      // keep scanning within the cap, but once we have entered and then left it we are done.
+      // Every index in [0, limit) the guards admit is read, with no early exit on leaving a
+      // once-entered domain: reviewed 2026-09-27 (chasing the demo's counts.sorted{} fault) --
+      // an earlier version of this loop broke out the moment a previously-accepted run of indices
+      // left the guarded domain, on the assumption that the domain is one contiguous range. It is
+      // not, in general: swift::Demangle::__runtime::getUnspecialized guards its table dispatch
+      // with `(kind - 13) unsigned >= 6` (excluding the contiguous hole [13, 18], handled by a
+      // separate, earlier special case) *and then* `kind <= 0x10f` before the table load, so the
+      // admitted domain is {0..12} ∪ {19..271} — two ranges with a gap. The old code accepted
+      // indices 0..12, then broke the instant it saw 13 fall outside the domain, silently
+      // dropping every target reachable only through 19..271 (including the one this demo's own
+      // guest images depend on) with no diagnostic at all: the address was never even attempted,
+      // so it never shows as a "cannot decode function" failure either, only as a runtime jump
+      // into never-lifted code. corpus/jumptable reproduces the shape (a table dispatch reachable
+      // only through a kind value on the far side of a gap) and fails the same way with this
+      // fix reverted. Bounded by `limit` regardless (the LVI-derived max, or the 4096 default
+      // cap), so this is not an unbounded scan -- just one that does not quit early on a
+      // non-contiguous domain.
       bool in_domain = true;
       for (auto &guard : guards) {
         auto value = Evaluate(guard.first, index, i, load, 0, 0);
@@ -687,9 +699,6 @@ class JumpTables {
         }
       }
       if (!in_domain) {
-        if (accepted) {
-          break;
-        }
         continue;
       }
       auto address = Evaluate(load->getPointerOperand(), index, i, nullptr, std::nullopt, 0);
@@ -711,7 +720,6 @@ class JumpTables {
         continue;
       }
       targets.insert(*target);
-      accepted = true;
     }
   }
 
