@@ -22,29 +22,21 @@
 // a run that dispatches through them crashes with "jump to an address that does not start a
 // translated function" -- exactly the shape of the counts.sorted{} fault.
 #include <stdint.h>
-#include <stdio.h>
 
 extern int32_t xl_dispatch(int32_t kind);
 
+// The driver check.sh builds and feeds to xlate, kept in the tree rather than generated per run so
+// there is one of it. It calls no libc function at all -- no printf, no puts: an unresolved import
+// makes xlate emit a call stub for it and stop before it lifts anything, so the fixture would never
+// reach the code under test (measured: with the printf version, xlate exits 1 naming _printf, _puts
+// and _fprintf and reports no lift at all). What each kind is expected to produce comes from
+// dispatch.s's own `mov w0, #N` literals, not from xlate; the verdict check.sh asserts is xlate's
+// own reported jump-table-target count, which no part of this file can influence.
 int main(void) {
-    static const int32_t expect[] = {100, 200, 999, 999, 300, 400};
-    int fail = 0;
-    for (int32_t k = 0; k < 6; k++) {
-        int32_t got = xl_dispatch(k);
-        printf("kind %d -> %d\n", k, got);
-        if (got != expect[k]) {
-            fprintf(stderr, "FAIL: kind %d: wanted %d, got %d\n", k, expect[k], got);
-            fail = 1;
-        }
+    static const int32_t expect[] = {100, 200, 999, 999, 300, 400, -1};
+    int32_t mask = 0;
+    for (int32_t k = 0; k <= 6; k++) {
+        if (xl_dispatch(k) != expect[k]) mask |= (1 << k);
     }
-    int32_t out_of_range = xl_dispatch(6);
-    printf("kind 6 (out of range) -> %d\n", out_of_range);
-    if (out_of_range != -1) {
-        fprintf(stderr, "FAIL: out-of-range kind: wanted -1, got %d\n", out_of_range);
-        fail = 1;
-    }
-    if (fail)
-        return 1;
-    printf("ok\n");
-    return 0;
+    return mask;
 }

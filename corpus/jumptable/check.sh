@@ -29,21 +29,9 @@ LAB=$(cd "$here/../.." && pwd)
 SDK=$(ls -d "$HOME"/.xmake/packages/i/iphoneos-sdk/16.4/*/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk | head -1)
 mkdir -p "$out"
 
-# A driver with no libc calls at all (no printf/fprintf -- nothing to bridge or pass through),
-# just a bitmask return so this needs nothing beyond xlate itself: bit k set means kind k's result
-# did not match what dispatch.s is supposed to produce for it.
-cat > "$out/diag.c" <<'EOF'
-extern int xl_dispatch(int kind);
-int main(void) {
-    static const int expect[] = {100, 200, 999, 999, 300, 400, -1};
-    int mask = 0;
-    for (int k = 0; k <= 6; k++) {
-        if (xl_dispatch(k) != expect[k]) mask |= (1 << k);
-    }
-    return mask;
-}
-EOF
-xcrun clang -target arm64-apple-ios12.0 -isysroot "$SDK" -O2 -w -o "$out/jumptable-arm64" "$out/diag.c" "$here/dispatch.s"
+# main.c is the driver (libc-free, so xlate lifts it without an unresolved-import call stub; its own
+# header says why). Built here, not run: the verdict is xlate's reported count, not the guest's.
+xcrun clang -target arm64-apple-ios12.0 -isysroot "$SDK" -O2 -w -o "$out/jumptable-arm64" "$here/main.c" "$here/dispatch.s"
 
 : > "$out/passthrough.txt"
 "$LAB/xlate/build/xlate" --base 0x10000000 --output "$out/out.bc" \
