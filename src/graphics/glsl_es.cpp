@@ -396,6 +396,29 @@ namespace ast {
         std::unique_ptr<Node> value;
     };
 
+    // Whether an argument for an out or inout parameter can be written: an
+    // l-value (a variable, an element or a field of one, or a swizzle without
+    // repeated components) whose variable is not read-only. A const, a uniform,
+    // an attribute, a fragment's varying or a built-in such as gl_FragCoord is
+    // read-only, and so is anything that is not an l-value (GLSL ES 1.00
+    // sections 5.8 and 6.1.1).
+    bool may_write(const Node& argument)
+    {
+        const Node* current = &argument;
+        while (current->type == Node::Type::Index ||
+               current->type == Node::Type::Swizzle) {
+            if (current->type == Node::Type::Swizzle) {
+                for (int i = 0; i < current->swizzle_count; ++i)
+                    for (int k = i + 1; k < current->swizzle_count; ++k)
+                        if (current->swizzle[static_cast<std::size_t>(i)] ==
+                            current->swizzle[static_cast<std::size_t>(k)])
+                            return false;
+            }
+            current = current->args[0].get();
+        }
+        return current->type == Node::Type::Variable && !current->read_only;
+    }
+
 } // namespace ast
 
 struct Module::Impl {
@@ -1857,6 +1880,32 @@ namespace {
                 refuse(line, "the target of an assignment is not writable");
         }
 
+        // An argument for an out or inout parameter must be writable. The
+        // overloads declared so far decide it: when every one of them with this
+        // many parameters takes the argument as out or inout, the call needs a
+        // writable argument whichever is chosen. Where they disagree the choice
+        // is made at run time, and the call checks its own chosen overload there.
+        void require_out_arguments(const ast::Node& call, int line)
+        {
+            const auto argc = call.args.size();
+            for (std::size_t i = 0; i < argc; ++i) {
+                std::size_t same_arity = 0;
+                std::size_t written = 0;
+                for (const auto* candidate : *call.overloads) {
+                    if (candidate->parameters.size() != argc)
+                        continue;
+                    ++same_arity;
+                    if (candidate->parameters[i].direction !=
+                        ast::Parameter::Direction::In)
+                        ++written;
+                }
+                if (same_arity != 0 && written == same_arity &&
+                    !ast::may_write(*call.args[i]))
+                    refuse(line, "an argument for an out or inout parameter of '" +
+                                     call.name + "' must be a variable that can be written");
+            }
+        }
+
         std::unique_ptr<ast::Node> assignment()
         {
             const Nesting nesting { *this, peek().line };
@@ -2183,6 +2232,8 @@ namespace {
             expect(")");
             if (result->args.size() > 16)
                 refuse(line, "too many arguments");
+            if (result->type == ast::Node::Type::Call)
+                require_out_arguments(*result, line);
             return result;
         }
 
@@ -3033,6 +3084,12 @@ struct Instance::State {
         if (chosen == nullptr)
             fail(node.line,
                 "no overload of '" + node.name + "' matches these arguments");
+        for (std::size_t i = 0; i < argc; ++i)
+            if (chosen->parameters[i].direction !=
+                    ast::Parameter::Direction::In &&
+                !ast::may_write(*node.args[i]))
+                fail(node.line, "an argument for an out or inout parameter of '" +
+                                    node.name + "' must be a variable that can be written");
         if (depth >= maximum_depth)
             fail(node.line, "calls nest too deeply");
         tick(node.line);

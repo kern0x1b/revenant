@@ -371,6 +371,27 @@ static void testCompiling(void)
         expectDrawn("and returns zero, not the value a call in it returned", 1, 1, 0, 0, 0, 255);
     }
 
+    // An out or inout argument must be a variable the callee can write (GLSL ES 1.00 sections 5.8 and
+    // 6.1.1): a uniform, a built-in that is read-only, a literal and a call's result are refused where
+    // the call is compiled, and a local is accepted.
+    shader = compile(GL_FRAGMENT_SHADER,
+        "precision mediump float;\nuniform vec4 u;\nvoid w(out vec4 o) { o = vec4(1.0); }\n"
+        "void main() { w(u); gl_FragColor = u; }\n", log, sizeof log);
+    check("an out argument that is a uniform does not compile, and the log says why",
+        shader == 0 && strstr(log, "can be written") != NULL, log);
+    shader = compile(GL_FRAGMENT_SHADER,
+        "precision mediump float;\nvoid w(inout vec4 o) { o.x = 1.0; }\n"
+        "void main() { w(gl_FragCoord); gl_FragColor = vec4(1.0); }\n", log, sizeof log);
+    check("an inout argument that is gl_FragCoord does not compile", shader == 0 && strstr(log, "can be written") != NULL, log);
+    shader = compile(GL_FRAGMENT_SHADER,
+        "precision mediump float;\nvoid w(out float o) { o = 1.0; }\nvoid main() { w(1.0); gl_FragColor = vec4(1.0); }\n",
+        log, sizeof log);
+    check("an out argument that is a literal does not compile", shader == 0 && strstr(log, "can be written") != NULL, log);
+    shader = compile(GL_FRAGMENT_SHADER,
+        "precision mediump float;\nvoid w(out float o) { o = 1.0; }\nvoid main() { float x; w(x); gl_FragColor = vec4(x); }\n",
+        log, sizeof log);
+    check("an out argument that is a local compiles", shader != 0, log);
+
     // How deep a shader may nest is bounded: a guest's GL thread has a small stack, and a few
     // thousand parentheses, blocks or terms used to run it out (the emulator crashed).
     static const struct { const char *name; const char *open, *middle, *close; int count; const char *log; } nested[] = {
