@@ -3056,10 +3056,13 @@ struct Instance::State {
         base = new_base;
         top = new_base + chosen->frame_size;
         ++depth;
-        returned = ast::make(TypeId::Void);
         const auto flow = exec(*chosen->body);
         --depth;
-        Value result = returned;
+        // A return statement leaves its value in returned. A body that ends
+        // without one returns an undefined value (GLSL ES 1.00 section 6.1):
+        // zero here, not whatever a call inside the body returned last.
+        Value result = flow == Flow::Return ? returned
+                                            : ast::make(chosen->result);
         base = saved_base;
         top = saved_top;
         if (flow == Flow::Discard) {

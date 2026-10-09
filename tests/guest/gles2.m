@@ -359,6 +359,18 @@ static void testCompiling(void)
         "precision mediump float;\n#define pair(a, b) (a + b)\nvoid main() { gl_FragColor = vec4(pair(1.0)); }\n", log, sizeof log);
     check("a function-like macro called with too few arguments does not compile", shader == 0 && strstr(log, "takes 2 arguments, not 1") != NULL, log);
 
+    // A non-void function that ends without return has an undefined value (GLSL ES 1.00 section 6.1).
+    // This compiler returns zero: it is not the value of a call the body made last.
+    program = build(plainVertex,
+        "precision mediump float;\nfloat half_() { return 0.5; }\nfloat falls() { half_(); }\nvarying vec2 p;\n"
+        "void main() { gl_FragColor = vec4(falls(), 0.0, 0.0, 1.0); }\n", log, sizeof log);
+    check("a function that ends without return links", program != 0, log);
+    if (program) {
+        clearTo(0.0f, 0.0f, 0.0f, 0.0f);
+        drawQuad(program);
+        expectDrawn("and returns zero, not the value a call in it returned", 1, 1, 0, 0, 0, 255);
+    }
+
     // How deep a shader may nest is bounded: a guest's GL thread has a small stack, and a few
     // thousand parentheses, blocks or terms used to run it out (the emulator crashed).
     static const struct { const char *name; const char *open, *middle, *close; int count; const char *log; } nested[] = {
