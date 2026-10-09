@@ -332,6 +332,18 @@ static void testCompiling(void)
         "void main() { float x = 0.0;\n C C C C C C C C\n gl_FragColor = vec4(x / 128.0); }\n", log, sizeof log);
     check("macros three deep expand", shader != 0, log);
 
+    // #define takes the word after the keyword as the name: macros named by letters of "define" are
+    // ordinary macros, and the shader draws their values.
+    program = build(plainVertex,
+        "precision mediump float;\n#define e 0.5\n#define n 1.0\nvarying vec2 p;\n"
+        "void main() { gl_FragColor = vec4(e, n, 0.0, 1.0); }\n", log, sizeof log);
+    check("macros named by letters of 'define' link", program != 0, log);
+    if (program) {
+        clearTo(0.0f, 0.0f, 0.0f, 0.0f);
+        drawQuad(program);
+        expectDrawn("and draw the values they stand for", 1, 1, 128, 255, 0, 255);
+    }
+
     // How deep a shader may nest is bounded: a guest's GL thread has a small stack, and a few
     // thousand parentheses, blocks or terms used to run it out (the emulator crashed).
     static const struct { const char *name; const char *open, *middle, *close; int count; const char *log; } nested[] = {

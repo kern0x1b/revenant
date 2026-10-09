@@ -787,9 +787,12 @@ namespace {
             if (name == "version" || name == "extension" || name == "pragma")
                 return;
             if (name == "define") {
-                if (w.size() < 2)
+                if (w.size() < 2 || !identifier_start(w[1].front()))
                     refuse(line, "#define needs a name");
-                const auto at = text.find(w[1]);
+                // The name is the first word after the keyword. Searching the
+                // text for it would find a letter inside "define" first.
+                const auto at = text.find_first_not_of(
+                    " \t\r", text.find(name) + name.size());
                 const auto after = at + w[1].size();
                 if (after < text.size() && text[after] == '(')
                     refuse(line, "function-like macros are not supported");
