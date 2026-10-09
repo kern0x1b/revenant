@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <deque>
 #include <map>
 #include <optional>
 #include <stdexcept>
@@ -433,6 +434,9 @@ namespace {
     // from a few hundred bytes of source.
     constexpr std::size_t maximum_tokens = 65536;
 
+    // How deeply the arguments of macro calls may contain macro calls.
+    constexpr int maximum_expansion_depth = 16;
+
     // How deep a shader may nest, in what the compiler and the run recurse
     // through. A guest chooses the shape of its source, and a few thousand
     // tokens of "(" or "{" or "a+a+a+..." would take a host thread's stack
@@ -484,27 +488,36 @@ namespace {
 
     bool digit(char c) { return c >= '0' && c <= '9'; }
 
-    // Turns GLSL ES source into tokens. Supports the preprocessor subset
-    // shaders use in practice: #version, #extension and #pragma (ignored),
-    // object-like #define and #undef, and #if / #ifdef / #ifndef / #else /
-    // #endif over defined(NAME), NAME, 0 and 1.
+    // Turns GLSL ES source into tokens. The preprocessor is the subset shaders
+    // use in practice: #version, #extension and #pragma (ignored); #define and
+    // #undef of object-like and function-like macros, as C++ defines them
+    // (without # stringizing, which GLSL ES has no strings for); and #if,
+    // #ifdef, #ifndef, #else and #endif over defined(NAME), NAME, 0 and 1.
     class Lexer {
     public:
         explicit Lexer(std::string_view source)
             : source_(source)
         {
-            macros_["GL_ES"] = "1";
+            macros_["GL_ES"] = Macro { false, {}, body_of("1", 1) };
         }
 
         std::vector<Token> run()
         {
-            scan(source_, 1, 0);
+            items_ = lex(source_, 1, false);
+            Stream source;
+            source.from_source = true;
+            std::vector<Piece> out;
+            expand(source, out, 0);
             if (!conditions_.empty())
                 refuse(line_, "#if without #endif");
+            std::vector<Token> tokens;
+            tokens.reserve(out.size() + 1);
+            for (auto& piece : out)
+                tokens.push_back(std::move(piece.token));
             Token end;
             end.line = line_;
-            tokens_.push_back(end);
-            return std::move(tokens_);
+            tokens.push_back(end);
+            return tokens;
         }
 
     private:
@@ -514,36 +527,55 @@ namespace {
             bool active { };
         };
 
+        // What the lexer reads from the source: a token, or a directive (its
+        // text after the '#', in token.text).
+        struct Item {
+            bool directive { };
+            Token token;
+        };
+
+        // A token that expansion may hide. A macro's name inside its own
+        // expansion is an ordinary identifier, so each piece carries the names
+        // it may not expand.
+        struct Piece {
+            Token token;
+            std::vector<std::string> hidden;
+        };
+
+        // What expansion reads: the pieces pushed back first, then the source
+        // (the arguments of a call are a stream of their own, with no source).
+        struct Stream {
+            std::deque<Piece> pushed;
+            bool from_source { };
+        };
+
+        struct Macro {
+            bool function_like { };
+            std::vector<std::string> parameters;
+            std::vector<Token> body;
+        };
+
         bool active() const
         {
             return conditions_.empty() || conditions_.back().active;
         }
 
-        void scan(std::string_view text, int first_line, int depth)
+        // Tokenizes text. A macro's body is tokenized with body set: it has no
+        // directives, and # and ## are punctuation.
+        std::vector<Item> lex(std::string_view text, int first_line, bool body)
         {
-            if (depth > 16)
-                refuse(first_line, "macro expansion is too deep");
-            // Every text scanned is counted, the source and each expansion of
-            // a macro, so an expansion that produces no token is bounded too.
-            scanned_ += text.size() + 1;
-            if (scanned_ > maximum_scanned_bytes)
-                refuse(
-                    first_line, "the shader's macros expand to too much text");
+            std::vector<Item> items;
             std::size_t i = 0;
             int line = first_line;
             bool line_start = true;
             auto push = [&](Token::Type type, std::string value,
                             double number) {
-                if (!active())
-                    return;
-                if (tokens_.size() >= maximum_tokens)
-                    refuse(line, "the shader expands to too many tokens");
-                Token token;
-                token.type = type;
-                token.text = std::move(value);
-                token.number = number;
-                token.line = line;
-                tokens_.push_back(std::move(token));
+                Item item;
+                item.token.type = type;
+                item.token.text = std::move(value);
+                item.token.number = number;
+                item.token.line = line;
+                items.push_back(std::move(item));
             };
             while (i < text.size()) {
                 const char c = text[i];
@@ -575,31 +607,27 @@ namespace {
                     i += 2;
                     continue;
                 }
-                if (c == '#' && line_start && depth == 0) {
+                if (c == '#' && line_start && !body) {
                     std::size_t end = i;
                     while (end < text.size() && text[end] != '\n')
                         ++end;
-                    line_ = line;
-                    directive(text.substr(i + 1, end - i - 1), line);
+                    Item item;
+                    item.directive = true;
+                    item.token.text = std::string { text.substr(i + 1, end - i - 1) };
+                    item.token.line = line;
+                    items.push_back(std::move(item));
                     i = end;
                     continue;
                 }
                 line_start = false;
-                line_ = line;
                 if (identifier_start(c)) {
                     std::size_t end = i;
                     while (end < text.size() &&
                            (identifier_start(text[end]) || digit(text[end])))
                         ++end;
-                    std::string name { text.substr(i, end - i) };
+                    push(Token::Type::Identifier,
+                        std::string { text.substr(i, end - i) }, 0.0);
                     i = end;
-                    const auto macro = macros_.find(name);
-                    if (macro != macros_.end()) {
-                        if (active())
-                            scan(macro->second, line, depth + 1);
-                        continue;
-                    }
-                    push(Token::Type::Identifier, std::move(name), 0.0);
                     continue;
                 }
                 if (digit(c) ||
@@ -659,6 +687,12 @@ namespace {
                         continue;
                     }
                 }
+                if (body && c == '#') {
+                    const bool paste = i + 1 < text.size() && text[i + 1] == '#';
+                    push(Token::Type::Punct, paste ? "##" : "#", 0.0);
+                    i += paste ? 2 : 1;
+                    continue;
+                }
                 static constexpr std::string_view singles =
                     "+-*/<>=!?:;,.(){}[]";
                 if (singles.find(c) == std::string_view::npos)
@@ -668,8 +702,304 @@ namespace {
                 push(Token::Type::Punct, std::string(1, c), 0.0);
                 ++i;
             }
-            if (depth == 0)
+            if (!body)
                 line_ = line;
+            return items;
+        }
+
+        std::vector<Token> body_of(std::string_view text, int line)
+        {
+            std::vector<Token> tokens;
+            for (auto& item : lex(text, line, true))
+                tokens.push_back(std::move(item.token));
+            return tokens;
+        }
+
+        // The next piece of a stream. The source runs each directive as it
+        // reaches it and skips the tokens that a false condition hides; a
+        // stream that is used up gives an End token.
+        Piece next(Stream& stream)
+        {
+            if (!stream.pushed.empty()) {
+                Piece piece = std::move(stream.pushed.front());
+                stream.pushed.pop_front();
+                return piece;
+            }
+            while (stream.from_source && next_item_ < items_.size()) {
+                const auto& item = items_[next_item_++];
+                if (item.directive) {
+                    directive(item.token.text, item.token.line);
+                } else if (active()) {
+                    Piece piece;
+                    piece.token = item.token;
+                    return piece;
+                }
+            }
+            Piece end;
+            end.token.type = Token::Type::End;
+            end.token.line = line_;
+            return end;
+        }
+
+        static void push_front(Stream& stream, std::vector<Piece> pieces)
+        {
+            stream.pushed.insert(stream.pushed.begin(),
+                std::make_move_iterator(pieces.begin()),
+                std::make_move_iterator(pieces.end()));
+        }
+
+        static void emit(std::vector<Piece>& out, Piece piece)
+        {
+            if (out.size() >= maximum_tokens)
+                refuse(piece.token.line, "the shader expands to too many tokens");
+            out.push_back(std::move(piece));
+        }
+
+        // Expands a stream into out. A macro's name is replaced by its body,
+        // which is read again with the name hidden from it. depth counts the
+        // expansions of arguments that this one is inside.
+        void expand(Stream& stream, std::vector<Piece>& out, int depth)
+        {
+            for (;;) {
+                Piece piece = next(stream);
+                if (piece.token.type == Token::Type::End)
+                    return;
+                const auto found = piece.token.type == Token::Type::Identifier
+                    ? macros_.find(piece.token.text)
+                    : macros_.end();
+                if (found == macros_.end() || hides(piece, found->first)) {
+                    emit(out, std::move(piece));
+                    continue;
+                }
+                // Copied, because reading the arguments may run a #undef.
+                const std::string name = found->first;
+                const Macro macro = found->second;
+                if (!macro.function_like) {
+                    auto hidden = piece.hidden;
+                    hidden.push_back(name);
+                    push_front(stream,
+                        substitute(macro, {}, {}, hidden, piece.token.line));
+                    continue;
+                }
+                Piece open = next(stream);
+                if (!is_punct(open.token, "(")) {
+                    push_front(stream, { std::move(open) });
+                    emit(out, std::move(piece));
+                    continue;
+                }
+                std::vector<std::vector<Piece>> arguments(1);
+                int nesting = 0;
+                Piece close;
+                for (;;) {
+                    Piece argument = next(stream);
+                    if (argument.token.type == Token::Type::End)
+                        refuse(piece.token.line,
+                            "the arguments of '" + name + "' are not closed");
+                    if (is_punct(argument.token, "(")) {
+                        ++nesting;
+                    } else if (is_punct(argument.token, ")")) {
+                        if (nesting == 0) {
+                            close = std::move(argument);
+                            break;
+                        }
+                        --nesting;
+                    } else if (is_punct(argument.token, ",") && nesting == 0) {
+                        arguments.emplace_back();
+                        continue;
+                    }
+                    arguments.back().push_back(std::move(argument));
+                }
+                if (arguments.size() == 1 && arguments.front().empty() &&
+                    macro.parameters.empty())
+                    arguments.clear();
+                if (arguments.size() != macro.parameters.size())
+                    refuse(piece.token.line,
+                        "'" + name + "' takes " +
+                            std::to_string(macro.parameters.size()) +
+                            " arguments, not " +
+                            std::to_string(arguments.size()));
+                if (depth >= maximum_expansion_depth)
+                    refuse(piece.token.line, "macro expansion is too deep");
+                std::vector<std::vector<Piece>> expanded;
+                for (const auto& argument : arguments) {
+                    Stream alone;
+                    alone.pushed.assign(argument.begin(), argument.end());
+                    std::vector<Piece> result;
+                    expand(alone, result, depth + 1);
+                    expanded.push_back(std::move(result));
+                }
+                auto hidden = intersection(piece.hidden, close.hidden);
+                hidden.push_back(name);
+                push_front(stream,
+                    substitute(macro, arguments, expanded, hidden,
+                        piece.token.line));
+            }
+        }
+
+        // The body of a macro with its parameters replaced. An argument is
+        // expanded first, unless ## joins it to a neighbour; ## pastes the
+        // tokens on either side of it. Every piece of the result hides names.
+        std::vector<Piece> substitute(const Macro& macro,
+            const std::vector<std::vector<Piece>>& arguments,
+            const std::vector<std::vector<Piece>>& expanded,
+            const std::vector<std::string>& hidden, int line)
+        {
+            // Every invocation is charged, even one whose body is empty: a
+            // macro that expands to nothing sixteen times, eight deep, is
+            // 16^8 invocations.
+            work_ += macro.body.size() + 1;
+            if (work_ > maximum_scanned_bytes)
+                refuse(line, "the shader's macros expand to too much text");
+            std::vector<Piece> out;
+            const auto& body = macro.body;
+            bool pasting = false;
+            // Whether out ends with an operand that a following ## pastes onto.
+            bool joinable = false;
+            for (std::size_t i = 0; i < body.size(); ++i) {
+                const auto& token = body[i];
+                if (is_punct(token, "##")) {
+                    if (i == 0 || i + 1 == body.size() ||
+                        is_punct(body[i - 1], "##"))
+                        refuse(line, "## must join two tokens of a macro's body");
+                    pasting = true;
+                    continue;
+                }
+                if (is_punct(token, "#"))
+                    refuse(line,
+                        "# is not supported: GLSL ES has no strings to make");
+                const bool paste = pasting;
+                pasting = false;
+                std::vector<Piece> pieces;
+                const auto parameter = parameter_index(macro, token);
+                if (parameter) {
+                    const bool joined =
+                        (i > 0 && is_punct(body[i - 1], "##")) ||
+                        (i + 1 < body.size() && is_punct(body[i + 1], "##"));
+                    pieces = joined ? arguments[*parameter]
+                                    : expanded[*parameter];
+                } else {
+                    Piece piece;
+                    piece.token = token;
+                    piece.token.line = line;
+                    pieces.push_back(std::move(piece));
+                }
+                for (auto& piece : pieces)
+                    for (const auto& name : hidden)
+                        if (!listed(piece.hidden, name))
+                            piece.hidden.push_back(name);
+                if (pieces.empty()) {
+                    if (!paste)
+                        joinable = false;
+                    continue;
+                }
+                if (paste && joinable) {
+                    out.back() = glue(out.back(), pieces.front(), line);
+                    pieces.erase(pieces.begin());
+                }
+                for (auto& piece : pieces) {
+                    work_ += piece.token.text.size() + 1;
+                    if (work_ > maximum_scanned_bytes)
+                        refuse(line,
+                            "the shader's macros expand to too much text");
+                    out.push_back(std::move(piece));
+                }
+                joinable = true;
+            }
+            return out;
+        }
+
+        // The token ## makes of two: their spellings written together, read
+        // again as one token.
+        Piece glue(const Piece& left, const Piece& right, int line)
+        {
+            const auto spelled = left.token.text + right.token.text;
+            auto items = lex(spelled, line, true);
+            if (items.size() != 1)
+                refuse(line,
+                    "'" + spelled + "' is not one token, so ## cannot paste it");
+            Piece result;
+            result.token = std::move(items.front().token);
+            result.hidden = left.hidden;
+            for (const auto& name : right.hidden)
+                if (!listed(result.hidden, name))
+                    result.hidden.push_back(name);
+            return result;
+        }
+
+        static bool is_punct(const Token& token, std::string_view text)
+        {
+            return token.type == Token::Type::Punct && token.text == text;
+        }
+
+        static bool listed(const std::vector<std::string>& names,
+            const std::string& name)
+        {
+            return std::find(names.begin(), names.end(), name) != names.end();
+        }
+
+        static bool hides(const Piece& piece, const std::string& name)
+        {
+            return listed(piece.hidden, name);
+        }
+
+        static std::vector<std::string> intersection(
+            const std::vector<std::string>& first,
+            const std::vector<std::string>& second)
+        {
+            std::vector<std::string> result;
+            for (const auto& name : first)
+                if (listed(second, name))
+                    result.push_back(name);
+            return result;
+        }
+
+        static std::optional<std::size_t> parameter_index(
+            const Macro& macro, const Token& token)
+        {
+            if (token.type != Token::Type::Identifier)
+                return std::nullopt;
+            const auto found = std::find(macro.parameters.begin(),
+                macro.parameters.end(), token.text);
+            if (found == macro.parameters.end())
+                return std::nullopt;
+            return static_cast<std::size_t>(found - macro.parameters.begin());
+        }
+
+        // The names of a function-like macro's parameters, from the text
+        // between its parentheses.
+        static std::vector<std::string> parameters(
+            std::string_view list, int line)
+        {
+            std::vector<std::string> result;
+            std::size_t i = 0;
+            const auto skip_spaces = [&] {
+                while (i < list.size() &&
+                       (list[i] == ' ' || list[i] == '\t' || list[i] == '\r'))
+                    ++i;
+            };
+            skip_spaces();
+            if (i == list.size())
+                return result;
+            for (;;) {
+                skip_spaces();
+                if (i == list.size() || !identifier_start(list[i]))
+                    refuse(line, "malformed macro parameters");
+                std::size_t end = i;
+                while (end < list.size() &&
+                       (identifier_start(list[end]) || digit(list[end])))
+                    ++end;
+                std::string name { list.substr(i, end - i) };
+                if (listed(result, name))
+                    refuse(line, "'" + name + "' is a macro parameter twice");
+                result.push_back(name);
+                i = end;
+                skip_spaces();
+                if (i == list.size())
+                    return result;
+                if (list[i] != ',')
+                    refuse(line, "malformed macro parameters");
+                ++i;
+            }
         }
 
         static std::vector<std::string> words(std::string_view text)
@@ -794,9 +1124,19 @@ namespace {
                 const auto at = text.find_first_not_of(
                     " \t\r", text.find(name) + name.size());
                 const auto after = at + w[1].size();
-                if (after < text.size() && text[after] == '(')
-                    refuse(line, "function-like macros are not supported");
-                macros_[w[1]] = std::string { text.substr(after) };
+                Macro macro;
+                std::string_view body = text.substr(after);
+                if (after < text.size() && text[after] == '(') {
+                    macro.function_like = true;
+                    const auto close = text.find(')', after);
+                    if (close == std::string_view::npos)
+                        refuse(line, "malformed macro parameters");
+                    macro.parameters = parameters(
+                        text.substr(after + 1, close - after - 1), line);
+                    body = text.substr(close + 1);
+                }
+                macro.body = body_of(body, line);
+                macros_[w[1]] = std::move(macro);
                 return;
             }
             if (name == "undef") {
@@ -809,10 +1149,11 @@ namespace {
         }
 
         std::string_view source_;
-        std::map<std::string, std::string> macros_;
+        std::map<std::string, Macro> macros_;
         std::vector<Condition> conditions_;
-        std::vector<Token> tokens_;
-        std::size_t scanned_ { };
+        std::vector<Item> items_;
+        std::size_t next_item_ { };
+        std::size_t work_ { };
         int line_ { 1 };
     };
 

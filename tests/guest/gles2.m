@@ -344,6 +344,21 @@ static void testCompiling(void)
         expectDrawn("and draw the values they stand for", 1, 1, 128, 255, 0, 255);
     }
 
+    // Function-like macros are C++'s (GLSL ES 1.00 section 3.4): a call expands to its body with the
+    // arguments in place, and a call with the wrong number of arguments does not compile.
+    program = build(plainVertex,
+        "precision mediump float;\n#define twice(x) (x * 2.0)\n#define pair(a, b) (a + b)\nvarying vec2 p;\n"
+        "void main() { gl_FragColor = vec4(twice(0.25), pair(0.25, 0.25), 0.0, 1.0); }\n", log, sizeof log);
+    check("function-like macros link", program != 0, log);
+    if (program) {
+        clearTo(0.0f, 0.0f, 0.0f, 0.0f);
+        drawQuad(program);
+        expectDrawn("and draw what their calls expand to", 1, 1, 128, 128, 0, 255);
+    }
+    shader = compile(GL_FRAGMENT_SHADER,
+        "precision mediump float;\n#define pair(a, b) (a + b)\nvoid main() { gl_FragColor = vec4(pair(1.0)); }\n", log, sizeof log);
+    check("a function-like macro called with too few arguments does not compile", shader == 0 && strstr(log, "takes 2 arguments, not 1") != NULL, log);
+
     // How deep a shader may nest is bounded: a guest's GL thread has a small stack, and a few
     // thousand parentheses, blocks or terms used to run it out (the emulator crashed).
     static const struct { const char *name; const char *open, *middle, *close; int count; const char *log; } nested[] = {
