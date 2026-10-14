@@ -2378,7 +2378,7 @@ public:
             Umbra::HaltReason reason { };
             for (;;) {
                 const auto consumed_before = callbacks_->consumed_ticks();
-                std::uint32_t block_location { };
+                std::uint64_t block_location { };
                 std::uint32_t block_caller { };
                 std::optional<StackAttribution> block_stack;
                 std::vector<std::uint32_t> block_chain;
