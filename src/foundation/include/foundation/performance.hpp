@@ -416,14 +416,10 @@ public:
                                 std::memory_order_acquire);
     }
 
-    // Executions and ticks per translated block (`--perf-block-profile`). The
-    // profile counts only inside an enabled perf summary. Blocks past the
-    // counter capacity are not counted and are reported as dropped.
-    static constexpr std::size_t block_profile_counter_capacity = 1U << 18U;
+    // Ticks per translated block (`--perf-block-profile`). The profile records
+    // only inside an enabled perf summary.
     void set_block_profile_diagnostics(bool enabled)
     {
-        if (enabled)
-            block_profile_.reserve_counters(block_profile_counter_capacity);
         block_profile_.set_enabled(enabled);
     }
     [[nodiscard]] bool block_profile_enabled() const

@@ -5890,10 +5890,10 @@ void EmulatorSession::run()
             const auto directory = options.rootfs.parent_path() / "perf";
             const auto path = directory / "block-profile.tsv";
             std::filesystem::create_directories(directory);
-            const auto mapped = map_block_counters(block_profile);
+            const auto mapped = map_block_rows(block_profile);
             {
                 std::ofstream file { path, std::ios::binary | std::ios::trunc };
-                file << format_block_counter_table(mapped);
+                file << format_block_table(mapped);
                 file.flush();
                 if (!file) {
                     throw std::runtime_error {
@@ -5901,7 +5901,7 @@ void EmulatorSession::run()
                     };
                 }
             }
-            for (const auto& line : format_block_counter_summary(
+            for (const auto& line : format_block_summary(
                      block_profile, final_snapshot.cpu_ticks, 30))
                 output.line(line);
             output.line("[perf-block-file] path=" + path.string() +

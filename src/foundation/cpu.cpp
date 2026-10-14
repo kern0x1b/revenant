@@ -582,22 +582,6 @@ namespace {
 #endif
     }
 
-// Called by the code of a counted block at each entry. `profile` is the
-// GuestBlockProfile the block's slot was allocated from.
-void count_block_execution(std::uint64_t profile, std::uint64_t slot)
-{
-    reinterpret_cast<GuestBlockProfile*>(profile)->count_execution(slot);
-}
-
-// Under the block profile every block is compiled with its counter, so an
-// artifact (compiled without one) is neither loaded nor published.
-[[nodiscard]] std::shared_ptr<JitArtifactStore> artifact_store_for_run(
-    std::shared_ptr<JitArtifactStore> store)
-{
-    return performance_counters().block_profile_enabled() ? nullptr
-                                                          : std::move(store);
-}
-
 } // namespace
 
 class JitCallbacks final : public Umbra::A32::UserCallbacks {
@@ -642,22 +626,11 @@ public:
         process_id_ = process_id;
     }
 
-    bool PreCodeReadHook(bool is_thumb, Umbra::A32::VAddr address,
+    bool PreCodeReadHook(bool, Umbra::A32::VAddr address,
         Umbra::A32::IREmitter& ir) override
     {
         if (ir.block.CycleCount() == 0) {
             performance_counters().record_translation_block();
-            block_counter_slot_.reset();
-            if (performance_counters().block_profile_enabled()) {
-                auto& profile = performance_counters().block_profile();
-                if (const auto slot = profile.allocate_counter(process_id_,
-                        address & ~Umbra::A32::VAddr { 1U }, is_thumb)) {
-                    block_counter_slot_ = slot;
-                    ir.CallHostFunction(&count_block_execution,
-                        ir.Imm64(reinterpret_cast<std::uintptr_t>(&profile)),
-                        ir.Imm64(*slot));
-                }
-            }
             // The dyld shared cache is the same read-only code at the same
             // addresses in every process, so its blocks are the ones every
             // process translates again.
@@ -697,11 +670,17 @@ public:
         std::uint64_t translation_nanoseconds,
         const Umbra::IR::Block& block) noexcept override
     {
-        // The emitted code charges this cycle count at each entry of the block.
-        if (block_counter_slot_) {
-            performance_counters().block_profile().set_counter_cycles(
-                *block_counter_slot_, block.CycleCount());
-            block_counter_slot_.reset();
+        if (performance_counters().block_profile_enabled()) {
+            // The emitted code charges this cycle count when the block ends.
+            const auto terminal = block.GetTerminal();
+            TranslatedBlock translated { block.CycleCount(), BlockEnd::Other };
+            if (boost::get<Umbra::IR::Term::LinkBlock>(&terminal))
+                translated.end = BlockEnd::LinkBlock;
+            else if (boost::get<Umbra::IR::Term::LinkBlockFast>(&terminal))
+                translated.end = BlockEnd::LinkBlockFast;
+            performance_counters().block_profile().record_translation(
+                static_cast<std::uint32_t>(process_id_), location_descriptor,
+                translated);
         }
         translation_completed(
             location_descriptor, translation_nanoseconds, &block);
@@ -2044,7 +2023,6 @@ private:
     std::optional<std::uint64_t> portable_generation_location_;
     bool portable_generation_published_ { };
     Umbra::IR::Block* translation_block_ { };
-    std::optional<std::uint64_t> block_counter_slot_;
     std::vector<std::uint32_t> translation_code_pages_;
     std::vector<JitConstantDependency> translation_constant_dependencies_;
     bool constant_dependency_failed_ { };
@@ -2316,8 +2294,14 @@ public:
         diagnostics.checkpoint(PerfLatencyKind::CpuRunLoadState);
         const auto effective_host_slice_budget =
             std::max(host_slice_budget, std::chrono::nanoseconds::zero());
-        callbacks_->begin(single_step ? 1 : ticks,
-            cooperative_execution && !single_step, effective_host_slice_budget);
+        // Under the block profile a run gets one tick, so it ends after the
+        // first block that ends in a checked link (see GuestBlockProfile).
+        const auto profiling_blocks =
+            performance_counters().block_profile_enabled();
+        const std::uint64_t run_ticks =
+            single_step || profiling_blocks ? 1 : ticks;
+        callbacks_->begin(run_ticks, cooperative_execution && !single_step,
+            effective_host_slice_budget);
         diagnostics.checkpoint(PerfLatencyKind::CpuRunCallbacksBegin);
         try {
             const auto entry_location =
@@ -2393,6 +2377,15 @@ public:
             diagnostics.checkpoint(PerfLatencyKind::CpuRunSaveState);
             record_code_cache_usage();
             performance_counters().record_cpu_execution(result.ticks_consumed);
+            if (profiling_blocks && !single_step) {
+                const Umbra::A32::LocationDescriptor descriptor {
+                    Umbra::IR::LocationDescriptor { entry_location }
+                };
+                performance_counters().block_profile().record_run(
+                    static_cast<std::uint32_t>(process_id_), entry_location,
+                    descriptor.PC(), descriptor.TFlag(),
+                    result.ticks_consumed);
+            }
             // Profile validation and merging never run in an executing Guest
             // slice. The fixed recorder spans a complete profile and is
             // drained only by an explicit quiet/image-transition safe point.
@@ -3388,7 +3381,7 @@ public:
         , native_preimport_tracker_ { }
         , monitor_ { monitor }
         , cpu_model_ { cpu_model }
-        , artifact_store_ { artifact_store_for_run(std::move(artifact_store)) }
+        , artifact_store_ { std::move(artifact_store) }
     {
         if (execution_slot_count == 0) {
             throw std::invalid_argument {
