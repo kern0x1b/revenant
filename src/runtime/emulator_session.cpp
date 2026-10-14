@@ -5891,10 +5891,12 @@ void EmulatorSession::run()
             const auto path = directory / "block-profile.tsv";
             const auto callers_path = directory / "block-callers.tsv";
             const auto stacks_path = directory / "block-stacks.tsv";
+            const auto chains_path = directory / "block-chains.tsv";
             std::filesystem::create_directories(directory);
             const auto mapped = map_block_rows(block_profile);
             const auto mapped_callers = map_caller_rows(block_profile);
             const auto mapped_stacks = map_stack_rows(block_profile);
+            const auto chain_table = format_chain_table(block_profile);
             const auto write_table = [](const std::filesystem::path& file_path,
                                          const std::string& text) {
                 std::ofstream file { file_path,
@@ -5910,6 +5912,7 @@ void EmulatorSession::run()
             write_table(path, format_block_table(mapped));
             write_table(callers_path, format_caller_table(mapped_callers));
             write_table(stacks_path, format_stack_table(mapped_stacks));
+            write_table(chains_path, chain_table);
             for (const auto& line : format_block_summary(
                      block_profile, final_snapshot.cpu_ticks, 30))
                 output.line(line);
@@ -5922,6 +5925,9 @@ void EmulatorSession::run()
             output.line("[perf-block-file] path=" + callers_path.string() +
                         " rows=" + std::to_string(mapped_callers.size()) +
                         " kind=callers");
+            output.line("[perf-block-file] path=" + chains_path.string() +
+                        " rows=" + std::to_string(block_profile.chains().size()) +
+                        " kind=chains");
         }
     }
     if (jit_observer_only && runtime_jit_memory) {

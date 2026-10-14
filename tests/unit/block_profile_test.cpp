@@ -435,6 +435,84 @@ void test_stack_rows()
     CHECK(profile.image_info_address(1) == 0x5000U);
 }
 
+void test_stack_chain()
+{
+    // Every frame is kept, ours and Apple's: the PC, LR without its Thumb bit,
+    // then the return address of each frame of the r7 chain.
+    SyntheticStack ours_second;
+    ours_second.words = { { 0x8000U, 0x8100U }, { 0x8004U, 0x3030U },
+        { 0x8100U, 0x8200U }, { 0x8104U, 0x1050U } };
+    const auto chain = shade::capture_stack_chain(
+        0x3010U, 0x3021U, 0x8000U, ours_second.reader());
+    CHECK(chain == std::vector<std::uint32_t>({ 0x3010U, 0x3020U, 0x3030U,
+                       0x1050U }));
+
+    // A frame that does not climb is recorded, then the walk ends.
+    SyntheticStack falling;
+    falling.words = { { 0x8000U, 0x7f00U }, { 0x8004U, 0x3030U },
+        { 0x7f00U, 0x0U }, { 0x7f04U, 0x1050U } };
+    const auto stopped = shade::capture_stack_chain(
+        0x3010U, 0x3020U, 0x8000U, falling.reader());
+    CHECK(stopped == std::vector<std::uint32_t>({ 0x3010U, 0x3020U,
+                         0x3030U }));
+
+    // A misaligned frame pointer adds nothing: PC and LR only.
+    const auto misaligned = shade::capture_stack_chain(
+        0x3010U, 0x3020U, 0x8002U, ours_second.reader());
+    CHECK(misaligned == std::vector<std::uint32_t>({ 0x3010U, 0x3020U }));
+
+    // The bound counts return addresses: 16 by default, 40 when asked.
+    SyntheticStack deep;
+    for (std::uint32_t index = 0; index < 40; ++index) {
+        const auto frame = 0x10000U + index * 0x100U;
+        deep.words[frame] = frame + 0x100U;
+        deep.words[frame + 4U] = index == 34U ? 0x1050U : 0x3030U;
+    }
+    const auto bounded = shade::capture_stack_chain(
+        0x3010U, 0x3020U, 0x10000U, deep.reader());
+    CHECK(bounded.size() == 2 + 16);
+    const auto longer = shade::capture_stack_chain(
+        0x3010U, 0x3020U, 0x10000U, deep.reader(), 40);
+    CHECK(longer.size() == 2 + 40);
+    // The chain holds our frame too: index 34 is the 36th entry (PC, LR, then
+    // the return addresses in order), and the walk does not stop there.
+    CHECK(longer.size() == 42 && longer[36] == 0x1050U);
+}
+
+void test_chain_rows()
+{
+    shade::GuestBlockProfile profile;
+    profile.set_enabled(true);
+    profile.record_images(1, shade::GuestImageTable { {
+        shade::GuestImage { "/usr/lib/charon/a.dylib", 0x1000U, 0x800U },
+        shade::GuestImage { "/usr/lib/libsystem_c.dylib", 0x3000U, 0x1000U },
+    } });
+    profile.record_chain(
+        1, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x1050U }, 10);
+    profile.record_chain(
+        1, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x1050U }, 5);
+    profile.record_chain(
+        1, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x3090U }, 3);
+    CHECK(profile.chains().size() == 2);
+
+    // Equal chains are one row; the largest ticks come first, and each frame
+    // is an image and offset, or its address when no image holds it.
+    const auto table = shade::format_chain_table(profile);
+    CHECK(contains(table,
+        "pid\tlocation\tentry\tthumb\truns\tticks\tdepth\tframes\n"));
+    CHECK(contains(table, "1\t0x0000000000003010\t0x00003010\t0\t2\t15\t3\t"
+                          "/usr/lib/libsystem_c.dylib+0x00000010 "
+                          "/usr/lib/libsystem_c.dylib+0x00000020 "
+                          "/usr/lib/charon/a.dylib+0x00000050\n"));
+    CHECK(contains(table, "1\t0x0000000000003010\t0x00003010\t0\t1\t3\t3\t"
+                          "/usr/lib/libsystem_c.dylib+0x00000010 "
+                          "/usr/lib/libsystem_c.dylib+0x00000020 "
+                          "/usr/lib/libsystem_c.dylib+0x00000090\n"));
+
+    profile.clear();
+    CHECK(profile.chains().empty());
+}
+
 } // namespace
 
 int main()
@@ -443,6 +521,8 @@ int main()
     test_own_ranges();
     test_stack_walk();
     test_stack_rows();
+    test_stack_chain();
+    test_chain_rows();
     test_run_classification();
     test_pids_keep_rows_apart();
     test_clear_and_images();

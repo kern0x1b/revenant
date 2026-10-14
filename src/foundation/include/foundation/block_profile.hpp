@@ -160,6 +160,29 @@ using GuestReader = std::function<std::optional<std::uint32_t>(std::uint32_t)>;
     std::uint32_t lr, std::uint32_t frame, const AddressRanges& own,
     const GuestReader& read32, std::size_t max_frames = 32);
 
+// The guest stack of a run as the r7 walk sees it, every frame kept: the PC,
+// then LR with its Thumb bit dropped (it is the second frame whether or not it
+// is a return address), then up to `max_frames` return addresses read from the
+// chain of [frame] and [frame + 4]. Unlike attribute_stack the walk does not
+// stop at our frames: it goes up to the walk's own end (a null, misaligned or
+// non-increasing frame pointer, or an unreadable word), so the frames above
+// the first one of ours are visible too.
+[[nodiscard]] std::vector<std::uint32_t> capture_stack_chain(std::uint32_t pc,
+    std::uint32_t lr, std::uint32_t frame, const GuestReader& read32,
+    std::size_t max_frames = 16);
+
+// The runs that started at one block with one guest stack (see
+// capture_stack_chain), and the ticks they consumed.
+struct ChainRow {
+    std::uint32_t pid { };
+    std::uint64_t location { };
+    std::uint32_t entry { };
+    bool thumb { };
+    std::vector<std::uint32_t> frames;
+    std::uint64_t runs { };
+    std::uint64_t ticks { };
+};
+
 // The runs of one process attributed to one stack location, and their ticks.
 struct StackRow {
     std::uint32_t pid { };
@@ -214,13 +237,20 @@ public:
     void record_stack(
         std::uint32_t pid, StackAttribution attribution, std::uint64_t ticks);
 
+    // Called after each run that started at `location` in process `pid`, with
+    // the frames its guest stack held at its start (capture_stack_chain) and
+    // its consumed ticks.
+    void record_chain(std::uint32_t pid, std::uint64_t location,
+        std::uint32_t entry, bool thumb, std::vector<std::uint32_t> frames,
+        std::uint64_t ticks);
+
     // The address of the guest's dyld_all_image_info, noted when a process is
     // created, so a run can read the image list while it runs (0 when none).
     void note_image_info(std::uint32_t pid, std::uint32_t address);
     [[nodiscard]] std::uint32_t image_info_address(std::uint32_t pid) const;
 
-    // Clears runs, callers, stacks, translations and images. The image info
-    // addresses are kept: they belong to live processes.
+    // Clears runs, callers, stacks, chains, translations and images. The image
+    // info addresses are kept: they belong to live processes.
     void clear();
 
     // Called when a process exits, while its address space still holds the
@@ -235,6 +265,8 @@ public:
     [[nodiscard]] std::vector<CallerRow> callers() const;
     // Stack rows in no particular order.
     [[nodiscard]] std::vector<StackRow> stacks() const;
+    // Chain rows in no particular order.
+    [[nodiscard]] std::vector<ChainRow> chains() const;
     [[nodiscard]] std::size_t translation_count() const;
 
 private:
@@ -247,6 +279,9 @@ private:
         callers_;
     std::map<std::tuple<std::uint32_t, std::uint8_t, std::uint32_t>, StackRow>
         stacks_;
+    std::map<std::tuple<std::uint32_t, std::uint64_t, std::vector<std::uint32_t>>,
+        ChainRow>
+        chains_;
     std::map<std::uint32_t, GuestImageTable> images_;
     std::map<std::uint32_t, std::uint32_t> image_info_;
 };
@@ -270,6 +305,11 @@ private:
 // Tab-separated table with a header line: one line per stack row.
 [[nodiscard]] std::string format_stack_table(
     const std::vector<MappedStackRow>& rows);
+
+// Tab-separated table with a header line: one line per chain row, largest
+// ticks first. Each frame is written as its image and offset ("path+0xOFFSET"),
+// or as its address ("0xADDRESS") when no image of its process holds it.
+[[nodiscard]] std::string format_chain_table(const GuestBlockProfile& profile);
 
 // One `[perf-block-stack]` line: the ticks of each kind of attribution.
 [[nodiscard]] std::string format_stack_summary(

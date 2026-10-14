@@ -2340,11 +2340,13 @@ public:
             // The run's guest stack at its start, walked now: the registers
             // are the run's, and the walk reads the guest memory it will use.
             std::optional<StackAttribution> entry_stack;
+            std::vector<std::uint32_t> entry_chain;
             if (profiling_blocks && !single_step) {
                 const Umbra::A32::LocationDescriptor entry_descriptor {
                     Umbra::IR::LocationDescriptor { entry_location }
                 };
                 entry_stack = attribute_run_stack(entry_descriptor.PC());
+                entry_chain = capture_run_chain(entry_descriptor.PC());
             }
             bool portable_demand_provider_enabled { };
             if (!single_step && demand_artifact_enabled_ &&
@@ -2427,6 +2429,10 @@ public:
                     result.ticks_consumed, entry_caller);
                 performance_counters().block_profile().record_stack(
                     static_cast<std::uint32_t>(process_id_), *entry_stack,
+                    result.ticks_consumed);
+                performance_counters().block_profile().record_chain(
+                    static_cast<std::uint32_t>(process_id_), entry_location,
+                    descriptor.PC(), descriptor.TFlag(), std::move(entry_chain),
                     result.ticks_consumed);
             }
             // Profile validation and merging never run in an executing Guest
@@ -3256,11 +3262,22 @@ private:
             own_image_ranges_ = own_text_ranges(images);
             own_image_count_ = *count;
         }
-        const auto read32 = [this](std::uint32_t address) {
+        return attribute_stack(pc, jit_->Regs()[14], jit_->Regs()[7],
+            own_image_ranges_, guest_word_reader());
+    }
+
+    // The run's guest stack, every frame, for the block profile's chain rows.
+    std::vector<std::uint32_t> capture_run_chain(std::uint32_t pc)
+    {
+        return capture_stack_chain(pc, jit_->Regs()[14], jit_->Regs()[7],
+            guest_word_reader());
+    }
+
+    GuestReader guest_word_reader()
+    {
+        return [this](std::uint32_t address) {
             return memory_.read32(address, MemoryPermission::Read);
         };
-        return attribute_stack(pc, jit_->Regs()[14], jit_->Regs()[7],
-            own_image_ranges_, read32);
     }
 
     void record_dispatch_counters()

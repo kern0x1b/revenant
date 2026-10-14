@@ -147,6 +147,7 @@ void GuestBlockProfile::clear()
     rows_.clear();
     callers_.clear();
     stacks_.clear();
+    chains_.clear();
     images_.clear();
 }
 
@@ -205,6 +206,23 @@ void GuestBlockProfile::record_stack(
     row.ticks += ticks;
 }
 
+void GuestBlockProfile::record_chain(std::uint32_t pid, std::uint64_t location,
+    std::uint32_t entry, bool thumb, std::vector<std::uint32_t> frames,
+    std::uint64_t ticks)
+{
+    const std::lock_guard lock { mutex_ };
+    auto& row = chains_[{ pid, location, frames }];
+    if (row.runs == 0) {
+        row.pid = pid;
+        row.location = location;
+        row.entry = entry;
+        row.thumb = thumb;
+        row.frames = std::move(frames);
+    }
+    ++row.runs;
+    row.ticks += ticks;
+}
+
 void GuestBlockProfile::note_image_info(std::uint32_t pid, std::uint32_t address)
 {
     const std::lock_guard lock { mutex_ };
@@ -224,6 +242,16 @@ std::vector<StackRow> GuestBlockProfile::stacks() const
     std::vector<StackRow> result;
     result.reserve(stacks_.size());
     for (const auto& [key, row] : stacks_)
+        result.push_back(row);
+    return result;
+}
+
+std::vector<ChainRow> GuestBlockProfile::chains() const
+{
+    const std::lock_guard lock { mutex_ };
+    std::vector<ChainRow> result;
+    result.reserve(chains_.size());
+    for (const auto& [key, row] : chains_)
         result.push_back(row);
     return result;
 }
@@ -387,6 +415,29 @@ StackAttribution attribute_stack(std::uint32_t pc, std::uint32_t lr,
         current = *next;
     }
     return outermost;
+}
+
+std::vector<std::uint32_t> capture_stack_chain(std::uint32_t pc,
+    std::uint32_t lr, std::uint32_t frame, const GuestReader& read32,
+    std::size_t max_frames)
+{
+    std::vector<std::uint32_t> frames { pc, lr & ~1U };
+    std::uint32_t current = frame;
+    for (std::size_t depth = 0; depth < max_frames; ++depth) {
+        if (current == 0U || current % 4U != 0U)
+            break;
+        const auto next = read32(current);
+        const auto saved_lr = read32(current + 4U);
+        if (!next || !saved_lr)
+            break;
+        frames.push_back(*saved_lr & ~1U);
+        // The same climb rule as attribute_stack: a frame that does not go up
+        // ends the walk after its return address was recorded.
+        if (*next <= current)
+            break;
+        current = *next;
+    }
+    return frames;
 }
 
 std::vector<MappedStackRow> map_stack_rows(const GuestBlockProfile& profile)
@@ -558,6 +609,44 @@ std::vector<std::string> format_block_summary(
                         " share=" + share_text(totals.first, total_ticks));
     }
     return lines;
+}
+
+std::string format_chain_table(const GuestBlockProfile& profile)
+{
+    auto rows = profile.chains();
+    std::stable_sort(rows.begin(), rows.end(),
+        [](const ChainRow& left, const ChainRow& right) {
+            if (left.ticks != right.ticks)
+                return left.ticks > right.ticks;
+            if (left.pid != right.pid)
+                return left.pid < right.pid;
+            if (left.location != right.location)
+                return left.location < right.location;
+            return left.frames < right.frames;
+        });
+    ImageLookup images { profile };
+    std::string text =
+        "pid\tlocation\tentry\tthumb\truns\tticks\tdepth\tframes\n";
+    for (const auto& row : rows) {
+        std::string frames;
+        for (const auto address : row.frames) {
+            if (!frames.empty())
+                frames += ' ';
+            const auto* image = images.find(row.pid, address);
+            frames += image ? image->path + "+" +
+                                  hex32(address - image->load_address)
+                            : hex32(address);
+        }
+        char location[24];
+        std::snprintf(location, sizeof location, "0x%016llx",
+            static_cast<unsigned long long>(row.location));
+        text += std::to_string(row.pid) + "\t" + location + "\t" +
+                hex32(row.entry) + "\t" + (row.thumb ? "1" : "0") + "\t" +
+                std::to_string(row.runs) + "\t" + std::to_string(row.ticks) +
+                "\t" + std::to_string(row.frames.size()) + "\t" + frames +
+                "\n";
+    }
+    return text;
 }
 
 } // namespace shade
