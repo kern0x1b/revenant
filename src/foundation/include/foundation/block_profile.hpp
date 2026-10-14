@@ -3,11 +3,13 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 // Opt-in guest CPU profile: ticks per translated block, mapped to the guest
-// image that holds the block's first instruction. A profiled run is given a
-// budget of one tick, and the JIT is configured without block linking, so a
-// run ends after its first block at the dispatcher's tick check. The runs that
-// still continue (a fast link, or a short run) are counted apart, so the table
-// says how far its attribution holds.
+// image that holds the block's first instruction. The JIT is configured without
+// block linking and is called once per block, each call with a budget of one
+// tick; the executor repeats the call until the slice's own budget is spent, so
+// the scheduler sees the same slice as an unprofiled run and only observes.
+// Each call is one profiled run. The runs that still continue (a fast link, or
+// a short run) are counted apart, so the table says how far its attribution
+// holds.
 #pragma once
 
 #include <atomic>
@@ -201,8 +203,8 @@ struct MappedStackRow {
 
 // Accumulates the runs and the ticks they consumed per start block. Off by
 // default: nothing is recorded, and the executor keeps its tick budget. While
-// it is enabled the executor gives each run a budget of one tick and records
-// every run here.
+// it is enabled the executor calls the JIT once per block (a budget of one
+// tick each) and records every call here; the slice keeps its whole budget.
 //
 // Artifacts are bypassed while the profile is on (neither loaded nor
 // published), so every block of a profiled run was translated in this process

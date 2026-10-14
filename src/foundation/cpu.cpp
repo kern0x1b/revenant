@@ -1534,14 +1534,32 @@ public:
     void AddTicks(std::uint64_t ticks) override
     {
         consumed_ += ticks;
+        slice_ticks_remaining_ = ticks >= slice_ticks_remaining_
+                                     ? 0
+                                     : slice_ticks_remaining_ - ticks;
         ticks_remaining_ =
             ticks >= ticks_remaining_ ? 0 : ticks_remaining_ - ticks;
         if (!cooperative_execution_ || host_yield_requested_) {
             return;
         }
-        maybe_check_host_yield(ticks, ticks_remaining_ == 0U);
+        maybe_check_host_yield(ticks, slice_ticks_remaining_ == 0U);
     }
     std::uint64_t GetTicksRemaining() override { return ticks_remaining_; }
+    // The JIT call budget (ticks_remaining_) and the scheduler slice budget
+    // differ only under the block profile, which calls the JIT once per block.
+    void begin_jit_call(std::uint64_t max_ticks)
+    {
+        ticks_remaining_ = std::min(max_ticks, slice_ticks_remaining_);
+    }
+    [[nodiscard]] std::uint64_t slice_ticks_remaining() const
+    {
+        return slice_ticks_remaining_;
+    }
+    [[nodiscard]] std::uint64_t consumed_ticks() const { return consumed_; }
+    [[nodiscard]] bool host_yield_pending() const
+    {
+        return host_yield_requested_;
+    }
     std::uint64_t GetTicksForCode(bool is_thumb, Umbra::A32::VAddr address,
         std::uint32_t instruction) override
     {
@@ -1553,6 +1571,7 @@ public:
             default_host_cooperative_slice_budget)
     {
         ticks_remaining_ = ticks;
+        slice_ticks_remaining_ = ticks;
         consumed_ = 0;
         svc_.reset();
         svc_calls_ = 0;
@@ -2021,6 +2040,7 @@ private:
     {
         host_yield_requested_ = true;
         ticks_remaining_ = 0;
+        slice_ticks_remaining_ = 0;
         if (jit_ != nullptr) {
             // UserDefined2 is the existing scheduler AST boundary. It keeps
             // the current XNU quantum and therefore does not model a guest
@@ -2035,6 +2055,7 @@ private:
     std::uint32_t process_id_ { };
     Umbra::A32::Jit* jit_ { };
     std::uint64_t ticks_remaining_ { };
+    std::uint64_t slice_ticks_remaining_ { };
     std::uint64_t consumed_ { };
     std::optional<std::uint32_t> svc_;
     std::uint64_t svc_calls_ { };
@@ -2321,33 +2342,16 @@ public:
         diagnostics.checkpoint(PerfLatencyKind::CpuRunLoadState);
         const auto effective_host_slice_budget =
             std::max(host_slice_budget, std::chrono::nanoseconds::zero());
-        // Under the block profile a run gets one tick, so it ends after the
-        // first block that ends in a checked link (see GuestBlockProfile).
+        // Under the block profile the JIT is called once per block; the slice
+        // keeps its whole budget (see the JIT call below).
         const auto profiling_blocks =
             performance_counters().block_profile_enabled();
-        const std::uint64_t run_ticks =
-            single_step || profiling_blocks ? 1 : ticks;
-        callbacks_->begin(run_ticks, cooperative_execution && !single_step,
-            effective_host_slice_budget);
+        callbacks_->begin(single_step ? 1 : ticks,
+            cooperative_execution && !single_step, effective_host_slice_budget);
         diagnostics.checkpoint(PerfLatencyKind::CpuRunCallbacksBegin);
         try {
             const auto entry_location =
                 single_step ? 0U : current_location_descriptor();
-            // LR at the run's start: for an entry block, the return address of
-            // the call that reached it (the block profile's caller column).
-            const auto entry_caller =
-                profiling_blocks && !single_step ? jit_->Regs()[14] : 0U;
-            // The run's guest stack at its start, walked now: the registers
-            // are the run's, and the walk reads the guest memory it will use.
-            std::optional<StackAttribution> entry_stack;
-            std::vector<std::uint32_t> entry_chain;
-            if (profiling_blocks && !single_step) {
-                const Umbra::A32::LocationDescriptor entry_descriptor {
-                    Umbra::IR::LocationDescriptor { entry_location }
-                };
-                entry_stack = attribute_run_stack(entry_descriptor.PC());
-                entry_chain = capture_run_chain(entry_descriptor.PC());
-            }
             bool portable_demand_provider_enabled { };
             if (!single_step && demand_artifact_enabled_ &&
                 !jit_demand_disabled() && !jit_portable_handoff_disabled() &&
@@ -2360,14 +2364,83 @@ public:
                 cooperative_execution && !single_step
                 ? host_execution_budget_.next(effective_host_slice_budget)
                 : 0U;
-            jit_->SetHostExecutionBlockBudget(native_block_budget);
             const auto jit_started = std::chrono::steady_clock::now();
-            const auto reason = single_step ? jit_->Step() : jit_->Run();
+            // The JIT call. Under the block profile it returns after every
+            // block, so the loop calls it once per block and records each
+            // block at its own start (the profile's per-block attribution).
+            // The slice is still one slice: the loop ends where one unprofiled
+            // call ends (slice ticks spent, a host yield, the native block
+            // budget, or a halt for another reason), so the scheduler sees the
+            // same run with the same ticks and the same halt.
+            const auto profiling_calls = profiling_blocks && !single_step;
+            decltype(jit_->GetHostExecutionBudgetResult()) native_budget_result { };
+            std::uint32_t native_blocks_executed { };
+            Umbra::HaltReason reason { };
+            for (;;) {
+                const auto consumed_before = callbacks_->consumed_ticks();
+                std::uint32_t block_location { };
+                std::uint32_t block_caller { };
+                std::optional<StackAttribution> block_stack;
+                std::vector<std::uint32_t> block_chain;
+                if (profiling_calls) {
+                    callbacks_->begin_jit_call(1);
+                    block_location = current_location_descriptor();
+                    const Umbra::A32::LocationDescriptor block_descriptor {
+                        Umbra::IR::LocationDescriptor { block_location }
+                    };
+                    // LR at the block's start: for an entry block, the return
+                    // address of the call that reached it (the block profile's
+                    // caller column).
+                    block_caller = jit_->Regs()[14];
+                    // The block's guest stack at its start, walked now: the
+                    // registers are the block's, and the walk reads the guest
+                    // memory it will use.
+                    block_stack = attribute_run_stack(block_descriptor.PC());
+                    block_chain = capture_run_chain(block_descriptor.PC());
+                }
+                jit_->SetHostExecutionBlockBudget(
+                    native_block_budget == 0U
+                        ? 0U
+                        : native_block_budget - native_blocks_executed);
+                reason = single_step ? jit_->Step() : jit_->Run();
+                native_budget_result = jit_->GetHostExecutionBudgetResult();
+                native_blocks_executed += native_budget_result.blocks_executed;
+                if (profiling_calls) {
+                    const auto block_ticks =
+                        callbacks_->consumed_ticks() - consumed_before;
+                    const Umbra::A32::LocationDescriptor block_descriptor {
+                        Umbra::IR::LocationDescriptor { block_location }
+                    };
+                    performance_counters().block_profile().record_run(
+                        static_cast<std::uint32_t>(process_id_), block_location,
+                        block_descriptor.PC(), block_descriptor.TFlag(),
+                        block_ticks, block_caller);
+                    performance_counters().block_profile().record_stack(
+                        static_cast<std::uint32_t>(process_id_), *block_stack,
+                        block_ticks);
+                    performance_counters().block_profile().record_chain(
+                        static_cast<std::uint32_t>(process_id_), block_location,
+                        block_descriptor.PC(), block_descriptor.TFlag(),
+                        std::move(block_chain), block_ticks);
+                }
+                // Run() returns no halt bit when the call's ticks are spent
+                // (Step is set only by the single-step entry).
+                const auto halted_for_ticks = reason == Umbra::HaltReason {} ||
+                                              reason == Umbra::HaltReason::Step;
+                if (!profiling_calls || !halted_for_ticks ||
+                    callbacks_->slice_ticks_remaining() == 0U ||
+                    callbacks_->host_yield_pending() ||
+                    native_budget_result.exhausted ||
+                    (native_block_budget != 0U &&
+                        native_blocks_executed >= native_block_budget)) {
+                    break;
+                }
+                jit_->ClearHalt(Umbra::HaltReason::Step);
+            }
+            native_budget_result.blocks_executed = native_blocks_executed;
             const auto jit_elapsed =
                 std::chrono::duration_cast<std::chrono::nanoseconds>(
                     std::chrono::steady_clock::now() - jit_started);
-            const auto native_budget_result =
-                jit_->GetHostExecutionBudgetResult();
             if (portable_demand_provider_enabled)
                 set_portable_demand_provider(false);
             diagnostics.checkpoint(PerfLatencyKind::CpuRunExecute);
@@ -2419,22 +2492,6 @@ public:
             diagnostics.checkpoint(PerfLatencyKind::CpuRunSaveState);
             record_code_cache_usage();
             performance_counters().record_cpu_execution(result.ticks_consumed);
-            if (profiling_blocks && !single_step) {
-                const Umbra::A32::LocationDescriptor descriptor {
-                    Umbra::IR::LocationDescriptor { entry_location }
-                };
-                performance_counters().block_profile().record_run(
-                    static_cast<std::uint32_t>(process_id_), entry_location,
-                    descriptor.PC(), descriptor.TFlag(),
-                    result.ticks_consumed, entry_caller);
-                performance_counters().block_profile().record_stack(
-                    static_cast<std::uint32_t>(process_id_), *entry_stack,
-                    result.ticks_consumed);
-                performance_counters().block_profile().record_chain(
-                    static_cast<std::uint32_t>(process_id_), entry_location,
-                    descriptor.PC(), descriptor.TFlag(), std::move(entry_chain),
-                    result.ticks_consumed);
-            }
             // Profile validation and merging never run in an executing Guest
             // slice. The fixed recorder spans a complete profile and is
             // drained only by an explicit quiet/image-transition safe point.
