@@ -3886,6 +3886,8 @@ void EmulatorSession::run()
             prepared.execution.cpu->set_svc_dispatch_mode(
                 parallel_guest_batch ? SvcDispatchMode::Deferred
                                      : SvcDispatchMode::Immediate);
+            prepared.execution.cpu->set_guest_thread(
+                prepared.scheduled.thread.thread);
         }
 
         if (guest_processor_count == 1 && !prepared_slices.empty() &&
@@ -5896,6 +5898,7 @@ void EmulatorSession::run()
             const auto mapped = map_block_rows(block_profile);
             const auto mapped_callers = map_caller_rows(block_profile);
             const auto mapped_stacks = map_stack_rows(block_profile);
+            const auto chain_rows = block_profile.chains().size();
             const auto chain_table = format_chain_table(block_profile);
             const auto write_table = [](const std::filesystem::path& file_path,
                                          const std::string& text) {
@@ -5926,7 +5929,10 @@ void EmulatorSession::run()
                         " rows=" + std::to_string(mapped_callers.size()) +
                         " kind=callers");
             output.line("[perf-block-file] path=" + chains_path.string() +
-                        " rows=" + std::to_string(block_profile.chains().size()) +
+                        " rows=" +
+                        std::to_string(std::min(chain_rows,
+                            chain_table_row_limit)) +
+                        " total-rows=" + std::to_string(chain_rows) +
                         " kind=chains");
         }
     }

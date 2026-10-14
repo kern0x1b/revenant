@@ -206,14 +206,15 @@ void GuestBlockProfile::record_stack(
     row.ticks += ticks;
 }
 
-void GuestBlockProfile::record_chain(std::uint32_t pid, std::uint64_t location,
-    std::uint32_t entry, bool thumb, std::vector<std::uint32_t> frames,
-    std::uint64_t ticks)
+void GuestBlockProfile::record_chain(std::uint32_t pid, std::uint32_t thread,
+    std::uint64_t location, std::uint32_t entry, bool thumb,
+    std::vector<std::uint32_t> frames, std::uint64_t ticks)
 {
     const std::lock_guard lock { mutex_ };
-    auto& row = chains_[{ pid, location, frames }];
+    auto& row = chains_[{ pid, thread, location, frames }];
     if (row.runs == 0) {
         row.pid = pid;
+        row.thread = thread;
         row.location = location;
         row.entry = entry;
         row.thumb = thumb;
@@ -611,7 +612,8 @@ std::vector<std::string> format_block_summary(
     return lines;
 }
 
-std::string format_chain_table(const GuestBlockProfile& profile)
+std::string format_chain_table(
+    const GuestBlockProfile& profile, std::size_t max_rows)
 {
     auto rows = profile.chains();
     std::stable_sort(rows.begin(), rows.end(),
@@ -620,13 +622,17 @@ std::string format_chain_table(const GuestBlockProfile& profile)
                 return left.ticks > right.ticks;
             if (left.pid != right.pid)
                 return left.pid < right.pid;
+            if (left.thread != right.thread)
+                return left.thread < right.thread;
             if (left.location != right.location)
                 return left.location < right.location;
             return left.frames < right.frames;
         });
+    if (rows.size() > max_rows)
+        rows.resize(max_rows);
     ImageLookup images { profile };
     std::string text =
-        "pid\tlocation\tentry\tthumb\truns\tticks\tdepth\tframes\n";
+        "pid\tthread\tlocation\tentry\tthumb\truns\tticks\tdepth\tframes\n";
     for (const auto& row : rows) {
         std::string frames;
         for (const auto address : row.frames) {
@@ -640,7 +646,8 @@ std::string format_chain_table(const GuestBlockProfile& profile)
         char location[24];
         std::snprintf(location, sizeof location, "0x%016llx",
             static_cast<unsigned long long>(row.location));
-        text += std::to_string(row.pid) + "\t" + location + "\t" +
+        text += std::to_string(row.pid) + "\t" + std::to_string(row.thread) +
+                "\t" + location + "\t" +
                 hex32(row.entry) + "\t" + (row.thumb ? "1" : "0") + "\t" +
                 std::to_string(row.runs) + "\t" + std::to_string(row.ticks) +
                 "\t" + std::to_string(row.frames.size()) + "\t" + frames +

@@ -244,6 +244,9 @@ public:
     void set_cthread_self(std::optional<std::uint32_t> value);
     void set_svc_handler(SvcHandler handler);
     void set_svc_dispatch_mode(SvcDispatchMode mode);
+    // The guest thread the next runs of this CPU execute for. Only the block
+    // profile reads it (its chain rows name the thread).
+    void set_guest_thread(std::uint32_t thread);
     void set_memory_write_watchpoint(
         std::uint32_t address, MemoryWriteHandler handler);
     void set_debug_breakpoints_enabled(bool enabled);
@@ -267,6 +270,7 @@ private:
     SvcHandler svc_handler_;
     MemoryWriteHandler memory_write_handler_;
     SvcDispatchMode svc_dispatch_mode_ { SvcDispatchMode::Immediate };
+    std::uint32_t guest_thread_ { };
     std::optional<std::uint32_t> memory_write_watch_address_;
     bool debug_breakpoints_enabled_ { };
     Umbra::HaltReason requested_halt_reason_ { };

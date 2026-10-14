@@ -2419,7 +2419,8 @@ public:
                         static_cast<std::uint32_t>(process_id_), *block_stack,
                         block_ticks);
                     performance_counters().block_profile().record_chain(
-                        static_cast<std::uint32_t>(process_id_), block_location,
+                        static_cast<std::uint32_t>(process_id_),
+                        cpu.guest_thread_, block_location,
                         block_descriptor.PC(), block_descriptor.TFlag(),
                         std::move(block_chain), block_ticks);
                 }
@@ -5309,6 +5310,10 @@ void Cpu::set_svc_handler(SvcHandler handler)
 void Cpu::set_svc_dispatch_mode(SvcDispatchMode mode)
 {
     svc_dispatch_mode_ = mode;
+}
+void Cpu::set_guest_thread(std::uint32_t thread)
+{
+    guest_thread_ = thread;
 }
 void Cpu::set_memory_write_watchpoint(
     std::uint32_t address, MemoryWriteHandler handler)

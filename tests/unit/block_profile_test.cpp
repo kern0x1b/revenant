@@ -488,26 +488,43 @@ void test_chain_rows()
         shade::GuestImage { "/usr/lib/libsystem_c.dylib", 0x3000U, 0x1000U },
     } });
     profile.record_chain(
-        1, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x1050U }, 10);
+        1, 7, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x1050U }, 10);
     profile.record_chain(
-        1, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x1050U }, 5);
+        1, 7, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x1050U }, 5);
     profile.record_chain(
-        1, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x3090U }, 3);
+        1, 7, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x3090U }, 3);
     CHECK(profile.chains().size() == 2);
+    // The same chain on another guest thread is another row.
+    profile.record_chain(
+        1, 8, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x1050U }, 4);
+    CHECK(profile.chains().size() == 3);
 
-    // Equal chains are one row; the largest ticks come first, and each frame
-    // is an image and offset, or its address when no image holds it.
+    // Equal chains of one thread are one row; the largest ticks come first,
+    // and each frame is an image and offset, or its address when no image
+    // holds it.
     const auto table = shade::format_chain_table(profile);
     CHECK(contains(table,
-        "pid\tlocation\tentry\tthumb\truns\tticks\tdepth\tframes\n"));
-    CHECK(contains(table, "1\t0x0000000000003010\t0x00003010\t0\t2\t15\t3\t"
+        "pid\tthread\tlocation\tentry\tthumb\truns\tticks\tdepth\tframes\n"));
+    CHECK(contains(table, "1\t7\t0x0000000000003010\t0x00003010\t0\t2\t15\t3\t"
                           "/usr/lib/libsystem_c.dylib+0x00000010 "
                           "/usr/lib/libsystem_c.dylib+0x00000020 "
                           "/usr/lib/charon/a.dylib+0x00000050\n"));
-    CHECK(contains(table, "1\t0x0000000000003010\t0x00003010\t0\t1\t3\t3\t"
+    CHECK(contains(table, "1\t8\t0x0000000000003010\t0x00003010\t0\t1\t4\t3\t"
+                          "/usr/lib/libsystem_c.dylib+0x00000010 "
+                          "/usr/lib/libsystem_c.dylib+0x00000020 "
+                          "/usr/lib/charon/a.dylib+0x00000050\n"));
+    CHECK(contains(table, "1\t7\t0x0000000000003010\t0x00003010\t0\t1\t3\t3\t"
                           "/usr/lib/libsystem_c.dylib+0x00000010 "
                           "/usr/lib/libsystem_c.dylib+0x00000020 "
                           "/usr/lib/libsystem_c.dylib+0x00000090\n"));
+
+    // The row cap keeps the largest rows and leaves the others out.
+    const auto capped = shade::format_chain_table(profile, 1);
+    CHECK(contains(capped,
+        "1\t7\t0x0000000000003010\t0x00003010\t0\t2\t15\t3\t"));
+    CHECK(!contains(capped, "1\t8\t"));
+    CHECK(shade::format_chain_table(profile, 0) ==
+          "pid\tthread\tlocation\tentry\tthumb\truns\tticks\tdepth\tframes\n");
 
     profile.clear();
     CHECK(profile.chains().empty());

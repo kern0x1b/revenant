@@ -174,9 +174,11 @@ using GuestReader = std::function<std::optional<std::uint32_t>(std::uint32_t)>;
     std::size_t max_frames = 16);
 
 // The runs that started at one block with one guest stack (see
-// capture_stack_chain), and the ticks they consumed.
+// capture_stack_chain), and the ticks they consumed. `thread` is the guest
+// thread the scheduler dispatched for those runs.
 struct ChainRow {
     std::uint32_t pid { };
+    std::uint32_t thread { };
     std::uint64_t location { };
     std::uint32_t entry { };
     bool thumb { };
@@ -239,12 +241,12 @@ public:
     void record_stack(
         std::uint32_t pid, StackAttribution attribution, std::uint64_t ticks);
 
-    // Called after each run that started at `location` in process `pid`, with
-    // the frames its guest stack held at its start (capture_stack_chain) and
-    // its consumed ticks.
-    void record_chain(std::uint32_t pid, std::uint64_t location,
-        std::uint32_t entry, bool thumb, std::vector<std::uint32_t> frames,
-        std::uint64_t ticks);
+    // Called after each run that started at `location` in process `pid` on
+    // guest thread `thread`, with the frames its guest stack held at its start
+    // (capture_stack_chain) and its consumed ticks.
+    void record_chain(std::uint32_t pid, std::uint32_t thread,
+        std::uint64_t location, std::uint32_t entry, bool thumb,
+        std::vector<std::uint32_t> frames, std::uint64_t ticks);
 
     // The address of the guest's dyld_all_image_info, noted when a process is
     // created, so a run can read the image list while it runs (0 when none).
@@ -281,7 +283,8 @@ private:
         callers_;
     std::map<std::tuple<std::uint32_t, std::uint8_t, std::uint32_t>, StackRow>
         stacks_;
-    std::map<std::tuple<std::uint32_t, std::uint64_t, std::vector<std::uint32_t>>,
+    std::map<std::tuple<std::uint32_t, std::uint32_t, std::uint64_t,
+                 std::vector<std::uint32_t>>,
         ChainRow>
         chains_;
     std::map<std::uint32_t, GuestImageTable> images_;
@@ -308,10 +311,18 @@ private:
 [[nodiscard]] std::string format_stack_table(
     const std::vector<MappedStackRow>& rows);
 
+// The chain table keeps this many rows, the largest ticks first. A row holds up
+// to 16 frames of about 70 bytes each, so the table is at most about 11 MB.
+// Rows left out are counted in the run's `[perf-block-file]` line; the stacks
+// table keeps the exact sums of every run.
+inline constexpr std::size_t chain_table_row_limit { 10'000 };
+
 // Tab-separated table with a header line: one line per chain row, largest
-// ticks first. Each frame is written as its image and offset ("path+0xOFFSET"),
-// or as its address ("0xADDRESS") when no image of its process holds it.
-[[nodiscard]] std::string format_chain_table(const GuestBlockProfile& profile);
+// ticks first, at most `max_rows` rows. Each frame is written as its image and
+// offset ("path+0xOFFSET"), or as its address ("0xADDRESS") when no image of
+// its process holds it.
+[[nodiscard]] std::string format_chain_table(const GuestBlockProfile& profile,
+    std::size_t max_rows = chain_table_row_limit);
 
 // One `[perf-block-stack]` line: the ticks of each kind of attribution.
 [[nodiscard]] std::string format_stack_summary(
