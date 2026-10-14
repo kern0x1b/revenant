@@ -526,6 +526,16 @@ void test_chain_rows()
     CHECK(shade::format_chain_table(profile, 0) ==
           "pid\tthread\tlocation\tentry\tthumb\truns\tticks\tdepth\tframes\n");
 
+    // The thread summary counts every row, capped or not.
+    const auto threads = shade::format_thread_summary(profile);
+    CHECK(threads.size() == 2);
+    CHECK(threads.size() == 2 &&
+          threads[0] == "[perf-block-thread] pid=1 thread=7 runs=3 ticks=18 "
+                        "share=0.8182");
+    CHECK(threads.size() == 2 &&
+          threads[1] == "[perf-block-thread] pid=1 thread=8 runs=1 ticks=4 "
+                        "share=0.1818");
+
     profile.clear();
     CHECK(profile.chains().empty());
 }

@@ -5920,6 +5920,8 @@ void EmulatorSession::run()
                      block_profile, final_snapshot.cpu_ticks, 30))
                 output.line(line);
             output.line(format_stack_summary(block_profile));
+            for (const auto& line : format_thread_summary(block_profile))
+                output.line(line);
             output.line("[perf-block-file] path=" + stacks_path.string() +
                         " rows=" + std::to_string(mapped_stacks.size()) +
                         " kind=stacks");

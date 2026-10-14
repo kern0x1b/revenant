@@ -41,6 +41,7 @@ namespace {
             "[perf-block-top]",
             "[perf-block-image]",
             "[perf-block-stack]",
+            "[perf-block-thread]",
             "[perf-block-file]",
             "[precompile]",
             "[precompile-outcomes]",

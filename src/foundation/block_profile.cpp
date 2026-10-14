@@ -503,6 +503,29 @@ std::string format_stack_table(const std::vector<MappedStackRow>& rows)
     return text;
 }
 
+std::vector<std::string> format_thread_summary(const GuestBlockProfile& profile)
+{
+    std::map<std::pair<std::uint32_t, std::uint32_t>,
+        std::pair<std::uint64_t, std::uint64_t>>
+        totals;
+    std::uint64_t all_ticks { };
+    for (const auto& row : profile.chains()) {
+        auto& [runs, ticks] = totals[{ row.pid, row.thread }];
+        runs += row.runs;
+        ticks += row.ticks;
+        all_ticks += row.ticks;
+    }
+    std::vector<std::string> lines;
+    for (const auto& [key, value] : totals) {
+        lines.push_back("[perf-block-thread] pid=" + std::to_string(key.first) +
+                        " thread=" + std::to_string(key.second) +
+                        " runs=" + std::to_string(value.first) +
+                        " ticks=" + std::to_string(value.second) +
+                        " share=" + share_text(value.second, all_ticks));
+    }
+    return lines;
+}
+
 std::string format_stack_summary(const GuestBlockProfile& profile)
 {
     std::uint64_t self_ticks { };

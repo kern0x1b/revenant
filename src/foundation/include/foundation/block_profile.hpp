@@ -324,6 +324,12 @@ inline constexpr std::size_t chain_table_row_limit { 10'000 };
 [[nodiscard]] std::string format_chain_table(const GuestBlockProfile& profile,
     std::size_t max_rows = chain_table_row_limit);
 
+// One `[perf-block-thread]` line per guest thread, in pid and thread order: the
+// runs and ticks of all its chain rows. It covers every chain row, not only
+// the rows the chain table keeps.
+[[nodiscard]] std::vector<std::string> format_thread_summary(
+    const GuestBlockProfile& profile);
+
 // One `[perf-block-stack]` line: the ticks of each kind of attribution.
 [[nodiscard]] std::string format_stack_summary(
     const GuestBlockProfile& profile);
