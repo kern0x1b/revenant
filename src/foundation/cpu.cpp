@@ -2332,6 +2332,10 @@ public:
         try {
             const auto entry_location =
                 single_step ? 0U : current_location_descriptor();
+            // LR at the run's start: for an entry block, the return address of
+            // the call that reached it (the block profile's caller column).
+            const auto entry_caller =
+                profiling_blocks && !single_step ? jit_->Regs()[14] : 0U;
             bool portable_demand_provider_enabled { };
             if (!single_step && demand_artifact_enabled_ &&
                 !jit_demand_disabled() && !jit_portable_handoff_disabled() &&
@@ -2410,7 +2414,7 @@ public:
                 performance_counters().block_profile().record_run(
                     static_cast<std::uint32_t>(process_id_), entry_location,
                     descriptor.PC(), descriptor.TFlag(),
-                    result.ticks_consumed);
+                    result.ticks_consumed, entry_caller);
             }
             // Profile validation and merging never run in an executing Guest
             // slice. The fixed recorder spans a complete profile and is

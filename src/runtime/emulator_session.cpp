@@ -5889,23 +5889,32 @@ void EmulatorSession::run()
             const auto& block_profile = performance_counters().block_profile();
             const auto directory = options.rootfs.parent_path() / "perf";
             const auto path = directory / "block-profile.tsv";
+            const auto callers_path = directory / "block-callers.tsv";
             std::filesystem::create_directories(directory);
             const auto mapped = map_block_rows(block_profile);
-            {
-                std::ofstream file { path, std::ios::binary | std::ios::trunc };
-                file << format_block_table(mapped);
+            const auto mapped_callers = map_caller_rows(block_profile);
+            const auto write_table = [](const std::filesystem::path& file_path,
+                                         const std::string& text) {
+                std::ofstream file { file_path,
+                    std::ios::binary | std::ios::trunc };
+                file << text;
                 file.flush();
                 if (!file) {
                     throw std::runtime_error {
-                        "cannot write block profile: " + path.string()
+                        "cannot write block profile: " + file_path.string()
                     };
                 }
-            }
+            };
+            write_table(path, format_block_table(mapped));
+            write_table(callers_path, format_caller_table(mapped_callers));
             for (const auto& line : format_block_summary(
                      block_profile, final_snapshot.cpu_ticks, 30))
                 output.line(line);
             output.line("[perf-block-file] path=" + path.string() +
                         " rows=" + std::to_string(mapped.size()));
+            output.line("[perf-block-file] path=" + callers_path.string() +
+                        " rows=" + std::to_string(mapped_callers.size()) +
+                        " kind=callers");
         }
     }
     if (jit_observer_only && runtime_jit_memory) {

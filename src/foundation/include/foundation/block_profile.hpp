@@ -16,6 +16,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -93,6 +94,31 @@ struct MappedBlockRow {
     std::uint32_t offset { };
 };
 
+// The runs that started at one block and whose guest LR was `caller` when they
+// started. For a block that is a function's entry, LR is the return address of
+// the call that reached it, so `caller` names the caller one level up. A block
+// reached inside its function (not at its entry) carries whatever LR held then,
+// so these rows cover the entry blocks, not the whole flat profile.
+struct CallerRow {
+    std::uint32_t pid { };
+    std::uint64_t location { };
+    std::uint32_t entry { };
+    bool thumb { };
+    std::uint32_t caller { };
+    std::uint64_t runs { };
+    std::uint64_t ticks { };
+};
+
+struct MappedCallerRow {
+    CallerRow row;
+    // The block's image and offset, as in MappedBlockRow.
+    std::string image;
+    std::uint32_t offset { };
+    // The caller's image and offset: empty when LR lies in no image.
+    std::string caller_image;
+    std::uint32_t caller_offset { };
+};
+
 // Accumulates the runs and the ticks they consumed per start block. Off by
 // default: nothing is recorded, and the executor keeps its tick budget. While
 // it is enabled the executor gives each run a budget of one tick and records
@@ -120,11 +146,13 @@ public:
         std::uint32_t pid, std::uint64_t location, TranslatedBlock block);
 
     // Called after each run that started at `location`, which is the block
-    // at `entry` (Thumb when `thumb`), with the run's consumed ticks.
+    // at `entry` (Thumb when `thumb`), with the run's consumed ticks and the
+    // guest LR the run started with (`caller`).
     void record_run(std::uint32_t pid, std::uint64_t location,
-        std::uint32_t entry, bool thumb, std::uint64_t ticks);
+        std::uint32_t entry, bool thumb, std::uint64_t ticks,
+        std::uint32_t caller);
 
-    // Clears runs, translations and images.
+    // Clears runs, callers, translations and images.
     void clear();
 
     // Called when a process exits, while its address space still holds the
@@ -135,6 +163,8 @@ public:
 
     // Rows in no particular order.
     [[nodiscard]] std::vector<BlockRow> rows() const;
+    // Caller rows in no particular order.
+    [[nodiscard]] std::vector<CallerRow> callers() const;
     [[nodiscard]] std::size_t translation_count() const;
 
 private:
@@ -143,6 +173,8 @@ private:
     std::map<std::pair<std::uint32_t, std::uint64_t>, TranslatedBlock>
         translations_;
     std::map<std::pair<std::uint32_t, std::uint64_t>, BlockRow> rows_;
+    std::map<std::tuple<std::uint32_t, std::uint64_t, std::uint32_t>, CallerRow>
+        callers_;
     std::map<std::uint32_t, GuestImageTable> images_;
 };
 
@@ -151,9 +183,19 @@ private:
 [[nodiscard]] std::vector<MappedBlockRow> map_block_rows(
     const GuestBlockProfile& profile);
 
+// Every caller row, mapped to the block's image and to the caller's image
+// through its process's table, sorted by ticks, largest first; ties by pid,
+// entry, Thumb, then caller.
+[[nodiscard]] std::vector<MappedCallerRow> map_caller_rows(
+    const GuestBlockProfile& profile);
+
 // Tab-separated table with a header line: one line per row.
 [[nodiscard]] std::string format_block_table(
     const std::vector<MappedBlockRow>& rows);
+
+// Tab-separated table with a header line: one line per caller row.
+[[nodiscard]] std::string format_caller_table(
+    const std::vector<MappedCallerRow>& rows);
 
 // `[perf-block]` totals against the run's cpu ticks, then up to `top`
 // `[perf-block-top]` rows and up to `top` `[perf-block-image]` totals.

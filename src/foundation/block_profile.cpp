@@ -31,6 +31,28 @@ namespace {
         return text;
     }
 
+    // The image of an address in one process, with each process's table read
+    // from the profile once.
+    class ImageLookup {
+    public:
+        explicit ImageLookup(const GuestBlockProfile& profile)
+            : profile_ { profile }
+        {
+        }
+
+        const GuestImage* find(std::uint32_t pid, std::uint32_t address)
+        {
+            auto found = tables_.find(pid);
+            if (found == tables_.end())
+                found = tables_.emplace(pid, profile_.image_table(pid)).first;
+            return found->second.find(address);
+        }
+
+    private:
+        const GuestBlockProfile& profile_;
+        std::map<std::uint32_t, GuestImageTable> tables_;
+    };
+
 } // namespace
 
 GuestImageTable::GuestImageTable(std::vector<GuestImage> images)
@@ -70,7 +92,7 @@ void GuestBlockProfile::record_translation(
 }
 
 void GuestBlockProfile::record_run(std::uint32_t pid, std::uint64_t location,
-    std::uint32_t entry, bool thumb, std::uint64_t ticks)
+    std::uint32_t entry, bool thumb, std::uint64_t ticks, std::uint32_t caller)
 {
     const std::lock_guard lock { mutex_ };
     auto& row = rows_[{ pid, location }];
@@ -85,6 +107,17 @@ void GuestBlockProfile::record_run(std::uint32_t pid, std::uint64_t location,
     }
     ++row.runs;
     row.ticks += ticks;
+
+    auto& caller_row = callers_[{ pid, location, caller }];
+    if (caller_row.runs == 0) {
+        caller_row.pid = pid;
+        caller_row.location = location;
+        caller_row.entry = entry;
+        caller_row.thumb = thumb;
+        caller_row.caller = caller;
+    }
+    ++caller_row.runs;
+    caller_row.ticks += ticks;
 
     const auto found = translations_.find({ pid, location });
     if (found == translations_.end()) {
@@ -104,6 +137,7 @@ void GuestBlockProfile::clear()
     const std::lock_guard lock { mutex_ };
     translations_.clear();
     rows_.clear();
+    callers_.clear();
     images_.clear();
 }
 
@@ -138,6 +172,16 @@ std::vector<BlockRow> GuestBlockProfile::rows() const
     return result;
 }
 
+std::vector<CallerRow> GuestBlockProfile::callers() const
+{
+    const std::lock_guard lock { mutex_ };
+    std::vector<CallerRow> result;
+    result.reserve(callers_.size());
+    for (const auto& [key, row] : callers_)
+        result.push_back(row);
+    return result;
+}
+
 std::size_t GuestBlockProfile::translation_count() const
 {
     const std::lock_guard lock { mutex_ };
@@ -146,15 +190,12 @@ std::size_t GuestBlockProfile::translation_count() const
 
 std::vector<MappedBlockRow> map_block_rows(const GuestBlockProfile& profile)
 {
-    std::map<std::uint32_t, GuestImageTable> tables;
+    ImageLookup images { profile };
     std::vector<MappedBlockRow> result;
     for (const auto& row : profile.rows()) {
-        auto found = tables.find(row.pid);
-        if (found == tables.end())
-            found = tables.emplace(row.pid, profile.image_table(row.pid)).first;
         MappedBlockRow mapped;
         mapped.row = row;
-        if (const auto* image = found->second.find(row.entry)) {
+        if (const auto* image = images.find(row.pid, row.entry)) {
             mapped.image = image->path;
             mapped.offset = row.entry - image->load_address;
         }
@@ -171,6 +212,65 @@ std::vector<MappedBlockRow> map_block_rows(const GuestBlockProfile& profile)
             return left.row.thumb < right.row.thumb;
         });
     return result;
+}
+
+std::vector<MappedCallerRow> map_caller_rows(const GuestBlockProfile& profile)
+{
+    ImageLookup images { profile };
+    std::vector<MappedCallerRow> result;
+    for (const auto& row : profile.callers()) {
+        MappedCallerRow mapped;
+        mapped.row = row;
+        if (const auto* image = images.find(row.pid, row.entry)) {
+            mapped.image = image->path;
+            mapped.offset = row.entry - image->load_address;
+        }
+        // The Thumb bit of LR is not part of the address the call returns to.
+        const auto returns_to = row.caller & ~1U;
+        if (const auto* image = images.find(row.pid, returns_to)) {
+            mapped.caller_image = image->path;
+            mapped.caller_offset = returns_to - image->load_address;
+        }
+        result.push_back(std::move(mapped));
+    }
+    std::stable_sort(result.begin(), result.end(),
+        [](const MappedCallerRow& left, const MappedCallerRow& right) {
+            if (left.row.ticks != right.row.ticks)
+                return left.row.ticks > right.row.ticks;
+            if (left.row.pid != right.row.pid)
+                return left.row.pid < right.row.pid;
+            if (left.row.entry != right.row.entry)
+                return left.row.entry < right.row.entry;
+            if (left.row.thumb != right.row.thumb)
+                return left.row.thumb < right.row.thumb;
+            return left.row.caller < right.row.caller;
+        });
+    return result;
+}
+
+std::string format_caller_table(const std::vector<MappedCallerRow>& rows)
+{
+    std::string text =
+        "pid\tentry\tthumb\timage\toffset\tcaller\tcaller_image\t"
+        "caller_offset\truns\tticks\n";
+    for (const auto& mapped : rows) {
+        const auto& row = mapped.row;
+        text += std::to_string(row.pid) + "\t" + hex32(row.entry) + "\t" +
+                (row.thumb ? "1" : "0") + "\t" +
+                (mapped.image.empty() ? std::string { "-" } : mapped.image) +
+                "\t" +
+                (mapped.image.empty() ? std::string { "-" }
+                                      : hex32(mapped.offset)) +
+                "\t" + hex32(row.caller) + "\t" +
+                (mapped.caller_image.empty() ? std::string { "-" }
+                                             : mapped.caller_image) +
+                "\t" +
+                (mapped.caller_image.empty() ? std::string { "-" }
+                                             : hex32(mapped.caller_offset)) +
+                "\t" + std::to_string(row.runs) + "\t" +
+                std::to_string(row.ticks) + "\n";
+    }
+    return text;
 }
 
 std::string format_block_table(const std::vector<MappedBlockRow>& rows)

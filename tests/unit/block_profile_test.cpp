@@ -3,8 +3,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 // Unit test for the guest block profile: exact, chained and short runs against
-// the translated cycle counts, the per-block rows, image mapping and the report
-// text. Build with BUILD_TESTING and run `ctest -R block_profile`.
+// the translated cycle counts, the per-block rows, the caller rows (block by
+// guest LR), image mapping and the report text. Build with BUILD_TESTING and
+// run `ctest -R block_profile`.
 
 #include "foundation/block_profile.hpp"
 
@@ -50,6 +51,15 @@ const shade::BlockRow* find_row(
     return nullptr;
 }
 
+const shade::MappedCallerRow* find_caller(
+    const std::vector<shade::MappedCallerRow>& rows, std::uint32_t caller)
+{
+    for (const auto& row : rows)
+        if (row.row.caller == caller)
+            return &row;
+    return nullptr;
+}
+
 void test_image_table()
 {
     const auto table = sample_table();
@@ -75,11 +85,11 @@ void test_run_classification()
     profile.record_translation(
         1U, 0x2000U, { 7U, shade::BlockEnd::LinkBlockFast });
 
-    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U); // exact
-    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U); // exact
-    profile.record_run(1U, 0x2000U, 0x2000U, true, 12U); // chained: 7 + 5
-    profile.record_run(1U, 0x2000U, 0x2000U, true, 3U); // short
-    profile.record_run(1U, 0x3000U, 0x3000U, false, 4U); // never translated
+    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U, 0U); // exact
+    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U, 0U); // exact
+    profile.record_run(1U, 0x2000U, 0x2000U, true, 12U, 0U); // chained: 7 + 5
+    profile.record_run(1U, 0x2000U, 0x2000U, true, 3U, 0U); // short
+    profile.record_run(1U, 0x3000U, 0x3000U, false, 4U, 0U); // never translated
 
     const auto rows = profile.rows();
     CHECK(rows.size() == 3U);
@@ -130,8 +140,8 @@ void test_pids_keep_rows_apart()
         1U, 0x1000U, { 5U, shade::BlockEnd::LinkBlock });
     profile.record_translation(
         2U, 0x1000U, { 9U, shade::BlockEnd::Other });
-    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U);
-    profile.record_run(2U, 0x1000U, 0x1000U, false, 9U);
+    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U, 0U);
+    profile.record_run(2U, 0x1000U, 0x1000U, false, 9U, 0U);
     CHECK(profile.rows().size() == 2U);
     std::uint64_t exact = 0;
     for (const auto& row : profile.rows())
@@ -144,7 +154,7 @@ void test_clear_and_images()
     shade::GuestBlockProfile profile;
     profile.record_translation(
         1U, 0x1000U, { 5U, shade::BlockEnd::LinkBlock });
-    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U);
+    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U, 0x3020U);
     profile.record_images(1U, sample_table());
     CHECK(profile.image_table_count() == 0U); // not enabled: nothing recorded
     profile.set_enabled(true);
@@ -153,6 +163,7 @@ void test_clear_and_images()
 
     profile.clear();
     CHECK(profile.rows().empty());
+    CHECK(profile.callers().empty());
     CHECK(profile.translation_count() == 0U);
     CHECK(profile.image_table_count() == 0U);
     CHECK(profile.enabled()); // clearing keeps the switch
@@ -169,9 +180,9 @@ void test_mapping_and_order()
         1U, 0x1010U, { 9U, shade::BlockEnd::LinkBlock });
     profile.record_translation(
         1U, 0x7000U, { 2U, shade::BlockEnd::LinkBlock });
-    profile.record_run(1U, 0x3010U, 0x3010U, false, 4U);
-    profile.record_run(1U, 0x1010U, 0x1010U, false, 9U);
-    profile.record_run(1U, 0x7000U, 0x7000U, false, 2U);
+    profile.record_run(1U, 0x3010U, 0x3010U, false, 4U, 0U);
+    profile.record_run(1U, 0x1010U, 0x1010U, false, 9U, 0U);
+    profile.record_run(1U, 0x7000U, 0x7000U, false, 2U, 0U);
 
     const auto mapped = shade::map_block_rows(profile);
     CHECK(mapped.size() == 3U);
@@ -193,14 +204,83 @@ void test_mapping_and_order()
     CHECK(contains(table, "\t-\t-\n"));
 }
 
-void test_summary_conservation()
+void test_caller_rows()
+{
+    shade::GuestBlockProfile profile;
+    profile.set_enabled(true);
+    profile.record_images(1U, sample_table());
+    profile.record_translation(
+        1U, 0x1010U, { 5U, shade::BlockEnd::LinkBlock });
+    profile.record_translation(
+        1U, 0x3010U, { 4U, shade::BlockEnd::LinkBlock });
+
+    // Two runs of block 0x1010 entered from 0x3021 (Thumb bit set in LR: the
+    // return address is 0x3020, in c.dylib), one from 0x3100, one from 0x7000
+    // (in no image). Block 0x3010 is entered from 0x3021 once.
+    profile.record_run(1U, 0x1010U, 0x1010U, false, 5U, 0x3021U);
+    profile.record_run(1U, 0x1010U, 0x1010U, false, 5U, 0x3021U);
+    profile.record_run(1U, 0x1010U, 0x1010U, false, 5U, 0x3100U);
+    profile.record_run(1U, 0x1010U, 0x1010U, false, 5U, 0x7000U);
+    profile.record_run(1U, 0x3010U, 0x3010U, false, 4U, 0x3021U);
+
+    const auto callers = profile.callers();
+    CHECK(callers.size() == 4U);
+    std::uint64_t caller_ticks = 0;
+    for (const auto& row : callers)
+        caller_ticks += row.ticks;
+    std::uint64_t block_ticks = 0;
+    for (const auto& row : profile.rows())
+        block_ticks += row.ticks;
+    CHECK(caller_ticks == block_ticks); // the caller rows add up to the blocks
+
+    const auto mapped = shade::map_caller_rows(profile);
+    CHECK(mapped.size() == 4U);
+    const auto* thumb = find_caller(mapped, 0x3021U);
+    CHECK(thumb != nullptr);
+    if (thumb) {
+        CHECK(thumb->row.location == 0x1010U);
+        CHECK(thumb->row.runs == 2U);
+        CHECK(thumb->row.ticks == 10U);
+        CHECK(thumb->image == "/usr/lib/a.dylib");
+        CHECK(thumb->offset == 0x10U);
+        CHECK(thumb->caller_image == "/usr/lib/c.dylib");
+        CHECK(thumb->caller_offset == 0x20U); // Thumb bit dropped
+    }
+    const auto* plain = find_caller(mapped, 0x3100U);
+    CHECK(plain != nullptr);
+    if (plain) {
+        CHECK(plain->row.runs == 1U);
+        CHECK(plain->caller_image == "/usr/lib/c.dylib");
+        CHECK(plain->caller_offset == 0x100U);
+    }
+    const auto* unmapped = find_caller(mapped, 0x7000U);
+    CHECK(unmapped != nullptr);
+    if (unmapped) {
+        CHECK(unmapped->caller_image.empty());
+        CHECK(unmapped->image == "/usr/lib/a.dylib");
+    }
+
+    // Largest first: the 10-tick caller row leads.
+    CHECK(!mapped.empty() && mapped.front().row.caller == 0x3021U);
+
+    const auto table = shade::format_caller_table(mapped);
+    CHECK(contains(table,
+        "pid\tentry\tthumb\timage\toffset\tcaller\tcaller_image\t"
+        "caller_offset\truns\tticks\n"));
+    CHECK(contains(table, "1\t0x00001010\t0\t/usr/lib/a.dylib\t0x00000010\t"
+                          "0x00003021\t/usr/lib/c.dylib\t0x00000020\t2\t10\n"));
+    CHECK(contains(table, "1\t0x00001010\t0\t/usr/lib/a.dylib\t0x00000010\t"
+                          "0x00007000\t-\t-\t1\t5\n"));
+}
+
+void test_mapping_order_and_summary()
 {
     shade::GuestBlockProfile profile;
     profile.set_enabled(true);
     profile.record_translation(
         1U, 0x1000U, { 5U, shade::BlockEnd::LinkBlock });
-    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U);
-    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U);
+    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U, 0U);
+    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U, 0U);
 
     const auto lines = shade::format_block_summary(profile, 10U, 30U);
     CHECK(!lines.empty());
@@ -229,7 +309,8 @@ int main()
     test_pids_keep_rows_apart();
     test_clear_and_images();
     test_mapping_and_order();
-    test_summary_conservation();
+    test_caller_rows();
+    test_mapping_order_and_summary();
     if (failures == 0) {
         std::printf("block_profile_test: all checks passed\n");
         return 0;
