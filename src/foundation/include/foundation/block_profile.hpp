@@ -4,9 +4,10 @@
 //
 // Opt-in guest CPU profile: ticks per translated block, mapped to the guest
 // image that holds the block's first instruction. A profiled run is given a
-// budget of one tick, so it executes one block when the block ends in a
-// checked link; the runs that continue into a fast-linked block are counted
-// apart, so the table says how far its attribution holds.
+// budget of one tick, and the JIT is configured without block linking, so a
+// run ends after its first block at the dispatcher's tick check. The runs that
+// still continue (a fast link, or a short run) are counted apart, so the table
+// says how far its attribution holds.
 #pragma once
 
 #include <atomic>
@@ -97,9 +98,10 @@ struct MappedBlockRow {
 // it is enabled the executor gives each run a budget of one tick and records
 // every run here.
 //
-// Artifacts are not affected: no code is emitted differently, so a block
-// loaded from an artifact runs and is charged as usual. Its cycle count is not
-// known here, so its runs are unknown rather than classified.
+// Artifacts are bypassed while the profile is on (neither loaded nor
+// published), so every block of a profiled run was translated in this process
+// and its cycle count is known. A run whose start block has no translation
+// record is still counted as unknown.
 class GuestBlockProfile {
 public:
     void set_enabled(bool enabled)

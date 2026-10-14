@@ -582,6 +582,32 @@ namespace {
 #endif
     }
 
+    // Under the block profile a run must return to the dispatcher after every
+    // block, because the dispatcher is where a run's remaining ticks are
+    // checked. Block linking, the return stack buffer and the fast dispatcher
+    // would let a run go on through a block. Code emitted with them differs.
+    [[nodiscard]] Umbra::OptimizationFlag jit_optimizations()
+    {
+        if (!performance_counters().block_profile_enabled())
+            return Umbra::all_safe_optimizations;
+        return Umbra::all_safe_optimizations &
+               ~(Umbra::OptimizationFlag::BlockLinking |
+                   Umbra::OptimizationFlag::ReturnStackBuffer |
+                   Umbra::OptimizationFlag::FastDispatch);
+    }
+
+    // The artifact key does not carry the optimization flags. An artifact
+    // compiled with block linking must not be loaded under the profile, and a
+    // block compiled without it must not be published for a run without it, so
+    // the profiled run uses no artifact store at all.
+    [[nodiscard]] std::shared_ptr<JitArtifactStore> artifact_store_for_run(
+        std::shared_ptr<JitArtifactStore> store)
+    {
+        return performance_counters().block_profile_enabled()
+            ? nullptr
+            : std::move(store);
+    }
+
 } // namespace
 
 class JitCallbacks final : public Umbra::A32::UserCallbacks {
@@ -3038,6 +3064,7 @@ private:
             callbacks_->cpu_model().architecture_version());
         config.always_little_endian = true;
         config.enable_cycle_counting = true;
+        config.optimizations = jit_optimizations();
         config.check_halt_on_memory_access = true;
         config.code_cache_size = code_cache_size_;
         config.coprocessors[15] = cp15_;
@@ -3381,7 +3408,7 @@ public:
         , native_preimport_tracker_ { }
         , monitor_ { monitor }
         , cpu_model_ { cpu_model }
-        , artifact_store_ { std::move(artifact_store) }
+        , artifact_store_ { artifact_store_for_run(std::move(artifact_store)) }
     {
         if (execution_slot_count == 0) {
             throw std::invalid_argument {
