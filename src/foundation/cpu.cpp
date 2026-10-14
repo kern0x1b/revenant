@@ -2288,6 +2288,11 @@ public:
         try {
             const auto entry_location =
                 single_step ? 0U : current_location_descriptor();
+            // The guest PC the run starts at: the key of the block profile.
+            const auto entry_pc = single_step
+                ? 0U
+                : static_cast<std::uint32_t>(
+                      jit_->Regs()[15] & ~std::uint32_t { 1U });
             bool portable_demand_provider_enabled { };
             if (!single_step && demand_artifact_enabled_ &&
                 !jit_demand_disabled() && !jit_portable_handoff_disabled() &&
@@ -2359,6 +2364,10 @@ public:
             diagnostics.checkpoint(PerfLatencyKind::CpuRunSaveState);
             record_code_cache_usage();
             performance_counters().record_cpu_execution(result.ticks_consumed);
+            if (!single_step)
+                performance_counters().record_block_run(
+                    static_cast<std::uint32_t>(process_id_), entry_pc,
+                    result.ticks_consumed);
             // Profile validation and merging never run in an executing Guest
             // slice. The fixed recorder spans a complete profile and is
             // drained only by an explicit quiet/image-transition safe point.

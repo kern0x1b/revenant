@@ -500,6 +500,8 @@ void PerformanceCounters::reset(bool enabled)
     display_window_active_.store(false, std::memory_order_release);
     frame_content_diagnostics_enabled_.store(false, std::memory_order_release);
     cpu_source_diagnostics_configured_.store(false, std::memory_order_release);
+    block_profile_.set_enabled(false);
+    block_profile_.clear();
     native_lookup_diagnostics_configured_.store(
         false, std::memory_order_release);
     jit_instances_.store(0, std::memory_order_relaxed);

@@ -105,7 +105,7 @@ std::string usage()
            "[--disable-scheduler-preemption] [--time-scale FACTOR] [--verbose] "
            "[--perf-summary] [--jit-observer-only] [--perf-frame-content] "
            "[--perf-cpu-phases] "
-           "[--perf-jit-native-lookups] "
+           "[--perf-jit-native-lookups] [--perf-block-profile] "
            "[--jit-profile-mode "
            "adaptive|off|record-only|load-only|idle|startup] "
            "[--jit-startup-profile] "
@@ -1198,6 +1198,14 @@ int main(int argc, char** argv)
         }
         performance_counters().set_native_lookup_diagnostics(
             perf_jit_native_lookups);
+        const auto perf_block_profile = flag(args, "--perf-block-profile");
+        if (perf_block_profile && !perf_summary) {
+            throw std::runtime_error {
+                "--perf-block-profile requires --perf-summary"
+            };
+        }
+        performance_counters().set_block_profile_diagnostics(
+            perf_block_profile);
         try {
             if (command == "profile") {
                 profile(args, *output);

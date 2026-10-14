@@ -16,6 +16,7 @@
 #include "security/extensions.hpp"
 
 #include "foundation/application_path.hpp"
+#include "foundation/guest_image_table.hpp"
 #include "kernel/darwin_abi.hpp"
 #include "kernel/darwin_kqueue_abi.hpp"
 #include "network/darwin_network_abi.hpp"
@@ -150,6 +151,7 @@ void CompatibilityKernel::exit_process(
     hid_event_system_hle_.reset(process_.pid);
     process_.exit_status = status;
     process_.termination_signal = signal;
+    std::uint32_t all_image_info_address { };
     // Publish the dead identity before tearing down its ports. Mach/graphics
     // observers share this record and must stop routing work to the PID while
     // ipc_space termination is in progress. The shared record remains as a
@@ -161,6 +163,7 @@ void CompatibilityKernel::exit_process(
             record->second.exited = true;
             record->second.exit_status = status;
             record->second.termination_signal = signal;
+            all_image_info_address = record->second.dyld_all_image_info_address;
         }
         if (shared_state_->sandbox_extensions)
             shared_state_->sandbox_extensions->exit_process(process_.pid);
@@ -172,6 +175,14 @@ void CompatibilityKernel::exit_process(
             signal != 0U ? signal & 0x7fU : (status & 0xffU) << 8U;
         shared_state_->mark_foreground_transition_cancelled_for_process_locked(
             process_.pid);
+    }
+    // The dyld image list lives in this process's memory, which goes away with
+    // it, so the block profile reads it here.
+    if (all_image_info_address != 0U &&
+        performance_counters().block_profile_enabled()) {
+        performance_counters().block_profile().record_images(
+            static_cast<std::uint32_t>(process_.pid),
+            read_guest_image_table(memory_, all_image_info_address));
     }
     shared_state_->note_io_event_transition();
     kernel_bsd::interval_timer::retire_process(*shared_state_, process_.pid);

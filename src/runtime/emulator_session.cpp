@@ -81,6 +81,7 @@
 #include "foundation/jit_work_signal.hpp"
 #include "foundation/macho.hpp"
 #include "foundation/output.hpp"
+#include "foundation/block_profile.hpp"
 #include "foundation/performance.hpp"
 #include "foundation/process_loader.hpp"
 #include "foundation/userland_hle.hpp"
@@ -5882,6 +5883,30 @@ void EmulatorSession::run()
             stopped_guest.jit_executor_local_peak_bytes;
         final_snapshot.jit_cache_slots = stopped_guest.jit_cache_slots;
         output.line(format_performance_summary(final_snapshot));
+        if (performance_counters().block_profile_enabled()) {
+            // The full table goes beside the run's root filesystem, where the
+            // run keeps its other files.
+            const auto& block_profile = performance_counters().block_profile();
+            const auto directory = options.rootfs.parent_path() / "perf";
+            const auto path = directory / "block-profile.tsv";
+            std::filesystem::create_directories(directory);
+            const auto mapped = map_block_profile(block_profile);
+            {
+                std::ofstream file { path, std::ios::binary | std::ios::trunc };
+                file << format_block_profile_table(mapped);
+                file.flush();
+                if (!file) {
+                    throw std::runtime_error {
+                        "cannot write block profile: " + path.string()
+                    };
+                }
+            }
+            for (const auto& line :
+                format_block_profile_summary(block_profile, 30))
+                output.line(line);
+            output.line("[perf-block-file] path=" + path.string() +
+                        " rows=" + std::to_string(mapped.size()));
+        }
     }
     if (jit_observer_only && runtime_jit_memory) {
         const auto& queue = concurrent_live_current_at_stop;

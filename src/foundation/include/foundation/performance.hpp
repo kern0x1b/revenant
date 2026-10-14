@@ -22,6 +22,8 @@
 #include <tuple>
 #include <vector>
 
+#include "foundation/block_profile.hpp"
+
 namespace shade {
 
 enum class PerfFallbackReason : std::uint8_t {
@@ -414,6 +416,27 @@ public:
                                 std::memory_order_acquire);
     }
 
+    // Per-run CPU ticks by guest entry address (`--perf-block-profile`). The
+    // profile records only inside an enabled perf summary.
+    void set_block_profile_diagnostics(bool enabled)
+    {
+        block_profile_.set_enabled(enabled);
+    }
+    [[nodiscard]] bool block_profile_enabled() const
+    {
+        return enabled() && block_profile_.enabled();
+    }
+    void record_block_run(
+        std::uint32_t pid, std::uint32_t entry, std::uint64_t ticks)
+    {
+        if (block_profile_enabled())
+            block_profile_.record_run(pid, entry, ticks);
+    }
+    [[nodiscard]] GuestBlockProfile& block_profile()
+    {
+        return block_profile_;
+    }
+
     void record_jit(std::uint64_t creation_nanoseconds = 0);
     // Background precompilation uses this always-on history to reserve time
     // for one non-preemptible Umbra block even when verbose perf output is
@@ -627,6 +650,7 @@ private:
     std::atomic<bool> frame_content_diagnostics_enabled_ { false };
     std::atomic<bool> cpu_source_diagnostics_configured_ { false };
     std::atomic<bool> native_lookup_diagnostics_configured_ { false };
+    GuestBlockProfile block_profile_;
     std::atomic<std::uint64_t> jit_instances_ { };
     std::atomic<std::uint64_t> jit_live_instances_ { };
     std::atomic<std::uint64_t> jit_live_peak_instances_ { };

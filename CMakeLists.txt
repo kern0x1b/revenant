@@ -161,6 +161,12 @@ endfunction()
 
 add_subdirectory(src/mach)
 add_subdirectory(src/foundation)
+
+if(BUILD_TESTING)
+    add_executable(shade_block_profile_test tests/unit/block_profile_test.cpp)
+    target_link_libraries(shade_block_profile_test PRIVATE Shade::foundation_block_profile)
+    add_test(NAME block_profile COMMAND shade_block_profile_test)
+endif()
 add_subdirectory(src/device_state)
 add_subdirectory(src/filesystem)
 add_subdirectory(src/network)

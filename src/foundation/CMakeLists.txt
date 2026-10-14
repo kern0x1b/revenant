@@ -9,6 +9,11 @@ add_library(shade_foundation_memory STATIC
 add_library(Shade::foundation_memory ALIAS shade_foundation_memory)
 shade_configure_module(shade_foundation_memory)
 
+add_library(shade_foundation_block_profile STATIC
+    block_profile.cpp)
+add_library(Shade::foundation_block_profile ALIAS shade_foundation_block_profile)
+shade_configure_module(shade_foundation_block_profile)
+
 add_library(shade_foundation STATIC
     address_space.cpp
     application_display.cpp
@@ -17,6 +22,7 @@ add_library(shade_foundation STATIC
     cpu.cpp
     darwin_notify_state_hle.cpp
     device_model.cpp
+    guest_image_table.cpp
     umbra_ir_artifact.cpp
     dyld_shared_cache.cpp
     executable_catalog.cpp
@@ -52,7 +58,7 @@ target_include_directories(shade_foundation SYSTEM PRIVATE
     "${SHADE_BOOST_DIR}")
 target_link_libraries(shade_foundation PUBLIC
     umbra Threads::Threads Shade::xnu_adapter
-    Shade::foundation_memory)
+    Shade::foundation_memory Shade::foundation_block_profile)
 if(TARGET PkgConfig::PLIST)
     target_link_libraries(shade_foundation PRIVATE PkgConfig::PLIST)
     target_compile_definitions(shade_foundation PRIVATE
