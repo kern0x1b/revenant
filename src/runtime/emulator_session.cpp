@@ -24,9 +24,13 @@
 #include "session_debugger.hpp"
 #include "session_diagnostics.hpp"
 
+#include <sys/random.h>
+
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <cerrno>
+#include <cstring>
 #include <bit>
 #include <chrono>
 #include <condition_variable>
@@ -97,6 +101,18 @@
 namespace shade {
 using namespace runtime_detail;
 namespace {
+
+    // One 64-bit seed from the host's entropy source, for the guest's /dev/random at boot. A failure stops the boot: a fixed
+    // fallback would hand every boot the same keys, which is what this seed exists to prevent.
+    std::uint64_t host_random_seed()
+    {
+        std::uint64_t seed = 0;
+        if (getentropy(&seed, sizeof seed) != 0) {
+            throw std::runtime_error { "getentropy failed for the guest's random seed: " +
+                                       std::string { std::strerror(errno) } };
+        }
+        return seed;
+    }
 
     // What the CPU reported, as the ARM exception a kernel sees: nothing for a
     // stop that is not the guest's fault (an interpreter fallback).
@@ -1278,6 +1294,15 @@ void EmulatorSession::run()
     initial->kernel = std::make_unique<CompatibilityKernel>(*initial->memory,
         output, rootfs, device, activation_override, lockdown_capabilities,
         darwin_configuration);
+    // The guest's entropy is the host's, once per boot. Only a deterministic run (bounded by --ticks) keeps the fixed seed,
+    // so its output repeats by request and not by accident.
+    if (bounded_execution) {
+        initial->kernel->seed_random(CompatibilityKernel::kDefaultRandomSeed);
+        output.line("[entropy] source=fixed-seed (deterministic run)");
+    } else {
+        initial->kernel->seed_random(host_random_seed());
+        output.line("[entropy] source=host-getentropy");
+    }
     if (device.keybag.apple_key_store_available) {
         const auto canonical_rootfs = std::filesystem::canonical(rootfs);
         const auto device_state = canonical_rootfs.parent_path() /

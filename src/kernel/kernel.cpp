@@ -186,6 +186,12 @@ namespace {
 
 } // namespace
 
+void CompatibilityKernel::seed_random(std::uint64_t seed)
+{
+    // xorshift64 has no zero state: the low bit is set, so any seed is a valid stream.
+    random_state_ = seed | 1U;
+}
+
 CompatibilityKernel::CompatibilityKernel(AddressSpace& memory, Output& output,
     std::filesystem::path rootfs, DeviceModel device,
     std::optional<bool> activated, LockdownCapabilities lockdown_capabilities,

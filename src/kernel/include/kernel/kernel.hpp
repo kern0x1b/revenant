@@ -181,6 +181,11 @@ public:
         LockdownCapabilities lockdown_capabilities = { },
         std::optional<DarwinKernelConfiguration> configuration = std::nullopt);
 
+    // The seed of the emulated /dev/random and /dev/urandom, a xorshift64 stream. The default is fixed, so a deterministic
+    // run (bounded by --ticks) draws the same bytes every boot; any other boot seeds it from the host (EmulatorSession).
+    static constexpr std::uint64_t kDefaultRandomSeed = 0x69a5'1e8d'4c3b'2701ULL;
+    void seed_random(std::uint64_t seed);
+
     void attach(Cpu& cpu);
     void set_key_store(std::shared_ptr<KeyStore> key_store)
     {
@@ -1021,7 +1026,7 @@ private:
         Cpu& cpu, std::uint32_t signal, const GuestSignalInfo& info);
     void dispatch_sigreturn(Cpu& cpu);
     void dispatch_sigaltstack(Cpu& cpu);
-    std::uint64_t random_state_ { 0x69a5'1e8d'4c3b'2701ULL };
+    std::uint64_t random_state_ { kDefaultRandomSeed };
     std::shared_ptr<KernelSharedState> shared_state_ {
         std::make_shared<KernelSharedState>()
     };
