@@ -62,28 +62,64 @@ const GuestImage* GuestImageTable::find(std::uint32_t address) const
     return address < end ? &candidate : nullptr;
 }
 
+void GuestBlockProfile::reserve_counters(std::size_t capacity)
+{
+    const std::lock_guard lock { mutex_ };
+    if (capacity <= capacity_)
+        return;
+    auto executions =
+        std::make_unique<std::atomic<std::uint64_t>[]>(capacity);
+    for (std::size_t slot = 0; slot < capacity_; ++slot)
+        executions[slot].store(
+            executions_[slot].load(std::memory_order_relaxed),
+            std::memory_order_relaxed);
+    executions_ = std::move(executions);
+    capacity_ = capacity;
+    blocks_.reserve(capacity);
+}
+
+std::optional<std::uint64_t> GuestBlockProfile::allocate_counter(
+    std::uint32_t pid, std::uint32_t entry, bool thumb)
+{
+    const std::lock_guard lock { mutex_ };
+    if (capacity_ == 0)
+        return std::nullopt;
+    if (blocks_.size() >= capacity_) {
+        ++dropped_blocks_;
+        return std::nullopt;
+    }
+    const auto slot = static_cast<std::uint64_t>(blocks_.size());
+    BlockCounter counter;
+    counter.pid = pid;
+    counter.entry = entry;
+    counter.thumb = thumb;
+    blocks_.push_back(counter);
+    return slot;
+}
+
+void GuestBlockProfile::set_counter_cycles(
+    std::uint64_t slot, std::uint64_t cycles)
+{
+    const std::lock_guard lock { mutex_ };
+    if (slot < blocks_.size())
+        blocks_[slot].cycles = cycles;
+}
+
+void GuestBlockProfile::count_execution(std::uint64_t slot) noexcept
+{
+    // Slots are below capacity_ by construction, and executions_ is replaced
+    // only by reserve_counters, which runs before any block is translated.
+    executions_[slot].fetch_add(1U, std::memory_order_relaxed);
+}
+
 void GuestBlockProfile::clear()
 {
     const std::lock_guard lock { mutex_ };
-    runs_.clear();
+    for (std::size_t slot = 0; slot < capacity_; ++slot)
+        executions_[slot].store(0U, std::memory_order_relaxed);
+    blocks_.clear();
+    dropped_blocks_ = 0;
     images_.clear();
-    total_ticks_ = 0;
-    total_runs_ = 0;
-}
-
-void GuestBlockProfile::record_run(
-    std::uint32_t pid, std::uint32_t entry, std::uint64_t ticks)
-{
-    if (!enabled())
-        return;
-    const std::lock_guard lock { mutex_ };
-    auto& row = runs_[{ pid, entry }];
-    row.pid = pid;
-    row.entry = entry;
-    row.ticks += ticks;
-    ++row.runs;
-    total_ticks_ += ticks;
-    ++total_runs_;
 }
 
 void GuestBlockProfile::record_images(std::uint32_t pid, GuestImageTable images)
@@ -92,38 +128,6 @@ void GuestBlockProfile::record_images(std::uint32_t pid, GuestImageTable images)
         return;
     const std::lock_guard lock { mutex_ };
     images_[pid] = std::move(images);
-}
-
-std::vector<BlockProfileRow> GuestBlockProfile::rows() const
-{
-    std::vector<BlockProfileRow> result;
-    {
-        const std::lock_guard lock { mutex_ };
-        result.reserve(runs_.size());
-        for (const auto& [key, row] : runs_)
-            result.push_back(row);
-    }
-    std::sort(result.begin(), result.end(),
-        [](const BlockProfileRow& left, const BlockProfileRow& right) {
-            if (left.ticks != right.ticks)
-                return left.ticks > right.ticks;
-            if (left.pid != right.pid)
-                return left.pid < right.pid;
-            return left.entry < right.entry;
-        });
-    return result;
-}
-
-std::uint64_t GuestBlockProfile::total_ticks() const
-{
-    const std::lock_guard lock { mutex_ };
-    return total_ticks_;
-}
-
-std::uint64_t GuestBlockProfile::total_runs() const
-{
-    const std::lock_guard lock { mutex_ };
-    return total_runs_;
 }
 
 GuestImageTable GuestBlockProfile::image_table(std::uint32_t pid) const
@@ -139,32 +143,66 @@ std::size_t GuestBlockProfile::image_table_count() const
     return images_.size();
 }
 
-std::vector<MappedBlockRow> map_block_profile(const GuestBlockProfile& profile)
+std::vector<BlockCounter> GuestBlockProfile::counters() const
 {
-    std::map<std::uint32_t, GuestImageTable> tables;
-    std::vector<MappedBlockRow> result;
-    for (const auto& row : profile.rows()) {
-        auto found = tables.find(row.pid);
-        if (found == tables.end())
-            found = tables.emplace(row.pid, profile.image_table(row.pid)).first;
-        MappedBlockRow mapped { row, { }, 0 };
-        if (const auto* image = found->second.find(row.entry)) {
-            mapped.image = image->path;
-            mapped.offset = row.entry - image->load_address;
-        }
-        result.push_back(std::move(mapped));
-    }
+    const std::lock_guard lock { mutex_ };
+    auto result = blocks_;
+    for (std::size_t slot = 0; slot < result.size(); ++slot)
+        result[slot].executions =
+            executions_[slot].load(std::memory_order_relaxed);
     return result;
 }
 
-std::string format_block_profile_table(const std::vector<MappedBlockRow>& rows)
+std::uint64_t GuestBlockProfile::dropped_blocks() const
 {
-    std::string text = "pid\tentry\tticks\truns\timage\toffset\n";
+    const std::lock_guard lock { mutex_ };
+    return dropped_blocks_;
+}
+
+std::vector<MappedBlockCounter> map_block_counters(
+    const GuestBlockProfile& profile)
+{
+    std::map<std::uint32_t, GuestImageTable> tables;
+    std::vector<MappedBlockCounter> result;
+    for (const auto& counter : profile.counters()) {
+        auto found = tables.find(counter.pid);
+        if (found == tables.end())
+            found = tables.emplace(counter.pid, profile.image_table(counter.pid))
+                        .first;
+        MappedBlockCounter mapped;
+        mapped.counter = counter;
+        mapped.ticks = counter.executions * counter.cycles;
+        if (const auto* image = found->second.find(counter.entry)) {
+            mapped.image = image->path;
+            mapped.offset = counter.entry - image->load_address;
+        }
+        result.push_back(std::move(mapped));
+    }
+    std::stable_sort(result.begin(), result.end(),
+        [](const MappedBlockCounter& left, const MappedBlockCounter& right) {
+            if (left.ticks != right.ticks)
+                return left.ticks > right.ticks;
+            if (left.counter.pid != right.counter.pid)
+                return left.counter.pid < right.counter.pid;
+            if (left.counter.entry != right.counter.entry)
+                return left.counter.entry < right.counter.entry;
+            return left.counter.thumb < right.counter.thumb;
+        });
+    return result;
+}
+
+std::string format_block_counter_table(const std::vector<MappedBlockCounter>& rows)
+{
+    std::string text =
+        "pid\tentry\tthumb\tcycles\texecutions\tticks\timage\toffset\n";
     for (const auto& mapped : rows) {
+        const auto& counter = mapped.counter;
         text +=
-            std::to_string(mapped.row.pid) + "\t" + hex32(mapped.row.entry) +
-            "\t" + std::to_string(mapped.row.ticks) + "\t" +
-            std::to_string(mapped.row.runs) + "\t" +
+            std::to_string(counter.pid) + "\t" + hex32(counter.entry) + "\t" +
+            (counter.thumb ? "1" : "0") + "\t" +
+            std::to_string(counter.cycles) + "\t" +
+            std::to_string(counter.executions) + "\t" +
+            std::to_string(mapped.ticks) + "\t" +
             (mapped.image.empty() ? std::string { "-" } : mapped.image) + "\t" +
             (mapped.image.empty() ? std::string { "-" }
                                   : hex32(mapped.offset)) +
@@ -173,58 +211,68 @@ std::string format_block_profile_table(const std::vector<MappedBlockRow>& rows)
     return text;
 }
 
-std::vector<std::string> format_block_profile_summary(
-    const GuestBlockProfile& profile, std::size_t top)
+std::vector<std::string> format_block_counter_summary(
+    const GuestBlockProfile& profile, std::uint64_t cpu_ticks, std::size_t top)
 {
-    const auto rows = map_block_profile(profile);
-    const auto total_ticks = profile.total_ticks();
+    const auto rows = map_block_counters(profile);
+    std::uint64_t total_ticks { };
+    std::uint64_t total_executions { };
     std::uint64_t unmapped_ticks { };
-    std::map<std::string, BlockProfileRow> by_image;
+    std::map<std::string, std::pair<std::uint64_t, std::uint64_t>> by_image;
     for (const auto& mapped : rows) {
+        total_ticks += mapped.ticks;
+        total_executions += mapped.counter.executions;
         if (mapped.image.empty()) {
-            unmapped_ticks += mapped.row.ticks;
+            unmapped_ticks += mapped.ticks;
             continue;
         }
-        auto& total = by_image[mapped.image];
-        total.ticks += mapped.row.ticks;
-        total.runs += mapped.row.runs;
+        auto& [ticks, executions] = by_image[mapped.image];
+        ticks += mapped.ticks;
+        executions += mapped.counter.executions;
     }
-    std::vector<std::pair<std::string, BlockProfileRow>> images(
-        by_image.begin(), by_image.end());
+    std::vector<std::pair<std::string, std::pair<std::uint64_t, std::uint64_t>>>
+        images(by_image.begin(), by_image.end());
     std::stable_sort(
         images.begin(), images.end(), [](const auto& left, const auto& right) {
-            return left.second.ticks > right.second.ticks;
+            return left.second.first > right.second.first;
         });
 
+    const auto difference = static_cast<std::int64_t>(total_ticks - cpu_ticks);
     std::vector<std::string> lines;
     lines.push_back(
-        "[perf-block] runs=" + std::to_string(profile.total_runs()) +
+        "[perf-block] blocks=" + std::to_string(rows.size()) +
+        " executions=" + std::to_string(total_executions) +
         " ticks=" + std::to_string(total_ticks) +
-        " entries=" + std::to_string(rows.size()) +
+        " cpu-ticks=" + std::to_string(cpu_ticks) +
+        " difference=" + std::to_string(difference) +
+        " dropped-blocks=" + std::to_string(profile.dropped_blocks()) +
         " image-tables=" + std::to_string(profile.image_table_count()) +
         " unmapped-ticks=" + std::to_string(unmapped_ticks) +
         " unmapped-share=" + share_text(unmapped_ticks, total_ticks));
     for (std::size_t index = 0; index < rows.size() && index < top; ++index) {
         const auto& mapped = rows[index];
+        const auto& counter = mapped.counter;
         lines.push_back(
             "[perf-block-top] rank=" + std::to_string(index + 1) +
-            " pid=" + std::to_string(mapped.row.pid) +
-            " entry=" + hex32(mapped.row.entry) +
-            " ticks=" + std::to_string(mapped.row.ticks) +
-            " runs=" + std::to_string(mapped.row.runs) +
-            " share=" + share_text(mapped.row.ticks, total_ticks) + " image=" +
+            " pid=" + std::to_string(counter.pid) +
+            " entry=" + hex32(counter.entry) +
+            " thumb=" + (counter.thumb ? "1" : "0") +
+            " cycles=" + std::to_string(counter.cycles) +
+            " executions=" + std::to_string(counter.executions) +
+            " ticks=" + std::to_string(mapped.ticks) +
+            " share=" + share_text(mapped.ticks, total_ticks) + " image=" +
             (mapped.image.empty() ? std::string { "-" } : mapped.image) +
             " offset=" +
             (mapped.image.empty() ? std::string { "-" }
                                   : hex32(mapped.offset)));
     }
     for (std::size_t index = 0; index < images.size() && index < top; ++index) {
-        const auto& [path, total] = images[index];
+        const auto& [path, totals] = images[index];
         lines.push_back("[perf-block-image] rank=" + std::to_string(index + 1) +
                         " image=" + path +
-                        " ticks=" + std::to_string(total.ticks) +
-                        " runs=" + std::to_string(total.runs) +
-                        " share=" + share_text(total.ticks, total_ticks));
+                        " ticks=" + std::to_string(totals.first) +
+                        " executions=" + std::to_string(totals.second) +
+                        " share=" + share_text(totals.first, total_ticks));
     }
     return lines;
 }

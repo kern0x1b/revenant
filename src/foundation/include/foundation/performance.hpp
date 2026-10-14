@@ -416,21 +416,19 @@ public:
                                 std::memory_order_acquire);
     }
 
-    // Per-run CPU ticks by guest entry address (`--perf-block-profile`). The
-    // profile records only inside an enabled perf summary.
+    // Executions and ticks per translated block (`--perf-block-profile`). The
+    // profile counts only inside an enabled perf summary. Blocks past the
+    // counter capacity are not counted and are reported as dropped.
+    static constexpr std::size_t block_profile_counter_capacity = 1U << 18U;
     void set_block_profile_diagnostics(bool enabled)
     {
+        if (enabled)
+            block_profile_.reserve_counters(block_profile_counter_capacity);
         block_profile_.set_enabled(enabled);
     }
     [[nodiscard]] bool block_profile_enabled() const
     {
         return enabled() && block_profile_.enabled();
-    }
-    void record_block_run(
-        std::uint32_t pid, std::uint32_t entry, std::uint64_t ticks)
-    {
-        if (block_profile_enabled())
-            block_profile_.record_run(pid, entry, ticks);
     }
     [[nodiscard]] GuestBlockProfile& block_profile()
     {

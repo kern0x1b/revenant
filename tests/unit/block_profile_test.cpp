@@ -2,8 +2,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
-// Unit test for the guest block profile: accounting, image mapping and the
-// report text. Build with BUILD_TESTING and run `ctest -R block_profile`.
+// Unit test for the guest block profile: counter slots, executions and ticks,
+// image mapping and the report text. Build with BUILD_TESTING and run
+// `ctest -R block_profile`.
 
 #include "foundation/block_profile.hpp"
 
@@ -26,6 +27,11 @@ void check(bool condition, const char* expression, int line)
 
 #define CHECK(expression) check((expression), #expression, __LINE__)
 
+bool contains(const std::string& text, const std::string& part)
+{
+    return text.find(part) != std::string::npos;
+}
+
 shade::GuestImageTable sample_table()
 {
     // Given out of order on purpose: the table sorts by load address.
@@ -36,133 +42,142 @@ shade::GuestImageTable sample_table()
     } };
 }
 
-void test_image_lookup()
-{
-    const auto table = sample_table();
-    const auto* first = table.find(0x1000U);
-    CHECK(first != nullptr && first->path == "/usr/lib/a.dylib");
-    CHECK(table.find(0x10ffU) != nullptr);
-    CHECK(table.find(0x1100U) == nullptr);
-    CHECK(table.find(0x0fffU) == nullptr);
-    // Without a recorded __TEXT size, an image reaches the next image.
-    const auto* second = table.find(0x2fffU);
-    CHECK(second != nullptr && second->path == "/usr/lib/b.dylib");
-    CHECK(table.find(0x3000U) != nullptr);
-    CHECK(table.find(0x3400U) == nullptr);
-    CHECK(shade::GuestImageTable { }.find(0x1000U) == nullptr);
-}
-
-void test_disabled_profile_records_nothing()
+void test_slots_need_a_reserved_table()
 {
     shade::GuestBlockProfile profile;
-    profile.record_run(1, 0x1000U, 5);
-    profile.record_images(1, sample_table());
-    CHECK(profile.rows().empty());
-    CHECK(profile.total_ticks() == 0U);
-    CHECK(profile.total_runs() == 0U);
-    CHECK(profile.image_table_count() == 0U);
+    CHECK(!profile.allocate_counter(1U, 0x1000U, false).has_value());
+    profile.reserve_counters(2U);
+    CHECK(profile.allocate_counter(1U, 0x1000U, false) == 0U);
+    CHECK(profile.allocate_counter(1U, 0x1004U, true) == 1U);
+    CHECK(!profile.allocate_counter(1U, 0x1008U, false).has_value());
+    CHECK(profile.dropped_blocks() == 1U);
+    CHECK(profile.counters().size() == 2U);
 }
 
-void fill(shade::GuestBlockProfile& profile)
+void test_executions_and_cycles()
 {
+    shade::GuestBlockProfile profile;
+    profile.reserve_counters(4U);
+    const auto slot = profile.allocate_counter(3U, 0x1010U, false);
+    CHECK(slot.has_value());
+    profile.set_counter_cycles(*slot, 5U);
+    profile.count_execution(*slot);
+    profile.count_execution(*slot);
+    profile.count_execution(*slot);
+    const auto counters = profile.counters();
+    CHECK(counters.size() == 1U);
+    CHECK(counters[0].pid == 3U);
+    CHECK(counters[0].entry == 0x1010U);
+    CHECK(!counters[0].thumb);
+    CHECK(counters[0].cycles == 5U);
+    CHECK(counters[0].executions == 3U);
+    const auto mapped = shade::map_block_counters(profile);
+    CHECK(mapped.size() == 1U);
+    CHECK(mapped[0].ticks == 15U);
+}
+
+void test_mapping_and_order()
+{
+    shade::GuestBlockProfile profile;
     profile.set_enabled(true);
-    profile.record_run(1, 0x1010U, 5);
-    profile.record_run(1, 0x1010U, 7);
-    profile.record_run(2, 0x1010U, 3);
-    profile.record_run(1, 0x2000U, 20);
-    profile.record_images(1, sample_table());
-}
+    profile.reserve_counters(8U);
+    profile.record_images(3U, sample_table());
+    const auto inside_a = profile.allocate_counter(3U, 0x1010U, false);
+    const auto inside_c = profile.allocate_counter(3U, 0x3008U, true);
+    const auto unmapped = profile.allocate_counter(3U, 0x5000U, false);
+    profile.set_counter_cycles(*inside_a, 4U);
+    profile.set_counter_cycles(*inside_c, 100U);
+    profile.set_counter_cycles(*unmapped, 1U);
+    profile.count_execution(*inside_a);
+    profile.count_execution(*inside_a);
+    profile.count_execution(*inside_c);
+    profile.count_execution(*unmapped);
 
-void test_accounting_and_order()
-{
-    shade::GuestBlockProfile profile;
-    fill(profile);
-    const auto rows = profile.rows();
-    CHECK(rows.size() == 3U);
-    if (rows.size() == 3U) {
-        CHECK(rows[0].pid == 1U && rows[0].entry == 0x2000U);
-        CHECK(rows[0].ticks == 20U && rows[0].runs == 1U);
-        CHECK(rows[1].pid == 1U && rows[1].entry == 0x1010U);
-        CHECK(rows[1].ticks == 12U && rows[1].runs == 2U);
-        CHECK(rows[2].pid == 2U && rows[2].ticks == 3U);
-    }
-    CHECK(profile.total_ticks() == 35U);
-    CHECK(profile.total_runs() == 4U);
-}
-
-void test_mapping()
-{
-    shade::GuestBlockProfile profile;
-    fill(profile);
-    const auto mapped = shade::map_block_profile(profile);
+    const auto mapped = shade::map_block_counters(profile);
     CHECK(mapped.size() == 3U);
-    if (mapped.size() == 3U) {
-        CHECK(mapped[0].image == "/usr/lib/b.dylib" && mapped[0].offset == 0U);
-        CHECK(
-            mapped[1].image == "/usr/lib/a.dylib" && mapped[1].offset == 0x10U);
-        // Pid 2 has no image table, so its entry stays unmapped.
-        CHECK(mapped[2].image.empty());
-    }
+    // Largest ticks first: 100 (c), 8 (a), 1 (unmapped).
+    CHECK(mapped[0].ticks == 100U);
+    CHECK(mapped[0].counter.thumb);
+    CHECK(mapped[0].image == "/usr/lib/c.dylib");
+    CHECK(mapped[0].offset == 0x8U);
+    CHECK(mapped[1].ticks == 8U);
+    CHECK(mapped[1].image == "/usr/lib/a.dylib");
+    CHECK(mapped[1].offset == 0x10U);
+    CHECK(mapped[2].ticks == 1U);
+    CHECK(mapped[2].image.empty());
 }
 
 void test_table_text()
 {
     shade::GuestBlockProfile profile;
-    fill(profile);
+    profile.set_enabled(true);
+    profile.reserve_counters(2U);
+    profile.record_images(3U, sample_table());
+    const auto slot = profile.allocate_counter(3U, 0x1010U, false);
+    profile.set_counter_cycles(*slot, 4U);
+    profile.count_execution(*slot);
+    profile.count_execution(*slot);
     const auto text =
-        shade::format_block_profile_table(shade::map_block_profile(profile));
-    const std::string expected =
-        "pid\tentry\tticks\truns\timage\toffset\n"
-        "1\t0x00002000\t20\t1\t/usr/lib/b.dylib\t0x00000000\n"
-        "1\t0x00001010\t12\t2\t/usr/lib/a.dylib\t0x00000010\n"
-        "2\t0x00001010\t3\t1\t-\t-\n";
-    CHECK(text == expected);
+        shade::format_block_counter_table(shade::map_block_counters(profile));
+    CHECK(text.rfind("pid\tentry\tthumb\tcycles\texecutions\tticks\timage\toffset\n",
+              0) == 0);
+    CHECK(contains(text,
+        "3\t0x00001010\t0\t4\t2\t8\t/usr/lib/a.dylib\t0x00000010\n"));
 }
 
-void test_summary_text()
+void test_summary_conservation()
 {
     shade::GuestBlockProfile profile;
-    fill(profile);
-    const auto lines = shade::format_block_profile_summary(profile, 2);
+    profile.set_enabled(true);
+    profile.reserve_counters(8U);
+    profile.record_images(3U, sample_table());
+    const auto inside_c = profile.allocate_counter(3U, 0x3008U, true);
+    const auto unmapped = profile.allocate_counter(3U, 0x5000U, false);
+    profile.set_counter_cycles(*inside_c, 100U);
+    profile.set_counter_cycles(*unmapped, 1U);
+    profile.count_execution(*inside_c);
+    profile.count_execution(*unmapped);
+
+    const auto lines = shade::format_block_counter_summary(profile, 100U, 5U);
     CHECK(!lines.empty());
-    if (lines.empty())
-        return;
-    CHECK(lines[0] == "[perf-block] runs=4 ticks=35 entries=3 image-tables=1 "
-                      "unmapped-ticks=3 unmapped-share=0.0857");
-    // Two top rows and two image totals, the top-N limit applied to each.
-    CHECK(lines.size() == 1U + 2U + 2U);
-    if (lines.size() == 5U) {
-        CHECK(lines[1] == "[perf-block-top] rank=1 pid=1 entry=0x00002000 "
-                          "ticks=20 runs=1 share=0.5714 "
-                          "image=/usr/lib/b.dylib offset=0x00000000");
-        CHECK(lines[3] == "[perf-block-image] rank=1 image=/usr/lib/b.dylib "
-                          "ticks=20 runs=1 share=0.5714");
-    }
+    CHECK(contains(lines[0], " ticks=101 "));
+    CHECK(contains(lines[0], " cpu-ticks=100 "));
+    CHECK(contains(lines[0], " difference=1 "));
+    CHECK(contains(lines[0], " unmapped-ticks=1 "));
+    CHECK(contains(lines[0], " dropped-blocks=0 "));
+    CHECK(lines.size() == 4U); // totals, two blocks, one image
+    CHECK(contains(lines[1], "[perf-block-top] rank=1 pid=3 entry=0x00003008 thumb=1"));
+    CHECK(contains(lines[3], "[perf-block-image] rank=1 image=/usr/lib/c.dylib ticks=100"));
 }
 
-void test_clear()
+void test_clear_keeps_reserved_slots()
 {
     shade::GuestBlockProfile profile;
-    fill(profile);
+    profile.set_enabled(true);
+    profile.reserve_counters(2U);
+    const auto slot = profile.allocate_counter(1U, 0x1000U, false);
+    profile.count_execution(*slot);
     profile.clear();
-    CHECK(profile.rows().empty());
-    CHECK(profile.total_ticks() == 0U);
-    CHECK(profile.image_table_count() == 0U);
-    CHECK(profile.enabled());
+    CHECK(profile.counters().empty());
+    CHECK(profile.dropped_blocks() == 0U);
+    CHECK(profile.allocate_counter(1U, 0x1000U, false) == 0U);
+    CHECK(profile.counters()[0].executions == 0U);
 }
 
 } // namespace
 
 int main()
 {
-    test_image_lookup();
-    test_disabled_profile_records_nothing();
-    test_accounting_and_order();
-    test_mapping();
+    test_slots_need_a_reserved_table();
+    test_executions_and_cycles();
+    test_mapping_and_order();
     test_table_text();
-    test_summary_text();
-    test_clear();
-    if (failures == 0)
-        std::printf("block_profile: all checks passed\n");
-    return failures == 0 ? 0 : 1;
+    test_summary_conservation();
+    test_clear_keeps_reserved_slots();
+    if (failures != 0) {
+        std::fprintf(stderr, "block_profile_test: %d failure(s)\n", failures);
+        return 1;
+    }
+    std::puts("block_profile_test: all checks passed");
+    return 0;
 }

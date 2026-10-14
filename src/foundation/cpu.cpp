@@ -582,6 +582,22 @@ namespace {
 #endif
     }
 
+// Called by the code of a counted block at each entry. `profile` is the
+// GuestBlockProfile the block's slot was allocated from.
+void count_block_execution(std::uint64_t profile, std::uint64_t slot)
+{
+    reinterpret_cast<GuestBlockProfile*>(profile)->count_execution(slot);
+}
+
+// Under the block profile every block is compiled with its counter, so an
+// artifact (compiled without one) is neither loaded nor published.
+[[nodiscard]] std::shared_ptr<JitArtifactStore> artifact_store_for_run(
+    std::shared_ptr<JitArtifactStore> store)
+{
+    return performance_counters().block_profile_enabled() ? nullptr
+                                                          : std::move(store);
+}
+
 } // namespace
 
 class JitCallbacks final : public Umbra::A32::UserCallbacks {
@@ -626,11 +642,22 @@ public:
         process_id_ = process_id;
     }
 
-    bool PreCodeReadHook(bool, Umbra::A32::VAddr address,
+    bool PreCodeReadHook(bool is_thumb, Umbra::A32::VAddr address,
         Umbra::A32::IREmitter& ir) override
     {
         if (ir.block.CycleCount() == 0) {
             performance_counters().record_translation_block();
+            block_counter_slot_.reset();
+            if (performance_counters().block_profile_enabled()) {
+                auto& profile = performance_counters().block_profile();
+                if (const auto slot = profile.allocate_counter(process_id_,
+                        address & ~Umbra::A32::VAddr { 1U }, is_thumb)) {
+                    block_counter_slot_ = slot;
+                    ir.CallHostFunction(&count_block_execution,
+                        ir.Imm64(reinterpret_cast<std::uintptr_t>(&profile)),
+                        ir.Imm64(*slot));
+                }
+            }
             // The dyld shared cache is the same read-only code at the same
             // addresses in every process, so its blocks are the ones every
             // process translates again.
@@ -670,6 +697,12 @@ public:
         std::uint64_t translation_nanoseconds,
         const Umbra::IR::Block& block) noexcept override
     {
+        // The emitted code charges this cycle count at each entry of the block.
+        if (block_counter_slot_) {
+            performance_counters().block_profile().set_counter_cycles(
+                *block_counter_slot_, block.CycleCount());
+            block_counter_slot_.reset();
+        }
         translation_completed(
             location_descriptor, translation_nanoseconds, &block);
     }
@@ -2011,6 +2044,7 @@ private:
     std::optional<std::uint64_t> portable_generation_location_;
     bool portable_generation_published_ { };
     Umbra::IR::Block* translation_block_ { };
+    std::optional<std::uint64_t> block_counter_slot_;
     std::vector<std::uint32_t> translation_code_pages_;
     std::vector<JitConstantDependency> translation_constant_dependencies_;
     bool constant_dependency_failed_ { };
@@ -2288,11 +2322,6 @@ public:
         try {
             const auto entry_location =
                 single_step ? 0U : current_location_descriptor();
-            // The guest PC the run starts at: the key of the block profile.
-            const auto entry_pc = single_step
-                ? 0U
-                : static_cast<std::uint32_t>(
-                      jit_->Regs()[15] & ~std::uint32_t { 1U });
             bool portable_demand_provider_enabled { };
             if (!single_step && demand_artifact_enabled_ &&
                 !jit_demand_disabled() && !jit_portable_handoff_disabled() &&
@@ -2364,10 +2393,6 @@ public:
             diagnostics.checkpoint(PerfLatencyKind::CpuRunSaveState);
             record_code_cache_usage();
             performance_counters().record_cpu_execution(result.ticks_consumed);
-            if (!single_step)
-                performance_counters().record_block_run(
-                    static_cast<std::uint32_t>(process_id_), entry_pc,
-                    result.ticks_consumed);
             // Profile validation and merging never run in an executing Guest
             // slice. The fixed recorder spans a complete profile and is
             // drained only by an explicit quiet/image-transition safe point.
@@ -3363,7 +3388,7 @@ public:
         , native_preimport_tracker_ { }
         , monitor_ { monitor }
         , cpu_model_ { cpu_model }
-        , artifact_store_ { std::move(artifact_store) }
+        , artifact_store_ { artifact_store_for_run(std::move(artifact_store)) }
     {
         if (execution_slot_count == 0) {
             throw std::invalid_argument {

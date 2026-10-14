@@ -2,8 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
-// Opt-in guest CPU profile: ticks and run counts per translated-run entry
-// address, mapped to the guest image that holds the address.
+// Opt-in guest CPU profile: executions and ticks per translated block, mapped
+// to the guest image that holds the block's first instruction.
 
 #pragma once
 
@@ -11,7 +11,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -45,27 +47,48 @@ private:
     std::vector<GuestImage> images_; // sorted by load address
 };
 
-struct BlockProfileRow {
+// One translated block: where its first instruction is, the cycle count the
+// translator gave it (what the emitted code charges per execution), and how
+// often it was entered.
+struct BlockCounter {
     std::uint32_t pid { };
     std::uint32_t entry { };
-    std::uint64_t ticks { };
-    std::uint64_t runs { };
+    bool thumb { };
+    std::uint64_t cycles { };
+    std::uint64_t executions { };
 };
 
-struct MappedBlockRow {
-    BlockProfileRow row;
+struct MappedBlockCounter {
+    BlockCounter counter;
+    // executions x cycles: the ticks the block's cycle count charges.
+    std::uint64_t ticks { };
     // Empty when the entry lies in no image of its process.
     std::string image;
     std::uint32_t offset { };
 };
 
-// Accumulates ticks per (process, run entry address). Recording is a no-op
-// unless the profile is enabled, so the default run pays one relaxed load.
-// Granularity: one Umbra run chains through many blocks until it halts (an
-// SVC, a host yield, the tick budget), and its ticks are charged to the PC the
-// run started at. The rows are therefore per run start, not per block.
+// Counts block executions and the ticks they charge. Off by default: the
+// translator emits no counter, and nothing here is reserved. When enabled, the
+// translator gives every block a slot (allocate_counter), the emitted code
+// counts entries into it (count_execution), and the translator reports the
+// block's cycle count when its emission completes (set_counter_cycles).
+//
+// Artifacts are not used while the profile is on: an artifact is compiled
+// without the counter, so a loaded block would not be counted.
 class GuestBlockProfile {
 public:
+    // Reserves `capacity` slots. Blocks translated after the table is full are
+    // not counted and are reported as dropped.
+    void reserve_counters(std::size_t capacity);
+    // The slot for a block about to be emitted, or nullopt when no table is
+    // reserved or the table is full.
+    [[nodiscard]] std::optional<std::uint64_t> allocate_counter(
+        std::uint32_t pid, std::uint32_t entry, bool thumb);
+    void set_counter_cycles(std::uint64_t slot, std::uint64_t cycles);
+    // Called by the emitted code at every entry of the block in `slot`.
+    void count_execution(std::uint64_t slot) noexcept;
+
+    // Clears counts and images; the reserved slots are kept.
     void clear();
     void set_enabled(bool enabled)
     {
@@ -76,40 +99,38 @@ public:
         return enabled_.load(std::memory_order_acquire);
     }
 
-    void record_run(
-        std::uint32_t pid, std::uint32_t entry, std::uint64_t ticks);
     // Called when a process exits, while its address space still holds the
     // dyld image list. A later table for the same pid replaces the earlier one.
     void record_images(std::uint32_t pid, GuestImageTable images);
-
-    // Rows sorted by ticks, largest first; ties by pid, then entry.
-    [[nodiscard]] std::vector<BlockProfileRow> rows() const;
-    [[nodiscard]] std::uint64_t total_ticks() const;
-    [[nodiscard]] std::uint64_t total_runs() const;
     [[nodiscard]] GuestImageTable image_table(std::uint32_t pid) const;
     [[nodiscard]] std::size_t image_table_count() const;
+
+    // Slots allocated so far, in slot order.
+    [[nodiscard]] std::vector<BlockCounter> counters() const;
+    [[nodiscard]] std::uint64_t dropped_blocks() const;
 
 private:
     std::atomic<bool> enabled_ { false };
     mutable std::mutex mutex_;
-    std::map<std::pair<std::uint32_t, std::uint32_t>, BlockProfileRow> runs_;
+    std::vector<BlockCounter> blocks_; // slot = index; executions are in executions_
+    std::unique_ptr<std::atomic<std::uint64_t>[]> executions_;
+    std::size_t capacity_ { };
+    std::uint64_t dropped_blocks_ { };
     std::map<std::uint32_t, GuestImageTable> images_;
-    std::uint64_t total_ticks_ { };
-    std::uint64_t total_runs_ { };
 };
 
-// Every row, mapped to its image through its process's table. The order is
-// rows() order.
-[[nodiscard]] std::vector<MappedBlockRow> map_block_profile(
+// Every counted block, mapped to its image through its process's table, sorted
+// by ticks, largest first; ties by pid, entry, then Thumb after ARM.
+[[nodiscard]] std::vector<MappedBlockCounter> map_block_counters(
     const GuestBlockProfile& profile);
 
-// Tab-separated table with a header line: one line per row.
-[[nodiscard]] std::string format_block_profile_table(
-    const std::vector<MappedBlockRow>& rows);
+// Tab-separated table with a header line: one line per counted block.
+[[nodiscard]] std::string format_block_counter_table(
+    const std::vector<MappedBlockCounter>& rows);
 
-// `[perf-block]` totals, then up to `top` `[perf-block-top]` rows and up to
-// `top` `[perf-block-image]` per-image totals, largest first.
-[[nodiscard]] std::vector<std::string> format_block_profile_summary(
-    const GuestBlockProfile& profile, std::size_t top);
+// `[perf-block]` totals against the run's cpu ticks, then up to `top`
+// `[perf-block-top]` rows and up to `top` `[perf-block-image]` totals.
+[[nodiscard]] std::vector<std::string> format_block_counter_summary(
+    const GuestBlockProfile& profile, std::uint64_t cpu_ticks, std::size_t top);
 
 } // namespace shade
