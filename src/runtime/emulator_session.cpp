@@ -12,6 +12,7 @@
 #include "graphics/display_presenter.hpp"
 #include "graphics/boot_logo.hpp"
 #include "guest_timing.hpp"
+#include "initial_process_failure.hpp"
 #include "jit_diagnostics.hpp"
 #include "jit_policy.hpp"
 #include "process.hpp"
@@ -151,6 +152,29 @@ namespace {
         return CompatibilityKernel::GuestFault { Kind::DataAccess,
             cpu.registers()[15], result.fault->address,
             has_permission(result.fault->access, MemoryPermission::Write) };
+    }
+    // The first process's fatal stop, named by the fault the CPU reported. A
+    // stop with no known fault is named too, so it cannot pass as a clean run.
+    runtime_detail::InitialProcessFailure initial_process_failure_of(
+        std::uint32_t pid, std::uint32_t pc,
+        const std::optional<CompatibilityKernel::GuestFault>& fault)
+    {
+        using Kind = CompatibilityKernel::GuestFault::Kind;
+        using Failure = runtime_detail::InitialProcessFailure;
+        if (!fault)
+            return { Failure::Kind::UnclassifiedStop, pid, pc, 0 };
+        switch (fault->kind) {
+        case Kind::Undefined:
+            return { Failure::Kind::UndefinedInstruction, pid, fault->pc, 0 };
+        case Kind::DataAccess:
+            return { Failure::Kind::DataAbort, pid, fault->pc, fault->address };
+        case Kind::InstructionFetch:
+            return { Failure::Kind::PrefetchAbort, pid, fault->pc,
+                fault->address };
+        case Kind::Breakpoint:
+            return { Failure::Kind::Breakpoint, pid, fault->pc, 0 };
+        }
+        return { Failure::Kind::UnclassifiedStop, pid, pc, 0 };
     }
     // Mixed host-control and debugger sessions use a bounded poll fallback.
     constexpr auto host_event_poll_fallback = std::chrono::milliseconds { 4 };
@@ -2180,10 +2204,10 @@ void EmulatorSession::run()
     std::size_t stopped_cpu = 0;
     CpuRunResult stopped_result { };
     bool hard_stop = false;
-    // Set when the first process dies of an undefined instruction: the run
+    // Set when the first process dies of a fatal stop or a signal: the run
     // ends by throwing it, so the boot exits non-zero instead of reporting
     // success for a process that never reached its main.
-    std::optional<std::string> initial_undefined_instruction;
+    std::optional<runtime_detail::InitialProcessFailure> initial_failure;
     std::unique_ptr<GdbRemoteServer> gdb_server;
     std::optional<GdbResumeRequest> debug_request;
     if (gdb_port) {
@@ -4112,16 +4136,9 @@ void EmulatorSession::run()
                         completion = XnuSliceCompletion::Continue;
                     }
                 } else {
-                    using Fault = CompatibilityKernel::GuestFault;
-                    const auto fault = guest_fault_of(result, cpu);
-                    if (fault && fault->kind == Fault::Kind::Undefined) {
-                        std::ostringstream failure;
-                        failure << "pid " << runtime.kernel->process().pid
-                                << " died of an undefined instruction at 0x"
-                                << std::hex << fault->pc
-                                << "; the run failed";
-                        initial_undefined_instruction = failure.str();
-                    }
+                    initial_failure = initial_process_failure_of(
+                        runtime.kernel->process().pid, cpu.registers()[15],
+                        guest_fault_of(result, cpu));
                     completion = XnuSliceCompletion::Terminate;
                     hard_stop = true;
                 }
@@ -4889,6 +4906,15 @@ void EmulatorSession::run()
         " stability-last-content=" +
         std::to_string(
             transition_attribution.stability_last_observed_content_revision));
+    // The first process dying of a signal is a failure too. Read here, while
+    // its runtime is still in the list.
+    if (!initial_failure &&
+        initial_runtime->kernel->process().termination_signal != 0) {
+        initial_failure = runtime_detail::InitialProcessFailure {
+            runtime_detail::InitialProcessFailure::Kind::Signal,
+            initial_runtime->kernel->process().pid, 0,
+            initial_runtime->kernel->process().termination_signal };
+    }
     diagnostics.stopped(stopped_pid, stopped_cpu, consumed_ticks, stopped_result);
     if (baseband_capture_stream) {
         baseband_capture_stream->flush();
@@ -5886,8 +5912,9 @@ void EmulatorSession::run()
             " atomic-queue-snapshot-tracker-bytes=" +
             std::to_string(queue.native_preimport_tracker_bytes));
     }
-    if (initial_undefined_instruction)
-        throw std::runtime_error { *initial_undefined_instruction };
+    if (initial_failure)
+        throw std::runtime_error {
+            runtime_detail::initial_process_failure_message(*initial_failure) };
 }
 
 } // namespace shade

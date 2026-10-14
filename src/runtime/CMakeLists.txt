@@ -16,3 +16,12 @@ shade_configure_module(shade_runtime)
 target_link_libraries(shade_runtime
     PUBLIC Shade::foundation Shade::device_state Shade::graphics Shade::network
     PRIVATE Shade::kernel Shade::debug Shade::crypto)
+
+if(BUILD_TESTING)
+    add_executable(shade_runtime_initial_process_failure_test
+        test/initial_process_failure_test.cpp)
+    target_include_directories(shade_runtime_initial_process_failure_test
+        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME runtime.initial_process_failure
+        COMMAND shade_runtime_initial_process_failure_test)
+endif()
