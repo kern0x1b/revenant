@@ -13,9 +13,12 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <mutex>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -119,6 +122,60 @@ struct MappedCallerRow {
     std::uint32_t caller_offset { };
 };
 
+// The images whose install name starts with this prefix are the ones this
+// project builds (the backports). Every other image is Apple's.
+inline constexpr std::string_view own_image_prefix { "/usr/lib/charon/" };
+
+// The [begin, end) address ranges of the __TEXT of the images that
+// own_image_prefix names.
+using AddressRanges = std::vector<std::pair<std::uint32_t, std::uint32_t>>;
+[[nodiscard]] AddressRanges own_text_ranges(const GuestImageTable& images);
+
+// Where one run's ticks go on the guest stack. Self: the run started in one
+// of our images, so the address is its PC. Caller: the run started in Apple
+// code reached from one of ours, so the address is the return address into
+// ours. System: no frame of the run's stack is ours, so the address is the
+// outermost frame's (the PC when there is none).
+struct StackAttribution {
+    enum class Kind : std::uint8_t {
+        Self,
+        Caller,
+        System,
+    };
+    Kind kind { Kind::Self };
+    std::uint32_t address { };
+};
+
+// Reads the guest word at an address, or nullopt when it cannot be read.
+using GuestReader = std::function<std::optional<std::uint32_t>(std::uint32_t)>;
+
+// Walks a run's guest stack from its start and attributes its ticks. `pc` is
+// the run's PC, `lr` its LR and `frame` its r7 (the frame pointer the armv7
+// ABI keeps: [frame] is the caller's frame, [frame + 4] the return address
+// into the caller). LR is checked first: a leaf that has pushed no frame, and
+// a function at its entry, return into its caller through LR. The walk stops
+// after `max_frames` frames, at a null, misaligned or non-increasing frame
+// pointer, or at an unreadable word.
+[[nodiscard]] StackAttribution attribute_stack(std::uint32_t pc,
+    std::uint32_t lr, std::uint32_t frame, const AddressRanges& own,
+    const GuestReader& read32, std::size_t max_frames = 32);
+
+// The runs of one process attributed to one stack location, and their ticks.
+struct StackRow {
+    std::uint32_t pid { };
+    StackAttribution attribution { };
+    std::uint64_t runs { };
+    std::uint64_t ticks { };
+};
+
+struct MappedStackRow {
+    StackRow row;
+    // The image and offset of the attributed address; empty when it lies in
+    // no image of its process.
+    std::string image;
+    std::uint32_t offset { };
+};
+
 // Accumulates the runs and the ticks they consumed per start block. Off by
 // default: nothing is recorded, and the executor keeps its tick budget. While
 // it is enabled the executor gives each run a budget of one tick and records
@@ -152,7 +209,18 @@ public:
         std::uint32_t entry, bool thumb, std::uint64_t ticks,
         std::uint32_t caller);
 
-    // Clears runs, callers, translations and images.
+    // Called after each run that started at `location` in process `pid`, with
+    // the stack attribution of its start and its consumed ticks.
+    void record_stack(
+        std::uint32_t pid, StackAttribution attribution, std::uint64_t ticks);
+
+    // The address of the guest's dyld_all_image_info, noted when a process is
+    // created, so a run can read the image list while it runs (0 when none).
+    void note_image_info(std::uint32_t pid, std::uint32_t address);
+    [[nodiscard]] std::uint32_t image_info_address(std::uint32_t pid) const;
+
+    // Clears runs, callers, stacks, translations and images. The image info
+    // addresses are kept: they belong to live processes.
     void clear();
 
     // Called when a process exits, while its address space still holds the
@@ -165,6 +233,8 @@ public:
     [[nodiscard]] std::vector<BlockRow> rows() const;
     // Caller rows in no particular order.
     [[nodiscard]] std::vector<CallerRow> callers() const;
+    // Stack rows in no particular order.
+    [[nodiscard]] std::vector<StackRow> stacks() const;
     [[nodiscard]] std::size_t translation_count() const;
 
 private:
@@ -175,7 +245,10 @@ private:
     std::map<std::pair<std::uint32_t, std::uint64_t>, BlockRow> rows_;
     std::map<std::tuple<std::uint32_t, std::uint64_t, std::uint32_t>, CallerRow>
         callers_;
+    std::map<std::tuple<std::uint32_t, std::uint8_t, std::uint32_t>, StackRow>
+        stacks_;
     std::map<std::uint32_t, GuestImageTable> images_;
+    std::map<std::uint32_t, std::uint32_t> image_info_;
 };
 
 // Every row, mapped to its image through its process's table, sorted by ticks,
@@ -187,6 +260,19 @@ private:
 // through its process's table, sorted by ticks, largest first; ties by pid,
 // entry, Thumb, then caller.
 [[nodiscard]] std::vector<MappedCallerRow> map_caller_rows(
+    const GuestBlockProfile& profile);
+
+// Every stack row, mapped to the image of its address through its process's
+// table, sorted by ticks, largest first; ties by pid, kind, then address.
+[[nodiscard]] std::vector<MappedStackRow> map_stack_rows(
+    const GuestBlockProfile& profile);
+
+// Tab-separated table with a header line: one line per stack row.
+[[nodiscard]] std::string format_stack_table(
+    const std::vector<MappedStackRow>& rows);
+
+// One `[perf-block-stack]` line: the ticks of each kind of attribution.
+[[nodiscard]] std::string format_stack_summary(
     const GuestBlockProfile& profile);
 
 // Tab-separated table with a header line: one line per row.

@@ -300,11 +300,149 @@ void test_mapping_order_and_summary()
     CHECK(!off.empty() && contains(off.front(), "difference=-2 "));
 }
 
+// A synthetic guest stack: words at addresses, nothing else readable.
+struct SyntheticStack {
+    std::map<std::uint32_t, std::uint32_t> words;
+
+    shade::GuestReader reader() const
+    {
+        return [this](std::uint32_t address)
+                   -> std::optional<std::uint32_t> {
+            const auto found = words.find(address);
+            if (found == words.end())
+                return std::nullopt;
+            return found->second;
+        };
+    }
+};
+
+// Our image's __TEXT is [0x1000, 0x2000); Apple's code lies at 0x3000 and up.
+const shade::AddressRanges kOwn { { 0x1000U, 0x2000U } };
+
+void test_own_ranges()
+{
+    const shade::GuestImageTable images { {
+        shade::GuestImage { "/usr/lib/charon/org.charon.emulatelaunchd/"
+                     "libFoundationBackports.dylib",
+            0x1000U, 0x800U },
+        shade::GuestImage { "/usr/lib/libobjc.A.dylib", 0x3000U, 0x1000U },
+        shade::GuestImage { "/usr/lib/charon/no-text.dylib", 0x6000U, 0U },
+    } };
+    const auto ranges = shade::own_text_ranges(images);
+    CHECK(ranges.size() == 1);
+    CHECK(ranges.size() == 1 && ranges.front().first == 0x1000U);
+    CHECK(ranges.size() == 1 && ranges.front().second == 0x1800U);
+}
+
+void test_stack_walk()
+{
+    using Kind = shade::StackAttribution::Kind;
+    const auto walk = [](std::uint32_t pc, std::uint32_t lr,
+                          std::uint32_t frame, const SyntheticStack& stack,
+                          std::size_t max_frames = 32) {
+        return shade::attribute_stack(
+            pc, lr, frame, kOwn, stack.reader(), max_frames);
+    };
+
+    // The PC is ours: the run is ours, whatever the frames say.
+    const auto self = walk(0x1040U, 0x3000U, 0U, {});
+    CHECK(self.kind == Kind::Self && self.address == 0x1040U);
+
+    // Apple code entered from ours through LR (a leaf with no frame, or a
+    // function at its entry). The Thumb bit of LR is dropped.
+    const auto leaf = walk(0x3010U, 0x1045U, 0x9999U, {});
+    CHECK(leaf.kind == Kind::Caller && leaf.address == 0x1044U);
+
+    // LR is Apple's: the walk goes on to the frame chain. Frame 0x8000 is the
+    // Apple function's own frame, and its saved LR is Apple's too; frame
+    // 0x8100 is ours, so its saved LR names our caller.
+    SyntheticStack ours_second;
+    ours_second.words = { { 0x8000U, 0x8100U }, { 0x8004U, 0x3030U },
+        { 0x8100U, 0x8200U }, { 0x8104U, 0x1050U } };
+    const auto chained = walk(0x3010U, 0x3020U, 0x8000U, ours_second);
+    CHECK(chained.kind == Kind::Caller && chained.address == 0x1050U);
+
+    // No frame of ours: the outermost Apple frame is the attribution.
+    SyntheticStack apple_only;
+    apple_only.words = { { 0x8000U, 0x8100U }, { 0x8004U, 0x3030U },
+        { 0x8100U, 0U }, { 0x8104U, 0x3090U } };
+    const auto system = walk(0x3010U, 0x3020U, 0x8000U, apple_only);
+    CHECK(system.kind == Kind::System && system.address == 0x3090U);
+
+    // A frame that does not climb (the stack would go back down) ends the walk
+    // after its own saved LR was read.
+    SyntheticStack falling;
+    falling.words = { { 0x8000U, 0x7f00U }, { 0x8004U, 0x3030U },
+        { 0x7f00U, 0x0U }, { 0x7f04U, 0x1050U } };
+    const auto stopped = walk(0x3010U, 0x3020U, 0x8000U, falling);
+    CHECK(stopped.kind == Kind::System && stopped.address == 0x3030U);
+
+    // A misaligned frame pointer is not followed; the PC is the outermost.
+    const auto misaligned = walk(0x3010U, 0x3020U, 0x8002U, ours_second);
+    CHECK(misaligned.kind == Kind::System && misaligned.address == 0x3010U);
+
+    // An unreadable frame stops the walk the same way.
+    const auto unreadable = walk(0x3010U, 0x3020U, 0x9000U, ours_second);
+    CHECK(unreadable.kind == Kind::System && unreadable.address == 0x3010U);
+
+    // The bound: our frame is the 35th, so 32 frames do not reach it and 40
+    // do. The frames climb by 0x100 from 0x10000.
+    SyntheticStack deep;
+    for (std::uint32_t index = 0; index < 40; ++index) {
+        const auto frame = 0x10000U + index * 0x100U;
+        deep.words[frame] = frame + 0x100U;
+        deep.words[frame + 4U] = index == 34U ? 0x1050U : 0x3030U;
+    }
+    const auto bounded = walk(0x3010U, 0x3020U, 0x10000U, deep, 32);
+    CHECK(bounded.kind == Kind::System && bounded.address == 0x3030U);
+    const auto reached = walk(0x3010U, 0x3020U, 0x10000U, deep, 40);
+    CHECK(reached.kind == Kind::Caller && reached.address == 0x1050U);
+}
+
+void test_stack_rows()
+{
+    shade::GuestBlockProfile profile;
+    profile.set_enabled(true);
+    profile.record_images(1, shade::GuestImageTable { {
+        shade::GuestImage { "/usr/lib/charon/a.dylib", 0x1000U, 0x800U },
+        shade::GuestImage { "/usr/lib/libobjc.A.dylib", 0x3000U, 0x1000U },
+    } });
+    profile.record_stack(1, { shade::StackAttribution::Kind::Self, 0x1040U }, 10);
+    profile.record_stack(1, { shade::StackAttribution::Kind::Caller, 0x1050U }, 5);
+    profile.record_stack(1, { shade::StackAttribution::Kind::Caller, 0x1050U }, 7);
+    profile.record_stack(1, { shade::StackAttribution::Kind::System, 0x3030U }, 3);
+    CHECK(profile.stacks().size() == 3);
+
+    const auto mapped = shade::map_stack_rows(profile);
+    CHECK(mapped.size() == 3);
+    CHECK(mapped.size() == 3 && mapped.front().row.ticks == 12U);
+    CHECK(mapped.size() == 3 && mapped.front().image == "/usr/lib/charon/a.dylib");
+    CHECK(mapped.size() == 3 && mapped.front().offset == 0x50U);
+
+    const auto summary = shade::format_stack_summary(profile);
+    CHECK(summary == "[perf-block-stack] self-ticks=10 caller-ticks=12 "
+                     "system-ticks=3 total-ticks=25");
+    const auto table = shade::format_stack_table(mapped);
+    CHECK(contains(table, "pid\tkind\taddress\timage\toffset\truns\tticks\n"));
+    CHECK(contains(table, "1\tcaller\t0x00001050\t/usr/lib/charon/a.dylib\t"
+                          "0x00000050\t2\t12\n"));
+
+    profile.note_image_info(1, 0x5000U);
+    CHECK(profile.image_info_address(1) == 0x5000U);
+    CHECK(profile.image_info_address(2) == 0U);
+    profile.clear();
+    CHECK(profile.stacks().empty());
+    CHECK(profile.image_info_address(1) == 0x5000U);
+}
+
 } // namespace
 
 int main()
 {
     test_image_table();
+    test_own_ranges();
+    test_stack_walk();
+    test_stack_rows();
     test_run_classification();
     test_pids_keep_rows_apart();
     test_clear_and_images();

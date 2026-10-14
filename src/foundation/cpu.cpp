@@ -47,6 +47,7 @@
 #include "foundation/jit_execution_budget.hpp"
 #include "foundation/jit_native_preimport_tracker.hpp"
 #include "foundation/jit_translation_profile.hpp"
+#include "foundation/guest_image_table.hpp"
 #include "foundation/jit_work_policy.hpp"
 #include "foundation/performance.hpp"
 
@@ -2336,6 +2337,15 @@ public:
             // the call that reached it (the block profile's caller column).
             const auto entry_caller =
                 profiling_blocks && !single_step ? jit_->Regs()[14] : 0U;
+            // The run's guest stack at its start, walked now: the registers
+            // are the run's, and the walk reads the guest memory it will use.
+            std::optional<StackAttribution> entry_stack;
+            if (profiling_blocks && !single_step) {
+                const Umbra::A32::LocationDescriptor entry_descriptor {
+                    Umbra::IR::LocationDescriptor { entry_location }
+                };
+                entry_stack = attribute_run_stack(entry_descriptor.PC());
+            }
             bool portable_demand_provider_enabled { };
             if (!single_step && demand_artifact_enabled_ &&
                 !jit_demand_disabled() && !jit_portable_handoff_disabled() &&
@@ -2415,6 +2425,9 @@ public:
                     static_cast<std::uint32_t>(process_id_), entry_location,
                     descriptor.PC(), descriptor.TFlag(),
                     result.ticks_consumed, entry_caller);
+                performance_counters().block_profile().record_stack(
+                    static_cast<std::uint32_t>(process_id_), *entry_stack,
+                    result.ticks_consumed);
             }
             // Profile validation and merging never run in an executing Guest
             // slice. The fixed recorder spans a complete profile and is
@@ -3223,6 +3236,33 @@ private:
         }
     }
 
+    // The stack attribution of a profiled run that starts at `pc`. The image
+    // list is read again only when dyld's image count has changed, so the
+    // walk's classification of our images follows the list as it grows.
+    StackAttribution attribute_run_stack(std::uint32_t pc)
+    {
+        const auto info = performance_counters().block_profile().image_info_address(
+            static_cast<std::uint32_t>(process_id_));
+        const auto count = info == 0U
+            ? std::nullopt
+            : memory_.read32(info + 4U, MemoryPermission::Read);
+        if (count && *count != own_image_count_) {
+            // The list read here is also the one the profile maps against:
+            // a process that never exits through the kernel (pid 1, which ends
+            // the run) has no exit-time list, and the last refresh is its list.
+            const auto images = read_guest_image_table(memory_, info);
+            performance_counters().block_profile().record_images(
+                static_cast<std::uint32_t>(process_id_), images);
+            own_image_ranges_ = own_text_ranges(images);
+            own_image_count_ = *count;
+        }
+        const auto read32 = [this](std::uint32_t address) {
+            return memory_.read32(address, MemoryPermission::Read);
+        };
+        return attribute_stack(pc, jit_->Regs()[14], jit_->Regs()[7],
+            own_image_ranges_, read32);
+    }
+
     void record_dispatch_counters()
     {
         if (!jit_)
@@ -3323,6 +3363,8 @@ private:
         exclusive_monitor_values_link_cell_address_ { };
     std::unique_ptr<Umbra::A32::Jit> jit_;
     JitHostExecutionBudget host_execution_budget_;
+    AddressRanges own_image_ranges_;
+    std::uint32_t own_image_count_ { 0xffffffffU };
     std::size_t code_cache_size_ { 64U * 1024U * 1024U };
     bool recorded_shared_memory_ { };
     std::uint64_t recorded_shared_used_bytes_ { };

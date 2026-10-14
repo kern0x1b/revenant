@@ -1249,6 +1249,13 @@ void CompatibilityKernel::set_process_image(std::string_view guest_path,
             }
         }
     }
+    // The block profile reads the image list while the process runs, to tell
+    // the backports' code from Apple's (see JitExecutor::attribute_run_stack).
+    if (performance_counters().block_profile_enabled()) {
+        performance_counters().block_profile().note_image_info(
+            static_cast<std::uint32_t>(process_.pid),
+            record.dyld_all_image_info_address);
+    }
     record.code_signature_entitlements.assign(
         code_signature_entitlements.begin(), code_signature_entitlements.end());
     record.display_orientation =

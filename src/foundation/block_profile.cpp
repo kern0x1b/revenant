@@ -21,6 +21,14 @@ namespace {
         return text;
     }
 
+    bool in_ranges(const AddressRanges& ranges, std::uint32_t address)
+    {
+        return std::any_of(ranges.begin(), ranges.end(),
+            [address](const auto& range) {
+                return address >= range.first && address < range.second;
+            });
+    }
+
     std::string share_text(std::uint64_t part, std::uint64_t whole)
     {
         char text[32];
@@ -138,6 +146,7 @@ void GuestBlockProfile::clear()
     translations_.clear();
     rows_.clear();
     callers_.clear();
+    stacks_.clear();
     images_.clear();
 }
 
@@ -178,6 +187,43 @@ std::vector<CallerRow> GuestBlockProfile::callers() const
     std::vector<CallerRow> result;
     result.reserve(callers_.size());
     for (const auto& [key, row] : callers_)
+        result.push_back(row);
+    return result;
+}
+
+void GuestBlockProfile::record_stack(
+    std::uint32_t pid, StackAttribution attribution, std::uint64_t ticks)
+{
+    const std::lock_guard lock { mutex_ };
+    auto& row = stacks_[{ pid, static_cast<std::uint8_t>(attribution.kind),
+        attribution.address }];
+    if (row.runs == 0) {
+        row.pid = pid;
+        row.attribution = attribution;
+    }
+    ++row.runs;
+    row.ticks += ticks;
+}
+
+void GuestBlockProfile::note_image_info(std::uint32_t pid, std::uint32_t address)
+{
+    const std::lock_guard lock { mutex_ };
+    image_info_[pid] = address;
+}
+
+std::uint32_t GuestBlockProfile::image_info_address(std::uint32_t pid) const
+{
+    const std::lock_guard lock { mutex_ };
+    const auto found = image_info_.find(pid);
+    return found == image_info_.end() ? 0U : found->second;
+}
+
+std::vector<StackRow> GuestBlockProfile::stacks() const
+{
+    const std::lock_guard lock { mutex_ };
+    std::vector<StackRow> result;
+    result.reserve(stacks_.size());
+    for (const auto& [key, row] : stacks_)
         result.push_back(row);
     return result;
 }
@@ -295,6 +341,139 @@ std::string format_block_table(const std::vector<MappedBlockRow>& rows)
             "\n";
     }
     return text;
+}
+
+AddressRanges own_text_ranges(const GuestImageTable& images)
+{
+    AddressRanges ranges;
+    for (const auto& image : images.images()) {
+        if (image.text_size == 0 ||
+            image.path.compare(0, own_image_prefix.size(), own_image_prefix) !=
+                0)
+            continue;
+        ranges.emplace_back(image.load_address,
+            image.load_address + image.text_size);
+    }
+    return ranges;
+}
+
+StackAttribution attribute_stack(std::uint32_t pc, std::uint32_t lr,
+    std::uint32_t frame, const AddressRanges& own, const GuestReader& read32,
+    std::size_t max_frames)
+{
+    if (in_ranges(own, pc))
+        return { StackAttribution::Kind::Self, pc };
+    // The Thumb bit of LR is not part of the address the call returns to.
+    const auto returns_to = lr & ~1U;
+    if (in_ranges(own, returns_to))
+        return { StackAttribution::Kind::Caller, returns_to };
+
+    StackAttribution outermost { StackAttribution::Kind::System, pc };
+    std::uint32_t current = frame;
+    for (std::size_t depth = 0; depth < max_frames; ++depth) {
+        if (current == 0U || current % 4U != 0U)
+            break;
+        const auto next = read32(current);
+        const auto saved_lr = read32(current + 4U);
+        if (!next || !saved_lr)
+            break;
+        const auto caller = *saved_lr & ~1U;
+        if (in_ranges(own, caller))
+            return { StackAttribution::Kind::Caller, caller };
+        outermost.address = caller;
+        // The stack grows down, so each caller's frame lies above its callee's.
+        if (*next <= current)
+            break;
+        current = *next;
+    }
+    return outermost;
+}
+
+std::vector<MappedStackRow> map_stack_rows(const GuestBlockProfile& profile)
+{
+    ImageLookup images { profile };
+    std::vector<MappedStackRow> result;
+    for (const auto& row : profile.stacks()) {
+        MappedStackRow mapped;
+        mapped.row = row;
+        if (const auto* image = images.find(row.pid, row.attribution.address)) {
+            mapped.image = image->path;
+            mapped.offset = row.attribution.address - image->load_address;
+        }
+        result.push_back(std::move(mapped));
+    }
+    std::stable_sort(result.begin(), result.end(),
+        [](const MappedStackRow& left, const MappedStackRow& right) {
+            if (left.row.ticks != right.row.ticks)
+                return left.row.ticks > right.row.ticks;
+            if (left.row.pid != right.row.pid)
+                return left.row.pid < right.row.pid;
+            if (left.row.attribution.kind != right.row.attribution.kind)
+                return left.row.attribution.kind < right.row.attribution.kind;
+            return left.row.attribution.address < right.row.attribution.address;
+        });
+    return result;
+}
+
+namespace {
+
+    const char* kind_name(StackAttribution::Kind kind)
+    {
+        switch (kind) {
+        case StackAttribution::Kind::Self:
+            return "self";
+        case StackAttribution::Kind::Caller:
+            return "caller";
+        case StackAttribution::Kind::System:
+            return "system";
+        }
+        return "system";
+    }
+
+} // namespace
+
+std::string format_stack_table(const std::vector<MappedStackRow>& rows)
+{
+    std::string text =
+        "pid\tkind\taddress\timage\toffset\truns\tticks\n";
+    for (const auto& mapped : rows) {
+        const auto& row = mapped.row;
+        text += std::to_string(row.pid) + "\t" +
+                kind_name(row.attribution.kind) + "\t" +
+                hex32(row.attribution.address) + "\t" +
+                (mapped.image.empty() ? std::string { "-" } : mapped.image) +
+                "\t" +
+                (mapped.image.empty() ? std::string { "-" }
+                                      : hex32(mapped.offset)) +
+                "\t" + std::to_string(row.runs) + "\t" +
+                std::to_string(row.ticks) + "\n";
+    }
+    return text;
+}
+
+std::string format_stack_summary(const GuestBlockProfile& profile)
+{
+    std::uint64_t self_ticks { };
+    std::uint64_t caller_ticks { };
+    std::uint64_t system_ticks { };
+    for (const auto& row : profile.stacks()) {
+        switch (row.attribution.kind) {
+        case StackAttribution::Kind::Self:
+            self_ticks += row.ticks;
+            break;
+        case StackAttribution::Kind::Caller:
+            caller_ticks += row.ticks;
+            break;
+        case StackAttribution::Kind::System:
+            system_ticks += row.ticks;
+            break;
+        }
+    }
+    return "[perf-block-stack] self-ticks=" + std::to_string(self_ticks) +
+           " caller-ticks=" + std::to_string(caller_ticks) +
+           " system-ticks=" + std::to_string(system_ticks) +
+           " total-ticks=" +
+           std::to_string(self_ticks + caller_ticks + system_ticks);
 }
 
 std::vector<std::string> format_block_summary(

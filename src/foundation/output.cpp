@@ -40,6 +40,7 @@ namespace {
             "[perf-block]",
             "[perf-block-top]",
             "[perf-block-image]",
+            "[perf-block-stack]",
             "[perf-block-file]",
             "[precompile]",
             "[precompile-outcomes]",
