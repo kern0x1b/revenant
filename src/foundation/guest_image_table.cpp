@@ -13,9 +13,14 @@
 namespace shade {
 namespace {
 
+    constexpr std::uint32_t dyld_all_image_info_version_offset = 0;
     constexpr std::uint32_t dyld_all_image_info_count_offset = 4;
     constexpr std::uint32_t dyld_all_image_info_array_offset = 8;
+    // dyldImageLoadAddress, in the layout that version 2 and later have.
+    constexpr std::uint32_t dyld_all_image_info_dyld_offset = 20;
+    constexpr std::uint32_t dyld_all_image_info_dyld_version = 2;
     constexpr std::uint32_t dyld_image_info_size = 12;
+    constexpr char dyld_path[] = "/usr/lib/dyld";
     constexpr std::uint32_t maximum_image_count = 4096;
     constexpr std::uint32_t macho32_magic = 0xfeedfaceU;
     constexpr std::uint32_t macho32_header_size = 28;
@@ -81,6 +86,20 @@ GuestImageTable read_guest_image_table(
         images.push_back(
             GuestImage { *path, *load, text_size_of(memory, *load) });
     }
+    // dyld is not in the list it keeps of the images it loaded, so its own
+    // load address comes from the all-image-info header.
+    const auto version = memory.read32(
+        all_image_info_address + dyld_all_image_info_version_offset);
+    const auto dyld_load =
+        memory.read32(all_image_info_address + dyld_all_image_info_dyld_offset);
+    if (version && *version >= dyld_all_image_info_dyld_version && dyld_load &&
+        *dyld_load != 0U &&
+        std::none_of(
+            images.begin(), images.end(), [&](const GuestImage& image) {
+                return image.load_address == *dyld_load;
+            }))
+        images.push_back(GuestImage {
+            dyld_path, *dyld_load, text_size_of(memory, *dyld_load) });
     return GuestImageTable { std::move(images) };
 }
 
