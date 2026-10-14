@@ -2180,6 +2180,10 @@ void EmulatorSession::run()
     std::size_t stopped_cpu = 0;
     CpuRunResult stopped_result { };
     bool hard_stop = false;
+    // Set when the first process dies of an undefined instruction: the run
+    // ends by throwing it, so the boot exits non-zero instead of reporting
+    // success for a process that never reached its main.
+    std::optional<std::string> initial_undefined_instruction;
     std::unique_ptr<GdbRemoteServer> gdb_server;
     std::optional<GdbResumeRequest> debug_request;
     if (gdb_port) {
@@ -4108,6 +4112,16 @@ void EmulatorSession::run()
                         completion = XnuSliceCompletion::Continue;
                     }
                 } else {
+                    using Fault = CompatibilityKernel::GuestFault;
+                    const auto fault = guest_fault_of(result, cpu);
+                    if (fault && fault->kind == Fault::Kind::Undefined) {
+                        std::ostringstream failure;
+                        failure << "pid " << runtime.kernel->process().pid
+                                << " died of an undefined instruction at 0x"
+                                << std::hex << fault->pc
+                                << "; the run failed";
+                        initial_undefined_instruction = failure.str();
+                    }
                     completion = XnuSliceCompletion::Terminate;
                     hard_stop = true;
                 }
@@ -5872,6 +5886,8 @@ void EmulatorSession::run()
             " atomic-queue-snapshot-tracker-bytes=" +
             std::to_string(queue.native_preimport_tracker_bytes));
     }
+    if (initial_undefined_instruction)
+        throw std::runtime_error { *initial_undefined_instruction };
 }
 
 } // namespace shade
