@@ -300,6 +300,9 @@ void EmulatorSession::run()
     }
     const auto ticks_option = options.ticks;
     const auto bounded_execution = ticks_option.has_value();
+    // A bounded run names host inodes by sighting order. Every kernel of the run shares this table.
+    const std::shared_ptr<hfs::GuestIdTable> guest_ids =
+        bounded_execution ? std::make_shared<hfs::GuestIdTable>() : nullptr;
     const auto device_time_policy =
         bounded_execution ? DeviceTimePolicy::DeterministicExecution
                           : DeviceTimePolicy::HostMappedInteractive;
@@ -1317,7 +1320,7 @@ void EmulatorSession::run()
         *initial, process, JitPrecompilePhase::Bootstrap);
     initial->kernel = std::make_unique<CompatibilityKernel>(*initial->memory,
         output, rootfs, device, activation_override, lockdown_capabilities,
-        darwin_configuration);
+        darwin_configuration, guest_ids);
     // The guest's entropy is the host's, once per boot. Only a deterministic run (bounded by --ticks) keeps the fixed seed,
     // so its output repeats by request and not by accident.
     if (bounded_execution) {
@@ -1837,7 +1840,7 @@ void EmulatorSession::run()
                 };
                 child->kernel = std::make_unique<CompatibilityKernel>(
                     *child->memory, output, rootfs, device, activation_override,
-                    lockdown_capabilities, darwin_configuration);
+                    lockdown_capabilities, darwin_configuration, guest_ids);
             }
             if (inheritance ==
                 CompatibilityKernel::ProcessInheritance::SpawnExec) {

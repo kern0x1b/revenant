@@ -195,13 +195,14 @@ void CompatibilityKernel::seed_random(std::uint64_t seed)
 CompatibilityKernel::CompatibilityKernel(AddressSpace& memory, Output& output,
     std::filesystem::path rootfs, DeviceModel device,
     std::optional<bool> activated, LockdownCapabilities lockdown_capabilities,
-    std::optional<DarwinKernelConfiguration> configuration)
+    std::optional<DarwinKernelConfiguration> configuration,
+    std::shared_ptr<hfs::GuestIdTable> guest_ids)
     : memory_ { memory }
     , output_ { output }
     , rootfs_ { std::move(rootfs) }
     , device_model_ { device }
     , hfs_volumes_ { rootfs_, device_model_.memory.storage_bytes }
-    , hfs_metadata_ { rootfs_ }
+    , hfs_metadata_ { rootfs_, std::move(guest_ids) }
     , display_state_ { std::make_shared<DisplayState>(
           device_model_.screen.panel) }
     , audio_service_ { std::make_shared<AudioService>(rootfs_) }
@@ -3115,8 +3116,10 @@ bool CompatibilityKernel::write_guest_stat(std::uint32_t address,
             path_status.st_ino != status.st_ino) {
             hfs::Metadata open_file;
             open_file.name = path.filename().string();
-            open_file.catalog_id = static_cast<std::uint32_t>(status.st_ino);
-            open_file.permanent_id = open_file.catalog_id;
+            open_file.permanent_id =
+                hfs_metadata_.table_id(status.st_dev, status.st_ino, path)
+                    .value_or(static_cast<std::uint32_t>(status.st_ino));
+            open_file.catalog_id = open_file.permanent_id;
             open_file.mode = static_cast<std::uint32_t>(status.st_mode);
             open_file.owner = static_cast<std::uint32_t>(status.st_uid);
             open_file.group = static_cast<std::uint32_t>(status.st_gid);
@@ -3255,8 +3258,10 @@ bool CompatibilityKernel::write_guest_stat64(std::uint32_t address,
             path_status.st_ino != status.st_ino) {
             hfs::Metadata open_file;
             open_file.name = path.filename().string();
-            open_file.catalog_id = static_cast<std::uint32_t>(status.st_ino);
-            open_file.permanent_id = open_file.catalog_id;
+            open_file.permanent_id =
+                hfs_metadata_.table_id(status.st_dev, status.st_ino, path)
+                    .value_or(static_cast<std::uint32_t>(status.st_ino));
+            open_file.catalog_id = open_file.permanent_id;
             open_file.mode = static_cast<std::uint32_t>(status.st_mode);
             open_file.owner = static_cast<std::uint32_t>(status.st_uid);
             open_file.group = static_cast<std::uint32_t>(status.st_gid);

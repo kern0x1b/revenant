@@ -225,12 +225,12 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             const std::lock_guard filesystem_lock {
                 shared_state_->filesystem_mutex
             };
-            if (!std::filesystem::remove(host, error)) {
+            if (!hfs_metadata_.remove_name(host, error)) {
                 bsd_error(cpu, bsd_support::darwin_filesystem_error(error, 2U));
                 return;
             }
             std::error_code resource_error;
-            static_cast<void>(std::filesystem::remove(
+            static_cast<void>(hfs_metadata_.remove_name(
                 hfs::MetadataProvider::resource_sidecar(host), resource_error));
             // HFS vnode metadata belongs to the inode, not to one catalog
             // name.  Keep it while another hard link still names the inode.
@@ -802,6 +802,9 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             const std::lock_guard filesystem_lock {
                 shared_state_->filesystem_mutex
             };
+            // The name the rename replaces ends its inode when it held the last link.
+            const auto replaced_identity =
+                hfs_metadata_.last_link_identity(destination);
             std::filesystem::rename(source, destination, error);
             if (!error) {
                 renamed = true;
@@ -813,19 +816,21 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
                 if (std::filesystem::is_regular_file(
                         source_resource, resource_error)) {
                     resource_error.clear();
-                    static_cast<void>(std::filesystem::remove(
+                    static_cast<void>(hfs_metadata_.remove_name(
                         destination_resource, resource_error));
                     resource_error.clear();
                     std::filesystem::rename(
                         source_resource, destination_resource, resource_error);
                 } else {
                     resource_error.clear();
-                    static_cast<void>(std::filesystem::remove(
+                    static_cast<void>(hfs_metadata_.remove_name(
                         destination_resource, resource_error));
                     resource_error.clear();
                 }
                 if (resource_error)
                     error = resource_error;
+                if (replaced_identity)
+                    hfs_metadata_.forget(*replaced_identity);
                 if (replaced_metadata) {
                     shared_state_->hfs_metadata_overrides.erase(
                         replaced_metadata->permanent_id);
@@ -947,7 +952,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
                 const std::lock_guard filesystem_lock {
                     shared_state_->filesystem_mutex
                 };
-                if (!std::filesystem::remove(host, error)) {
+                if (!hfs_metadata_.remove_name(host, error)) {
                     bsd_error(
                         cpu, bsd_support::darwin_filesystem_error(error, 66U));
                     return;
@@ -2047,7 +2052,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         }
         if (*name == resource_fork_name) {
             std::error_code error;
-            static_cast<void>(std::filesystem::remove(
+            static_cast<void>(hfs_metadata_.remove_name(
                 hfs::MetadataProvider::resource_sidecar(host), error));
             if (error) {
                 bsd_error(cpu, bsd_support::darwin_filesystem_error(error));

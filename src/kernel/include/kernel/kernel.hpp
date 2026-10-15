@@ -179,7 +179,8 @@ public:
         DeviceModel device = DeviceModel::default_model(),
         std::optional<bool> activated = std::nullopt,
         LockdownCapabilities lockdown_capabilities = { },
-        std::optional<DarwinKernelConfiguration> configuration = std::nullopt);
+        std::optional<DarwinKernelConfiguration> configuration = std::nullopt,
+        std::shared_ptr<hfs::GuestIdTable> guest_ids = nullptr);
 
     // The seed of the emulated /dev/random and /dev/urandom, a xorshift64 stream. The default is fixed, so a deterministic
     // run (bounded by --ticks) draws the same bytes every boot; any other boot seeds it from the host (EmulatorSession).

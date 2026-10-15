@@ -39,6 +39,7 @@ namespace {
     constexpr std::uint32_t hfs_root_catalog_id = 2;
     constexpr std::uint32_t hfs_root_parent_id = 1;
     constexpr std::uint32_t first_user_catalog_id = 16;
+    constexpr std::uint32_t last_user_catalog_id = 0x7fff'ffffU;
     constexpr std::uint32_t hfs_vnode_tag = 16;
     constexpr std::uint32_t hfs_device = 1;
     constexpr std::uint32_t hfs_block_size = allocation_block_size;
@@ -378,9 +379,86 @@ namespace {
 
 } // namespace
 
-MetadataProvider::MetadataProvider(std::filesystem::path root)
-    : root_ { std::move(root) }
+std::uint32_t GuestIdTable::id_for(
+    const Identity& identity, std::string_view guest_path)
 {
+    std::lock_guard lock { mutex_ };
+    if (const auto known = ids_.find(identity); known != ids_.end())
+        return known->second;
+    auto id = fnv_catalog_id(
+        std::as_bytes(std::span { guest_path.data(), guest_path.size() }));
+    if (owners_.contains(id))
+        ++collisions_;
+    while (owners_.contains(id))
+        id = id == last_user_catalog_id ? first_user_catalog_id : id + 1U;
+    ids_.emplace(identity, id);
+    owners_.emplace(id, identity);
+    return id;
+}
+
+void GuestIdTable::forget(const Identity& identity)
+{
+    std::lock_guard lock { mutex_ };
+    const auto known = ids_.find(identity);
+    if (known == ids_.end())
+        return;
+    owners_.erase(known->second);
+    ids_.erase(known);
+}
+
+std::size_t GuestIdTable::collisions() const
+{
+    std::lock_guard lock { mutex_ };
+    return collisions_;
+}
+
+MetadataProvider::MetadataProvider(
+    std::filesystem::path root, std::shared_ptr<GuestIdTable> guest_ids)
+    : root_ { std::move(root) }
+    , guest_ids_ { std::move(guest_ids) }
+{
+}
+
+std::optional<std::uint32_t> MetadataProvider::table_id(std::uint64_t device,
+    std::uint64_t inode, const std::filesystem::path& path) const
+{
+    if (!guest_ids_)
+        return std::nullopt;
+    const auto guest_path =
+        path.lexically_normal().lexically_relative(root_).generic_string();
+    return guest_ids_->id_for(
+        GuestIdTable::Identity { device, inode }, guest_path);
+}
+
+std::optional<GuestIdTable::Identity> MetadataProvider::last_link_identity(
+    const std::filesystem::path& path) const
+{
+    if (!guest_ids_)
+        return std::nullopt;
+    struct stat status { };
+    if (::lstat(path.c_str(), &status) != 0)
+        return std::nullopt;
+    if (!S_ISDIR(status.st_mode) && status.st_nlink > 1)
+        return std::nullopt;
+    return GuestIdTable::Identity { static_cast<std::uint64_t>(status.st_dev),
+        static_cast<std::uint64_t>(status.st_ino) };
+}
+
+bool MetadataProvider::remove_name(
+    const std::filesystem::path& path, std::error_code& error) const
+{
+    const auto freed = last_link_identity(path);
+    if (!std::filesystem::remove(path, error))
+        return false;
+    if (freed)
+        forget(*freed);
+    return true;
+}
+
+void MetadataProvider::forget(const GuestIdTable::Identity& identity) const
+{
+    if (guest_ids_)
+        guest_ids_->forget(identity);
 }
 
 std::optional<Metadata> MetadataProvider::query(
@@ -416,7 +494,8 @@ std::optional<Metadata> MetadataProvider::query(
         numeric_xattr(path, "user.hfsfuse.record.bsd_flags", follow_symlink)
             .value_or(0);
     result.link_count = static_cast<std::uint32_t>(status.st_nlink);
-    result.permanent_id = inode_catalog_id(status);
+    result.permanent_id = table_id(status.st_dev, status.st_ino, path)
+                              .value_or(inode_catalog_id(status));
     result.catalog_id =
         is_root ? hfs_root_catalog_id
         : status.st_nlink > 1
@@ -428,13 +507,19 @@ std::optional<Metadata> MetadataProvider::query(
     } else {
         struct stat parent_status { };
         const auto parent = path.parent_path();
-        result.parent_catalog_id =
-            ::stat(parent.c_str(), &parent_status) == 0
-                ? numeric_xattr(parent, "user.hfsfuse.record.cnid", true)
-                      .value_or(parent == root_
-                                    ? hfs_root_catalog_id
-                                    : inode_catalog_id(parent_status))
-                : hfs_root_catalog_id;
+        if (::stat(parent.c_str(), &parent_status) != 0) {
+            result.parent_catalog_id = hfs_root_catalog_id;
+        } else if (const auto cnid =
+                       numeric_xattr(parent, "user.hfsfuse.record.cnid", true)) {
+            result.parent_catalog_id = *cnid;
+        } else if (parent == root_) {
+            result.parent_catalog_id = hfs_root_catalog_id;
+        } else {
+            // Only a parent without a cnid takes a sighting here.
+            result.parent_catalog_id =
+                table_id(parent_status.st_dev, parent_status.st_ino, parent)
+                    .value_or(inode_catalog_id(parent_status));
+        }
     }
     result.data_length = S_ISREG(status.st_mode)
                              ? static_cast<std::uint64_t>(status.st_size)
