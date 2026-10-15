@@ -45,13 +45,12 @@ boundary, in `src/graphics`, `src/media` and `src/telephony`.
 
 ```sh
 git submodule update --init
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_CXX_FLAGS=-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
-Options are `SHADE_ENABLE_SDL2`, `SHADE_ENABLE_VULKAN` and `SHADE_ENABLE_IPO`; the
-compiler flag is for the bundled Boost 1.71.0 with a current Apple libc++.
+Options are `SHADE_ENABLE_SDL2`, `SHADE_ENABLE_VULKAN` and `SHADE_ENABLE_IPO`. The bundled
+Boost is 1.81.0 and needs no compiler flag with Apple clang 21.
 Through Charon the build is the `shade` package: `xmake emulate` builds and runs it.
 
 ## Usage

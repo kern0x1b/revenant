@@ -5,7 +5,7 @@
 | Component | Version | License | Copyright | Where |
 | --- | --- | --- | --- | --- |
 | Umbra | this project's own core | 0BSD | see its `LICENSE` | `external/umbra`, a submodule |
-| Boost libraries | 1.71.0, trimmed | BSL-1.0 | the Boost authors | `external/ext-boost`, a submodule |
+| Boost libraries | 1.81.0, trimmed | BSL-1.0 | the Boost authors | `external/ext-boost`, a submodule |
 | Vulkan Memory Allocator | 3.4.0 | MIT | 2017 - 2026 Advanced Micro Devices, Inc. | `external/vulkan-memory-allocator`, unmodified single header |
 
 Umbra vendors libraries of its own, listed in its `THIRD-PARTY.md`. Each vendored
