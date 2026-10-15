@@ -24,6 +24,9 @@ struct GuestExecutionRequest {
     std::uint64_t tick_budget { };
     std::chrono::nanoseconds host_slice_budget { };
     bool single_step { };
+    // A cooperative slice yields to the host clock. A bounded (--ticks) run
+    // turns that off so its tick counts depend on the guest alone.
+    bool cooperative { true };
     CpuRunResult result;
     std::exception_ptr error;
 };

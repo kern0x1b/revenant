@@ -101,12 +101,17 @@ void GuestExecutionCoordinator::execute(GuestExecutionRequest& request) noexcept
     request.result = { };
     request.error = nullptr;
     try {
-        request.result = request.single_step
-                             ? request.cpu->step(request.execution_slot)
-                             : request.cpu->run_cooperatively(
-                                   request.tick_budget,
-                                   request.host_slice_budget,
-                                   request.execution_slot);
+        if (request.single_step) {
+            request.result = request.cpu->step(request.execution_slot);
+        } else if (request.cooperative) {
+            request.result = request.cpu->run_cooperatively(
+                request.tick_budget,
+                request.host_slice_budget,
+                request.execution_slot);
+        } else {
+            request.result =
+                request.cpu->run(request.tick_budget, request.execution_slot);
+        }
     } catch (...) {
         request.error = std::current_exception();
     }

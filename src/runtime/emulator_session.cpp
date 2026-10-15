@@ -3862,6 +3862,9 @@ void EmulatorSession::run()
                     slice,
                     host_slice_budget,
                     debug_request && debug_request->kind == GdbResumeKind::Step,
+                    // Host slice deadlines and the adaptive native block budget
+                    // are host-timed, so a bounded run keeps them out of its ticks.
+                    !bounded_execution,
                 },
                 false,
             });
