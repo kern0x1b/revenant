@@ -24,4 +24,11 @@ if(BUILD_TESTING)
         PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME runtime.initial_process_failure
         COMMAND shade_runtime_initial_process_failure_test)
+
+    add_executable(shade_runtime_bounded_slice_rule_test
+        test/bounded_slice_rule_test.cpp)
+    target_link_libraries(shade_runtime_bounded_slice_rule_test
+        PRIVATE Shade::foundation)
+    add_test(NAME runtime.bounded_slice_rule
+        COMMAND shade_runtime_bounded_slice_rule_test)
 endif()
