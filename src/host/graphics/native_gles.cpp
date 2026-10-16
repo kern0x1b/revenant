@@ -19,14 +19,10 @@ void register_native_gles_renderer()
 #if defined(SHADE_HAS_VULKAN)
     configure_gles_accelerated_factory(create_vulkan_gles_renderer);
 #else
-    configure_gles_accelerated_factory(
-        [](const std::filesystem::path&, const VulkanPresenterConfiguration*,
-            GlesDeviceSelection, std::string* failure) noexcept
-            -> std::unique_ptr<GlesRenderer> {
-            if (failure != nullptr)
-                *failure = "Vulkan support was not built";
-            return { };
-        });
+    // Without Vulkan there is no accelerated factory: the software renderer
+    // is then the one a boot gets. A factory that always fails would make
+    // every software boot throw instead.
+    configure_gles_accelerated_factory(nullptr);
 #endif
 }
 
