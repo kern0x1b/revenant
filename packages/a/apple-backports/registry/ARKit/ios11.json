@@ -271,10 +271,11 @@
       "kind": "class",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build the class ARFaceGeometry; where the device lacks the part, answer as the system's availability query does",
-      "effect": "until built: NSClassFromString answers nil",
-      "source": "the armv7 shared cache of iOS 6.1.3 (244881694 bytes) and of 4.3 (153152518 bytes), read with modules/apple/objc.lua's inventory, which walks each cache's own __objc_classlist, __objc_catlist and __objc_protolist: 0 of the 11378 class names and 0 of the 1171 protocol names of 6.1.3 begin AR, and 0 of its 12549 class and protocol names contain Depth, TrueDepth, LiDAR, SceneDepth, Tracked or DepthData; 4.3 answers 0 of 7187 class names, 0 of 564 protocol names and 0 of 7751 names for those words. The controls of those same two reads: AVCaptureDevice is present with 100 instance and 5 class methods in 6.1.3 and 66 and 5 in 4.3, CMMotionManager with 74 and 4 against 64 and 1, UIView with 597 and 66 against 341 and 51, and the nonsense name charonNegativeControlZZZ is absent from both, and ARFaceGeometry is absent, 0 entries, from the class list of both. The declaration is `@interface ARFaceGeometry : NSObject<NSSecureCoding, NSCopying>` in ARKit.framework/Headers/ARFaceGeometry.h of the iPhoneOS16.4 SDK"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "carried: the class is there with its six members, which are the accessors of the SDK's own properties and answer the zero values of a mesh that was never measured. A face mesh is measured by the TrueDepth camera this device lacks (ARFaceTrackingConfiguration.isSupported is NO), so no session makes one. The initialiser from blend shapes and the other methods are not carried; facts/ARKit/AbsentClasses.md has the list",
+      "effect": "alloc and init answer an object whose six members are nil or zero, as the host's fresh object answers",
+      "source": "carried in packages/a/apple-backports/ARKit/ARFaceGeometry.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
     },
     {
       "api": "ARMeshAnchor",
@@ -288,12 +289,13 @@
     {
       "api": "ARMeshGeometry",
       "kind": "class",
-      "introduced": "13.0",
+      "introduced": "13.4",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build the class ARMeshGeometry; where the device lacks the part, answer as the system's availability query does",
-      "effect": "until built: NSClassFromString answers nil",
-      "source": "the armv7 shared cache of iOS 6.1.3 (244881694 bytes) and of 4.3 (153152518 bytes), read with modules/apple/objc.lua's inventory, which walks each cache's own __objc_classlist, __objc_catlist and __objc_protolist: 0 of the 11378 class names and 0 of the 1171 protocol names of 6.1.3 begin AR, and 0 of its 12549 class and protocol names contain Depth, TrueDepth, LiDAR, SceneDepth, Tracked or DepthData; 4.3 answers 0 of 7187 class names, 0 of 564 protocol names and 0 of 7751 names for those words. The controls of those same two reads: AVCaptureDevice is present with 100 instance and 5 class methods in 6.1.3 and 66 and 5 in 4.3, CMMotionManager with 74 and 4 against 64 and 1, UIView with 597 and 66 against 341 and 51, and the nonsense name charonNegativeControlZZZ is absent from both, and ARMeshGeometry is absent, 0 entries, from the class list of both; tools/cache-index/first-rung.py reads 16.0 for the name, which is a name the 13.0 header declares and is not what this row rests on. The declaration is `@interface ARMeshGeometry : NSObject<NSSecureCoding>` in ARKit.framework/Headers/ARMeshGeometry.h of the iPhoneOS16.4 SDK"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "carried: the class is there with its four members (vertices, normals, faces, classification), which answer nil because a scene mesh is reconstructed from scene depth and this device has no depth sensor, so no session makes one (ARMeshAnchor.m says the same of its anchor). The methods that build a mesh are not carried; facts/ARKit/AbsentClasses.md",
+      "effect": "alloc and init answer an object whose four members are nil, as the host's fresh object answers",
+      "source": "carried in packages/a/apple-backports/ARKit/ARMeshGeometry.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
     },
     {
       "api": "ARObjectAnchor",
@@ -309,10 +311,11 @@
       "kind": "class",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build the class ARSCNFaceGeometry; where the device lacks the part, answer as the system's availability query does",
-      "effect": "until built: NSClassFromString answers nil",
-      "source": "the armv7 shared cache of iOS 6.1.3 (244881694 bytes) and of 4.3 (153152518 bytes), read with modules/apple/objc.lua's inventory, which walks each cache's own __objc_classlist, __objc_catlist and __objc_protolist: 0 of the 11378 class names and 0 of the 1171 protocol names of 6.1.3 begin AR, and 0 of its 12549 class and protocol names contain Depth, TrueDepth, LiDAR, SceneDepth, Tracked or DepthData; 4.3 answers 0 of 7187 class names, 0 of 564 protocol names and 0 of 7751 names for those words. The controls of those same two reads: AVCaptureDevice is present with 100 instance and 5 class methods in 6.1.3 and 66 and 5 in 4.3, CMMotionManager with 74 and 4 against 64 and 1, UIView with 597 and 66 against 341 and 51, and the nonsense name charonNegativeControlZZZ is absent from both, and ARSCNFaceGeometry is absent, 0 entries, from the class list of both. The declaration is `@interface ARSCNFaceGeometry : SCNGeometry` in ARKit.framework/Headers/ARSCNFaceGeometry.h of the iPhoneOS16.4 SDK"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "carried as a SceneKit geometry: the class is there, and its init is SCNGeometry's own, as on the host. The factories that build one from a device and the update from an ARFaceGeometry are not carried, because the face mesh they draw needs the TrueDepth camera this device lacks; facts/ARKit/AbsentClasses.md",
+      "effect": "a SceneKit geometry with no face in it; the factories it would be made by are not carried",
+      "source": "carried in packages/a/apple-backports/ARKit/ARSCNFaceGeometry.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
     },
     {
       "api": "ARSCNPlaneGeometry",
@@ -1220,10 +1223,11 @@
       "kind": "class",
       "introduced": "12.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build the class ARReferenceObject",
-      "effect": "until built: NSClassFromString answers nil",
-      "source": "the armv7 shared cache of iOS 6.1.3 (244881694 bytes) and of 4.3 (153152518 bytes), read with modules/apple/objc.lua's inventory, which walks each cache's own __objc_classlist, __objc_catlist and __objc_protolist: 0 of the 11378 class names and 0 of the 1171 protocol names of 6.1.3 begin AR, and 0 of its 12549 class and protocol names contain Depth, TrueDepth, LiDAR, SceneDepth, Tracked or DepthData; 4.3 answers 0 of 7187 class names, 0 of 564 protocol names and 0 of 7751 names for those words. The controls of those same two reads: AVCaptureDevice is present with 100 instance and 5 class methods in 6.1.3 and 66 and 5 in 4.3, CMMotionManager with 74 and 4 against 64 and 1, UIView with 597 and 66 against 341 and 51, and the nonsense name charonNegativeControlZZZ is absent from both, and ARReferenceObject is absent, 0 entries, from the class list of both; tools/cache-index/first-rung.py reads 12.0 for the name, the release the SDK declares it introduced in. The declaration is `@interface ARReferenceObject : NSObject<NSSecureCoding>` in ARKit.framework/Headers/ARReferenceObject.h of the iPhoneOS16.4 SDK"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "carried: the class is there with its six members, which answer nil or zero for an object no scan made. A scan reads a mesh out of a depth sensor (ARObjectScanningConfiguration.isSupported is NO), so no archive is written on this device. The archive readers and the merge and transform methods are not carried; facts/ARKit/AbsentClasses.md",
+      "effect": "alloc and init answer an object whose six members are nil or zero, as the host's fresh object answers",
+      "source": "carried in packages/a/apple-backports/ARKit/ARReferenceObject.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
     },
     {
       "api": "ARSCNView",
@@ -1583,11 +1587,9 @@
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARBody2D new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARBody2D is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARCamera new]",
@@ -1604,11 +1606,9 @@
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARCollaborationData new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARCollaborationData is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARConfiguration new]",
@@ -1625,11 +1625,9 @@
       "kind": "method",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARFaceGeometry new]; where the device lacks the part, answer as the system's availability query does",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARFaceGeometry is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARFrame new]",
@@ -1646,33 +1644,27 @@
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARGeoTrackingStatus new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARGeoTrackingStatus is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARGeometryElement new]",
       "kind": "method",
       "introduced": "13.4",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARGeometryElement new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARGeometryElement is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARGeometrySource new]",
       "kind": "method",
       "introduced": "13.4",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARGeometrySource new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARGeometrySource is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARHitTestResult new]",
@@ -1699,22 +1691,18 @@
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARMatteGenerator new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARMatteGenerator is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARMeshGeometry new]",
       "kind": "method",
       "introduced": "13.4",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARMeshGeometry new]; where the device lacks the part, answer as the system's availability query does",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARMeshGeometry is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARPlaneGeometry new]",
@@ -1751,55 +1739,45 @@
       "kind": "method",
       "introduced": "12.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARReferenceObject new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARReferenceObject is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARSCNFaceGeometry new]",
       "kind": "method",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARSCNFaceGeometry new]; where the device lacks the part, answer as the system's availability query does",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARSCNFaceGeometry is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARSkeleton new]",
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARSkeleton new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARSkeleton is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARSkeleton2D new]",
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARSkeleton2D new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARSkeleton2D is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARSkeleton3D new]",
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build +[ARSkeleton3D new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARSkeleton3D is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "+[ARVideoFormat new]",
@@ -1836,11 +1814,9 @@
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARBody2D init]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARCamera init]",
@@ -1858,11 +1834,9 @@
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARCollaborationData init]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARConfiguration init]",
@@ -1880,11 +1854,9 @@
       "kind": "method",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARFaceGeometry init]; where the device lacks the part, answer as the system's availability query does",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARFrame init]",
@@ -1901,33 +1873,27 @@
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARGeoTrackingStatus init]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARGeometryElement init]",
       "kind": "method",
       "introduced": "13.4",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARGeometryElement init]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARGeometrySource init]",
       "kind": "method",
       "introduced": "13.4",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARGeometrySource init]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARHitTestResult init]",
@@ -1954,22 +1920,18 @@
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARMatteGenerator init]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARMeshGeometry init]",
       "kind": "method",
       "introduced": "13.4",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARMeshGeometry init]; where the device lacks the part, answer as the system's availability query does",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARPlaneGeometry init]",
@@ -2048,55 +2010,45 @@
       "kind": "method",
       "introduced": "12.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARReferenceObject init]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARSCNFaceGeometry init]",
       "kind": "method",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARSCNFaceGeometry init]; where the device lacks the part, answer as the system's availability query does",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARSkeleton init]",
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARSkeleton init]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARSkeleton2D init]",
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARSkeleton2D init]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARSkeleton3D init]",
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARSkeleton3D init]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "source": "measured on the Catalyst host: the selector is answered by the superclass's own IMP and the class defines none of its own (facts/ARKit/NSObjectInit.md); the class and its shell are in facts/ARKit/AbsentClasses.md"
     },
     {
       "api": "-[ARTrackedRaycast init]",

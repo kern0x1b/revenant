@@ -33,7 +33,7 @@ framework has is not a class.
 
 - The carried classes define no `-init` and no `+new` in their `@implementation` blocks. The check is a
   source scan, not a compiled comparison: `tests/backports/host/arkit-nsobject-init/run.sh` reads `ARKit/*.m`
-  and `SensorKit/*.m` and finds no definition of the 37 selectors. A planted definition in a scratch copy
+  and `SensorKit/*.m` and finds no definition of the 63 selectors. A planted definition in a scratch copy
   (`+[ARCamera new]` returning nil) is found by the same scan, so the scan can fail.
 - The superclass on the port side is the release's by construction: each `@implementation` names no superclass
   and is compiled against the SDK's own `@interface`, which fixes the superclass. So a selector the class does

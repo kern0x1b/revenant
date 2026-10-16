@@ -49,7 +49,8 @@ freshly made UUIDs in its header on every run.
                                 CMTagCollection's 23 functions to the host's own, the port's file built as its own
                                 image and reached through dlopen, 208 answers, none different
                                 (facts/CoreMedia/TagCollection.md)
-    sh host/arkit-nsobject-init/run.sh  the 37 -init and +new rows of the carried ARKit and SensorKit classes: on the host each selector is the superclass's own IMP and the class defines none; the port's sources define none of them (facts/ARKit/NSObjectInit.md)
+    sh host/arkit-nsobject-init/run.sh  the 63 -init and +new rows of the carried ARKit and SensorKit classes: on the host each selector is the superclass's own IMP and the class defines none; the port's sources define none of them (facts/ARKit/NSObjectInit.md)
+    sh host/arkit-absent-classes/run.sh the thirteen data and skeleton classes of ARKit and SceneKit (ARBody2D, ARSkeleton and its 2D and 3D kinds, ARMeshGeometry, ARFaceGeometry, ARReferenceObject and the rest) against the host's own: superclass, the iOS SDK's property names with the host's types, a fresh object's values (facts/ARKit/AbsentClasses.md)
     sh host/arkit-sensorshells/run.sh   the six sensor-data classes of ARKit (ARDepthData, ARFaceAnchor, AREnvironmentProbeAnchor, ARMeshAnchor, ARObjectAnchor, ARDirectionalLightEstimate) against the host's own ARKit on Mac Catalyst: superclass, protocol, declared properties by name and type, and the probe's constructors
     sh host/gamecontroller/run.sh   the port of the GameController model against the host's GameController, 8576 lines
     sh host/alert/run.sh

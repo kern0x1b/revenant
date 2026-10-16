@@ -1,0 +1,16 @@
+{
+ "framework": "ARKit",
+ "entries": [
+  {
+   "api": "ARGeoTrackingStatus",
+   "kind": "class",
+   "introduced": "14.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/AbsentClasses.md",
+   "reason": "carried: the class is there with its three members, state, accuracy and stateReason, which answer 0. A geo-tracking session reports a status, and this port runs none, because its geo-tracking configuration is not carried yet (ARGeoTrackingConfiguration, facts/ARKit/AbsentClasses.md)",
+   "effect": "alloc and init answer an object whose three members are 0, as the host's fresh object answers",
+   "source": "ARGeoTrackingStatus.m, carried in packages/a/apple-backports/ARKit; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
+  }
+ ]
+}

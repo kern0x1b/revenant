@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh - the -init and +new rows of the carried ARKit and SensorKit classes (rows.inc, 37 of them).
+# run.sh - the -init and +new rows of the carried ARKit and SensorKit classes (rows.inc, 63 of them).
 #
 # Two halves. The host half compiles check.m against the Catalyst copies of ARKit and SensorKit: for each row the
 # selector is answered by the superclass's own IMP and the class defines none of its own. The port half reads the
@@ -56,4 +56,4 @@ awk -v rows="$here/rows.inc" '
   }
 ' "$port"/ARKit/*.m "$port"/SensorKit/*.m | tee "$runs/port.txt"
 grep -q '^VERDICT port ok' "$runs/port.txt" || { echo "FAIL: the port half is not green"; exit 1; }
-echo "ok the 37 rows: the release answers each selector through its superclass, and the port defines none of them"
+echo "ok the 63 rows: the release answers each selector through its superclass, and the port defines none of them"
