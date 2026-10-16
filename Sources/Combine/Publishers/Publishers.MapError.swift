@@ -25,6 +25,13 @@ extension Publishers {
             self.transform = map
         }
 
+        /// The same initializer with its transform under a label, which the spec declares
+        /// beside the unlabeled one.
+        public init(upstream: Upstream, transform: @escaping (Upstream.Failure) -> Failure) {
+            self.upstream = upstream
+            self.transform = transform
+        }
+
         /// This function is called to attach the specified `Subscriber`
         /// to this `Publisher` by `subscribe(_:)`
         ///
