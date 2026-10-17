@@ -22,7 +22,7 @@
 -- compiles and runs one process per name, so run it under the slot: coordination/heavy.sh xmake l tools/gen/imageio_names.lua
 
 local tsv = import("tsv", {anonymous = true})
-local files = import("files", {anonymous = true})
+local pyjson = import("pyjson", {anonymous = true})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
 local ROOT = path.join(os.scriptdir(), "..", "..")
@@ -82,43 +82,6 @@ local function render(template, values)
     text = string.gsub(text, "{(%w+)}", function (key) return values[key] end)
     text = string.gsub(text, "\1", "{")
     return string.gsub(text, "\2", "}")
-end
-
--- A JSON string as Python's json.dump writes one with ensure_ascii: quote, backslash and the control bytes escaped.
-local function json_string(text)
-    assert(not string.find(text, "[\128-\255]"), "a registry row holds a non-ASCII byte, which the writer does not escape")
-    local escaped = string.gsub(text, "[%z\1-\31\"\\]", function (c)
-        local named = {['"'] = '\\"', ["\\"] = "\\\\", ["\n"] = "\\n", ["\r"] = "\\r", ["\t"] = "\\t", ["\b"] = "\\b", ["\f"] = "\\f"}
-        return named[c] or string.format("\\u%04x", string.byte(c))
-    end)
-    return '"' .. escaped .. '"'
-end
-
--- A JSON value, laid out as json.dump(value, indent=2) lays it out: an object is {object = {{key, value}, ...}} so its keys keep
--- their order, and an array is {array = {...}}.
-local function json_text(value, depth)
-    if type(value) == "string" then
-        return json_string(value)
-    end
-    local pad, inner = string.rep("  ", depth), string.rep("  ", depth + 1)
-    if value.object then
-        if #value.object == 0 then
-            return "{}"
-        end
-        local items = {}
-        for _, pair in ipairs(value.object) do
-            table.insert(items, inner .. json_string(pair[1]) .. ": " .. json_text(pair[2], depth + 1))
-        end
-        return "{\n" .. table.concat(items, ",\n") .. "\n" .. pad .. "}"
-    end
-    if #value.array == 0 then
-        return "[]"
-    end
-    local items = {}
-    for _, item in ipairs(value.array) do
-        table.insert(items, inner .. json_text(item, depth + 1))
-    end
-    return "[\n" .. table.concat(items, ",\n") .. "\n" .. pad .. "]"
 end
 
 -- The text of a name's value as the host's ImageIO gives it, one probe process per name. The probe is compiled against the
@@ -316,7 +279,7 @@ function main(ledger, out)
             }})
         end
         local document = {object = {{"framework", FRAMEWORK}, {"entries", {array = entries}}}}
-        write_bytes(path.join(registry, "names" .. suffix .. ".json"), json_text(document, 0) .. "\n")
+        write_bytes(path.join(registry, "names" .. suffix .. ".json"), pyjson.encode(document, "  ") .. "\n")
         print(string.format("%-28s %3d constants", "ImageIONames" .. suffix .. ".m", #names))
     end
 
