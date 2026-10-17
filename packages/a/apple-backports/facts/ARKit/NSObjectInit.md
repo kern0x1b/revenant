@@ -42,8 +42,17 @@ framework has is not a class.
   The Catalyst SDK lacks CoreMotion, which the tracker and the configuration files import, so those files
   cannot be built for the host as they are.
 
-## Not covered
+## The instance-method `-new` rows
 
-- The instance-method rows `-[ARRaycastQuery new]`, `-[ARRaycastResult new]` and `-[ARTrackedRaycast new]`.
-  The SDK declares no instance `-new` for any ARKit class, and NSObject has only the class method, so there is
-  no selector for these rows to describe. They are not implemented here; the registry needs a ruling on them.
+The rows `-[ARRaycastQuery new]`, `-[ARRaycastResult new]` and `-[ARTrackedRaycast new]` are the instance selector
+`new`, which NSObject does not have: `+new` is the class method. The SDK declares it on each class anyway, as
+`- (instancetype)new NS_UNAVAILABLE;` from iOS 13.0 (ARRaycastQuery.h, ARRaycastResult.h, ARTrackedRaycast.h), and
+the generator's spec says the same (spec/ARKit/declarations.tsv, the `(im)new` rows, `*unavailable ios=13.0`).
+
+What the release answers is measured on the Catalyst host's ARKit, by `tests/backports/host/arkit-instance-new/run.sh`:
+the class defines no instance `new` of its own, `respondsToSelector:` answers NO, and a call raises
+`NSInvalidArgumentException`, the unrecognised-selector exception. The port defines no `-new` on these classes, so
+its answer is the same, and the rows are implemented as that answer: nothing is built, and nothing is faked.
+
+An earlier note of these rows said the SDK declared no instance `-new`. That was wrong; the header declares it
+unavailable, and the test reads the header, so the note cannot drift from it.

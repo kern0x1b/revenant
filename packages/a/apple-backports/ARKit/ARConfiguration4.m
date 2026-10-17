@@ -97,7 +97,9 @@
     // A body is a pose the release estimates from the frames with a neural network. This port builds no estimator, so
     // a session of this configuration would run and never report a body, and the answer is NO. Apple documents body
     // tracking as needing an A12 chip or later; this device is an A5. That requirement is the documented one and was
-    // not measured here, since the host is a Mac and answers NO for every configuration.
+    // not measured here, since the host is a Mac and answers NO for every configuration. This is the state until the
+    // body pose estimator lands (the v-impl-vision-models band); then the configuration is built on that estimator and
+    // this answer comes from the estimator's availability (facts/ARKit/ConfigurationSettings.md).
     return NO;
 }
 

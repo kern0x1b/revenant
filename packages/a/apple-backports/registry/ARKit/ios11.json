@@ -1581,7 +1581,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1600,7 +1599,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1619,7 +1617,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1638,7 +1635,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1675,7 +1671,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1685,7 +1680,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1713,7 +1707,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1723,7 +1716,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1733,7 +1725,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1788,7 +1779,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1798,7 +1788,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1808,7 +1797,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1867,7 +1855,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1904,7 +1891,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1914,7 +1900,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1942,7 +1927,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1952,7 +1936,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1962,7 +1945,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1970,11 +1952,10 @@
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARRaycastQuery new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARRaycastQuery is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/NSObjectInit.md",
+      "effect": "not defined: respondsToSelector: answers NO, and a call raises the unrecognised-selector exception, as the release does; the SDK declares the method NS_UNAVAILABLE from iOS 13.0",
+      "source": "the SDK headers ARRaycastQuery.h, ARRaycastResult.h and ARTrackedRaycast.h declare `- (instancetype)new NS_UNAVAILABLE;`, and spec/ARKit/declarations.tsv has the same declaration from iOS 13.0 (its (im)new rows); measured on the Catalyst host ARKit by tests/backports/host/arkit-instance-new/run.sh"
     },
     {
       "api": "-[ARRaycastResult init]",
@@ -1983,7 +1964,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -1991,11 +1971,10 @@
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARRaycastResult new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARRaycastResult is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/NSObjectInit.md",
+      "effect": "not defined: respondsToSelector: answers NO, and a call raises the unrecognised-selector exception, as the release does; the SDK declares the method NS_UNAVAILABLE from iOS 13.0",
+      "source": "the SDK headers ARRaycastQuery.h, ARRaycastResult.h and ARTrackedRaycast.h declare `- (instancetype)new NS_UNAVAILABLE;`, and spec/ARKit/declarations.tsv has the same declaration from iOS 13.0 (its (im)new rows); measured on the Catalyst host ARKit by tests/backports/host/arkit-instance-new/run.sh"
     },
     {
       "api": "-[ARReferenceImage init]",
@@ -2004,7 +1983,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -2059,7 +2037,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -2067,11 +2044,10 @@
       "kind": "method",
       "introduced": "13.0",
       "minimum": "6.0",
-      "status": "owed",
-      "facts": "facts/ARKit/ARKit.md",
-      "reason": "build -[ARTrackedRaycast new]",
-      "effect": "until built: respondsToSelector: answers NO",
-      "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/class-selector-census.lua over modules/apple/objc.lua's inventory: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 in their own instance list, and ARTrackedRaycast is in neither; restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. The controls of that read, because a reader that answered nothing would answer this too: 523 of the cache's 143137 classes carry `-new` in their own class-method list and 3 carry it in their own instance list, and restricted to ARKitCore (285 classes) the 13 owners are ARBodyTrackingConfiguration, ARCustomTechniquesConfiguration, ARFaceTrackingConfiguration, ARGeoTrackingConfiguration, ARImageTrackingConfiguration, ARInternalFaceTrackingConfiguration, ARObjectScanningConfiguration, AROrientationTrackingConfiguration, ARPositionalTrackingConfiguration, ARRemoteGeoTrackingTechnique, ARRemoteLocationSensor, ARSplitForwarderTechnique, ARWorldTrackingConfiguration. A class that inherits `+new` does not own it and does not appear in that census, because collect() in modules/apple/objc.lua reads the metaclass's own list and never walks a superclass. The count of 28851 classes carrying `-init` in their own instance list, and NSObject carrying `-init` and `-new` itself, are the controls that a class's own methods are visible at all."
+      "status": "implemented",
+      "facts": "facts/ARKit/NSObjectInit.md",
+      "effect": "not defined: respondsToSelector: answers NO, and a call raises the unrecognised-selector exception, as the release does; the SDK declares the method NS_UNAVAILABLE from iOS 13.0",
+      "source": "the SDK headers ARRaycastQuery.h, ARRaycastResult.h and ARTrackedRaycast.h declare `- (instancetype)new NS_UNAVAILABLE;`, and spec/ARKit/declarations.tsv has the same declaration from iOS 13.0 (its (im)new rows); measured on the Catalyst host ARKit by tests/backports/host/arkit-instance-new/run.sh"
     },
     {
       "api": "-[ARVideoFormat init]",
@@ -2080,7 +2056,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {
@@ -2090,7 +2065,6 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/NSObjectInit.md",
-      "facts": "facts/ARKit/ARKit.md",
       "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
     },
     {

@@ -47,6 +47,12 @@ A12 chip or later; this device is an A5. That requirement is the documented one 
 Mac). A session started with the configuration is refused, through `session:didFailWithError:`, as
 `facts/ARKit/ARSession.md` describes for every NO answer.
 
+This NO is the state of the port now, and it is not the end state. The body pose estimator is being built by the
+v-impl-vision-models band. When it lands, `ARBodyTrackingConfiguration` is built on that estimator: a session runs the
+estimator over the tracker's frames and reports `ARBodyAnchor`s with their skeletons, and `+isSupported` answers from
+that estimator's own availability on this device, measured the way the other answers are, and not from a constant.
+Until then the body rows stay as they are, and this file is the place that says so.
+
 ## Not carried
 
 - `initialWorldMap` on the world, body and positional configurations is owed. It is the map a session localises to;
