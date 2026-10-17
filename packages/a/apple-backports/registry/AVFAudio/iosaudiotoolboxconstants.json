@@ -1,0 +1,239 @@
+{
+  "framework": "AVFAudio",
+  "entries": [
+    {
+      "api": "k3DMixerParam_BusEnable",
+      "kind": "case",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "k3DMixerParam_DryWetReverbBlend",
+      "kind": "case",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "k3DMixerParam_GlobalReverbGainInDecibels",
+      "kind": "case",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "k3DMixerParam_MaxGainInDecibels",
+      "kind": "case",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "k3DMixerParam_MinGainInDecibels",
+      "kind": "case",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "k3DMixerParam_ObstructionAttenuationInDecibels",
+      "kind": "case",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "k3DMixerParam_OcclusionAttenuationInDecibels",
+      "kind": "case",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAUAudioMixParameter_RemixAmount",
+      "kind": "case",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAUAudioMixParameter_Style",
+      "kind": "case",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAUAudioMixProperty_EnableSpatialization",
+      "kind": "case",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAUAudioMixProperty_SpatialAudioMixMetadata",
+      "kind": "case",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAUSoundIsolationParam_SoundToIsolate",
+      "kind": "case",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAUSoundIsolationParam_WetDryMixPercent",
+      "kind": "case",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAUSoundIsolationSoundType_HighQualityVoice",
+      "kind": "case",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAUSoundIsolationSoundType_Voice",
+      "kind": "case",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAUVoiceIOProperty_MutedSpeechActivityEventListener",
+      "kind": "case",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAUVoiceIOProperty_OtherAudioDuckingConfiguration",
+      "kind": "case",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAudioQueueProperty_ChannelAssignments",
+      "kind": "case",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAudioUnitProperty_SpatialMixerAnyInputIsUsingPersonalizedHRTF",
+      "kind": "case",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAudioUnitProperty_SpatialMixerEnableHeadTracking",
+      "kind": "case",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAudioUnitProperty_SpatialMixerPersonalizedHRTFMode",
+      "kind": "case",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAudioUnitSubType_AUAudioMix",
+      "kind": "case",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAudioUnitSubType_AUSoundIsolation",
+      "kind": "case",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAudioUnitType_SpeechSynthesizer",
+      "kind": "case",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAudioComponentRegistrationsChangedNotification",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    },
+    {
+      "api": "kAudioComponentInstanceInvalidationNotification",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AudioToolboxConstants.md",
+      "source": "SDK 26.2 AudioToolbox declarations (spec/AudioToolbox/declarations.tsv: the enumerator or the variable, its availability and its value), and the 6.1.3 armv7 cache export list (tools/image-exports.lua)"
+    }
+  ]
+}
