@@ -18,6 +18,9 @@ fi
 # What this sweep cannot start, with the reason for each: a test passed over without one is the same blind
 # spot the sweep exists to close, so nothing is skipped silently and no reason here is a guess.
 needs_arguments="registry cachereader fuzz"
+# The arguments the sweep gives a script that takes one: inventory is the generic differential, run here for the one
+# spec the tree carries (tools/corpus/spec/FileProvider.json). Without it the script prints its usage and exits 1.
+arguments_for="inventory=FileProvider"
 records_only="naturallanguage-record smallapis2"
 # Directories that hold a helper the differentials use rather than a test of their own: nothing here builds or
 # checks anything, and passing them over silently is the blind spot this sweep exists to close, so each is named.
@@ -69,7 +72,11 @@ for name in $wanted; do
     esac
     output=$(mktemp "$(runs_folder charon-run-all)/output.XXXXXX")
     set +e
-    ( cd "$here/.." && exec sh "$script" ) > "$output" 2>&1 &
+    argument=
+    for pair in $arguments_for; do
+        case $pair in "$name"=*) argument=${pair#*=} ;; esac
+    done
+    ( cd "$here/.." && exec sh "$script" $argument ) > "$output" 2>&1 &
     runner=$!
     waited=0
     while kill -0 "$runner" 2>/dev/null && [ "$waited" -lt "$seconds" ]; do
