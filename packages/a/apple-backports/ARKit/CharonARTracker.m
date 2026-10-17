@@ -464,12 +464,64 @@ static BOOL CharonSolveSix(float A[6][6], float b[6], float out[6])
 
 @end
 
+// The world's state, as an archive holds it, is written field by field and little-endian, so an archive made on
+// one build reads back on another whatever the layout of the structs in memory. A point is ten floats, then its
+// identifier and its age and hits in a byte each: 46 bytes. A plane is ten floats and its identifier: 44 bytes.
+static const char CharonWorldStateMagic[8] = "CHWORLD1";
+static const NSUInteger CharonWorldStateHeaderBytes = 8 + 4 + 4;
+static const NSUInteger CharonWorldStatePointBytes = 46;
+static const NSUInteger CharonWorldStatePlaneBytes = 44;
+
+static void CharonAppendUInt32(NSMutableData *out, uint32_t value)
+{
+    uint8_t bytes[4] = { value & 0xff, (value >> 8) & 0xff, (value >> 16) & 0xff, (value >> 24) & 0xff };
+    [out appendBytes:bytes length:4];
+}
+
+static void CharonAppendFloat(NSMutableData *out, float value)
+{
+    uint32_t bits;
+    memcpy(&bits, &value, sizeof bits);
+    CharonAppendUInt32(out, bits);
+}
+
+static void CharonAppendVector3(NSMutableData *out, simd_float3 value)
+{
+    CharonAppendFloat(out, value.x);
+    CharonAppendFloat(out, value.y);
+    CharonAppendFloat(out, value.z);
+}
+
+static uint32_t CharonReadUInt32(const uint8_t *p)
+{
+    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+}
+
+static float CharonReadFloat(const uint8_t *p)
+{
+    uint32_t bits = CharonReadUInt32(p);
+    float value;
+    memcpy(&value, &bits, sizeof value);
+    return value;
+}
+
+static simd_float3 CharonReadVector3(const uint8_t *p)
+{
+    return simd_make_float3(CharonReadFloat(p), CharonReadFloat(p + 4), CharonReadFloat(p + 8));
+}
+
+// The camera's frames come to the tracker through its sample-buffer delegate, on the frame queue the
+// tracker makes for them; the pixel buffer is the picture the tracker processes.
+@interface CharonARTracker () <AVCaptureVideoDataOutputSampleBufferDelegate>
+@end
+
 @implementation CharonARTracker
 {
     AVCaptureSession *_capture;
     AVCaptureConnection *_connection;
     AVCaptureVideoOrientation _videoOrientation;
     AVCaptureVideoDataOutput *_output;
+    dispatch_queue_t _frameQueue;
     AVCaptureDeviceInput *_input;
 #if !CHARON_NO_MOTION
     CMMotionManager *_motion;
@@ -633,6 +685,8 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
     if (!self)
         return nil;
     _worldPoints = [NSMutableData data];
+    // The identity attitude until the gyroscope reports one: a zero quaternion normalises to NaN.
+    _lastDeviceRotation = simd_quaternion(0.0f, 0.0f, 0.0f, 1.0f);
     _planes = [NSMutableArray array];
     _nextIdentifier = 1;
     _cameraTransform = CharonARKitIdentityFloat4x4;
@@ -668,7 +722,16 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 /// handler calls this; a caller that drives the tracker itself passes the attitude directly.
 - (void)setLastDeviceRotation:(simd_quatf)rotation
 {
-    _lastDeviceRotation = rotation;
+    @synchronized (self) {
+        _lastDeviceRotation = rotation;
+    }
+}
+
+- (simd_quatf)lastDeviceRotation
+{
+    @synchronized (self) {
+        return _lastDeviceRotation;
+    }
 }
 
 - (BOOL)startWithError:(NSError **)error
@@ -734,6 +797,12 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
                                         @"The camera cannot give frames to track.");
         return NO;
     }
+    // Frames are delivered to captureOutput:didOutputSampleBuffer:fromConnection: on a queue of the
+    // tracker's own, and the capture session is started only once its delegate is set, so the first
+    // frame the camera gives is the first frame the tracker sees.
+    _frameQueue = dispatch_queue_create("space.kern0x1b.arkit.frames", DISPATCH_QUEUE_SERIAL);
+    [_output setSampleBufferDelegate:self queue:_frameQueue];
+    [_capture startRunning];
 
     // 30 frames a second is what the gyroscope is asked for, and what the tracker integrates against.
     [_motion setDeviceMotionUpdateInterval:1.0 / 30.0];
@@ -756,6 +825,176 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
     return YES;
 #endif
 #endif
+}
+
++ (BOOL)isOrientationSupported
+{
+    // Orientation needs the gyroscope and nothing else: the same question CharonARTracker's own isSupported asks,
+    // without the camera. CMMotionManager answers it on the instance, not on the class.
+    return [[CMMotionManager alloc] init].deviceMotionAvailable;
+}
+
+- (BOOL)startOrientationWithError:(NSError **)error
+{
+    if (_running)
+        return YES;
+#if CHARON_NO_MOTION
+    if (error)
+        *error = CharonTrackerError(CharonARTrackerErrorMotionUnavailable,
+                                    @"This build has no motion, so orientation cannot be tracked.");
+    return NO;
+#else
+    _motion = [[CMMotionManager alloc] init];
+    if (!_motion || !_motion.deviceMotionAvailable) {
+        _motion = nil;
+        if (error)
+            *error = CharonTrackerError(CharonARTrackerErrorMotionUnavailable,
+                                        @"This device has no gyroscope, so its orientation cannot be tracked.");
+        return NO;
+    }
+    // Orientation tracking has no camera: the attitude the device reports is the whole of the pose, so the motion
+    // updates are the frames, at the same 30 a second as the world's motion, and nothing else is started.
+    [_motion setDeviceMotionUpdateInterval:1.0 / 30.0];
+    _motionQueue = [[NSOperationQueue alloc] init];
+    _motionQueue.maxConcurrentOperationCount = 1;
+    _motionQueue.name = @"space.kern0x1b.arkit.motion";
+    [_motion startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryZVertical
+                                                 toQueue:_motionQueue
+                                             withHandler:^(CMDeviceMotion *motion, NSError *motionError) {
+        (void)motionError;
+        if (motion)
+            [self updateOrientationFromMotion:motion];
+    }];
+    _running = YES;
+    return YES;
+#endif
+}
+
+/// The attitude the device reports, as the pose of the camera. Orientation tracking places nothing: the position
+/// stays at the origin, and there is no picture, so the image resolution stays empty and no point is placed.
+- (void)updateOrientationFromMotion:(CMDeviceMotion *)motion
+{
+    CMQuaternion q = motion.attitude.quaternion;
+    simd_quatf rotation = simd_normalize(simd_quaternion((float)q.x, (float)q.y, (float)q.z, (float)q.w));
+    [self setLastDeviceRotation:rotation];
+    simd_float4x4 pose = CharonQuaternionMatrix(rotation);
+    _cameraTransform = pose;
+    _deviceTransform = pose;
+    _timestamp = motion.timestamp;
+    _tracking = YES;
+    if ([_delegate respondsToSelector:@selector(tracker:didUpdateWithTimestamp:)])
+        [_delegate tracker:self didUpdateWithTimestamp:motion.timestamp];
+}
+
+#pragma mark - Frames from the camera
+
+/// A frame from the camera, which is the picture the tracker processes with the attitude the gyroscope had last
+/// reported for it.
+- (void)captureOutput:(AVCaptureOutput *)output
+didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+       fromConnection:(AVCaptureConnection *)connection
+{
+    (void)output;
+    (void)connection;
+    CVPixelBufferRef pixels = CMSampleBufferGetImageBuffer(sampleBuffer);
+    if (!pixels)
+        return;
+    NSTimeInterval captureTime = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer));
+    [self processPixelBuffer:pixels captureTime:captureTime deviceRotation:[self lastDeviceRotation]];
+}
+
+#pragma mark - The world as an archive holds it
+
+/// The points and planes the tracker has placed, and the counter the next identifier comes from, as bytes an archive
+/// can keep. A restored state is the world the archive had, with no pose: the next frame starts its pose again, so the
+/// restored world is coherent with the device only where the device is when the session starts.
+- (NSData *)worldState
+{
+    NSMutableData *out = [NSMutableData dataWithBytes:CharonWorldStateMagic length:sizeof CharonWorldStateMagic];
+    const NSUInteger count = _worldPoints.length / sizeof(CharonARPoint);
+    CharonAppendUInt32(out, (uint32_t)count);
+    CharonAppendUInt32(out, (uint32_t)_planes.count);
+    const CharonARPoint *points = (const CharonARPoint *)_worldPoints.bytes;
+    for (NSUInteger i = 0; i < count; i++) {
+        const CharonARPoint *p = &points[i];
+        CharonAppendFloat(out, p->image.x);
+        CharonAppendFloat(out, p->image.y);
+        CharonAppendVector3(out, p->camera);
+        CharonAppendVector3(out, p->world);
+        CharonAppendFloat(out, p->scale);
+        CharonAppendFloat(out, p->depth);
+        CharonAppendUInt32(out, p->identifier);
+        uint8_t counts[2] = { p->age, p->hits };
+        [out appendBytes:counts length:2];
+    }
+    for (CharonARValue *value in _planes) {
+        CharonARPlane plane;
+        memset(&plane, 0, sizeof plane);
+        if (![value getValue:&plane])
+            continue;
+        CharonAppendVector3(out, plane.center);
+        CharonAppendVector3(out, plane.normal);
+        CharonAppendVector3(out, plane.extent);
+        CharonAppendFloat(out, plane.alignment);
+        CharonAppendUInt32(out, plane.identifier);
+    }
+    return out;
+}
+
+/// Takes a state back in. NO is answered for anything that is not one of this build's states, which is what a
+/// truncated or foreign archive is, and nothing is changed then.
+- (BOOL)restoreWorldState:(NSData *)state
+{
+    const NSUInteger length = state.length;
+    if (length < CharonWorldStateHeaderBytes)
+        return NO;
+    const uint8_t *bytes = state.bytes;
+    if (memcmp(bytes, CharonWorldStateMagic, sizeof CharonWorldStateMagic) != 0)
+        return NO;
+    const NSUInteger pointCount = CharonReadUInt32(bytes + 8);
+    const NSUInteger planeCount = CharonReadUInt32(bytes + 12);
+    if (length != CharonWorldStateHeaderBytes + pointCount * CharonWorldStatePointBytes + planeCount * CharonWorldStatePlaneBytes)
+        return NO;
+
+    NSMutableData *points = [NSMutableData dataWithLength:pointCount * sizeof(CharonARPoint)];
+    CharonARPoint *decoded = points.mutableBytes;
+    const uint8_t *cursor = bytes + CharonWorldStateHeaderBytes;
+    uint32_t highest = 0;
+    for (NSUInteger i = 0; i < pointCount; i++, cursor += CharonWorldStatePointBytes) {
+        CharonARPoint p;
+        memset(&p, 0, sizeof p);
+        p.image = simd_make_float2(CharonReadFloat(cursor), CharonReadFloat(cursor + 4));
+        p.camera = CharonReadVector3(cursor + 8);
+        p.world = CharonReadVector3(cursor + 20);
+        p.scale = CharonReadFloat(cursor + 32);
+        p.depth = CharonReadFloat(cursor + 36);
+        p.identifier = CharonReadUInt32(cursor + 40);
+        p.age = cursor[44];
+        p.hits = cursor[45];
+        decoded[i] = p;
+        highest = MAX(highest, p.identifier);
+    }
+    NSMutableArray<CharonARValue *> *planes = [NSMutableArray arrayWithCapacity:planeCount];
+    for (NSUInteger i = 0; i < planeCount; i++, cursor += CharonWorldStatePlaneBytes) {
+        CharonARPlane plane;
+        memset(&plane, 0, sizeof plane);
+        plane.center = CharonReadVector3(cursor);
+        plane.normal = CharonReadVector3(cursor + 12);
+        plane.extent = CharonReadVector3(cursor + 24);
+        plane.alignment = CharonReadFloat(cursor + 36);
+        plane.identifier = CharonReadUInt32(cursor + 40);
+        highest = MAX(highest, plane.identifier);
+        [planes addObject:[[CharonARValue alloc] initWithBytes:&plane size:sizeof plane]];
+    }
+
+    [_worldPoints setData:points];
+    [_planes setArray:planes];
+    _nextIdentifier = highest + 1;
+    _havePose = NO;
+    _tracking = NO;
+    _pointCount = 0;
+    _previousCount = 0;
+    return YES;
 }
 
 - (CVPixelBufferRef)copyHighResolutionImageWithError:(NSError **)error

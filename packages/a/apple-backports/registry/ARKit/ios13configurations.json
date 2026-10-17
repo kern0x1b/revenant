@@ -207,9 +207,10 @@
    "kind": "property",
    "introduced": "13.0",
    "minimum": "6.0",
-   "status": "owed",
-   "reason": "owed: the map a positional session localises to. It is the same archive of the tracker's state as the world configuration's, which is owed with it",
-   "effect": "respondsToSelector: answers NO for it, and a call compiled against the SDK raises an unrecognised selector",
+   "status": "implemented",
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "carried: the world configuration keeps the map it is given, and a session that starts with it restores the tracker's world from the map (its points and planes) before the camera starts. The restore is not a relocalisation: the tracker does not match the live frames against the map",
+   "effect": "a map given to the configuration reads back as given, and a session started with it has the map's world, placed from the pose the device has when the session starts",
    "source": "ARKit/ARConfiguration4.m, @dynamic; the SDK's ARConfiguration.h; facts/ARKit/ConfigurationSettings.md"
   },
   {

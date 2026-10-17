@@ -1287,7 +1287,7 @@
       "introduced": "12.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "carried: the anchors a session has, which is what a world map is carried from 6.0, not below: from a deployment target of 6.0 a dispatch queue is an Objective-C object, and the SDK's own `ARSession.h:73` declares `@property (nonatomic, strong, nullable) dispatch_queue_t delegateQueue`, which the compiler refuses below that - \"property with 'retain (or strong)' attribute must be of object type\". `os/object.h` reads the fact from `OS_OBJECT_USE_OBJC`, and forcing it off to get past the line breaks 6.0 itself, where dispatch objects are objects. Vision and CoreML set the same 6.0 minimum for the same reason, so ARKit follows them and the 4.3 build leaves it out. oracle: measured by the tracker's own differential, tests/backports/host/arkit/run.sh over a 30-frame synthetic sequence, whose numbers are recorded in facts/ARKit/TrackerDifferential.md",
+      "reason": "carried: the anchors a session has, and the tracker's own world (the points and planes it placed), which a session restores from the map; a restored world is not relocalised (facts/ARKit/ConfigurationSettings.md)",
       "effect": "the class is there; its anchors are the session's, its centre and extent are computed from them, and it codes and copies",
       "source": "the SDK 16.4 headers of ARKit"
     },
@@ -1338,10 +1338,10 @@
       "kind": "property",
       "introduced": "12.0",
       "minimum": "6.0",
-      "status": "owed",
+      "status": "implemented",
       "facts": "facts/ARKit/ConfigurationSettings.md",
-      "reason": "owed: the map a session localises to. It is built as the archive of the tracker's own state (ARWorldMap), which the tracker takes back when a session starts; no member of the tracker takes a map yet",
-      "effect": "respondsToSelector: answers NO for it, and a call compiled against the SDK raises an unrecognised selector",
+      "reason": "carried: the world configuration keeps the map it is given, and a session that starts with it restores the tracker's world from the map (its points and planes) before the camera starts. The restore is not a relocalisation: the tracker does not match the live frames against the map",
+      "effect": "a map given to the configuration reads back as given, and a session started with it has the map's world, placed from the pose the device has when the session starts",
       "source": "ARKit/ARConfiguration2.m, @dynamic; the SDK's ARConfiguration.h; facts/ARKit/ConfigurationSettings.md"
     },
     {

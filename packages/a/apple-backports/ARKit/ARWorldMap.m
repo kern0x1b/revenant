@@ -10,6 +10,7 @@
 
 @interface ARWorldMap ()
 @property (nonatomic, strong) ARPointCloud *rawFeaturePoints;
+@property (nonatomic, copy, nullable) NSData *trackerState;
 @end
 
 @implementation ARWorldMap
@@ -28,12 +29,15 @@
 @synthesize center = _center;
 @synthesize extent = _extent;
 @synthesize anchors = _anchors;
+@synthesize trackerState = _trackerState;
 @synthesize rawFeaturePoints = _rawFeaturePoints;
 
 - (id)copyWithZone:(NSZone *)zone
 {
     // a map copied is the same map somewhere else, and the anchors go with it because the map is them
-    return [[ARWorldMap allocWithZone:zone] initWithAnchors:_anchors featurePoints:_rawFeaturePoints];
+    ARWorldMap *copy = [[ARWorldMap allocWithZone:zone] initWithAnchors:_anchors featurePoints:_rawFeaturePoints];
+    copy.trackerState = _trackerState;
+    return copy;
 }
 
 + (BOOL)supportsSecureCoding { return YES; }
@@ -43,6 +47,7 @@
     // the anchors are the map, so they go across as themselves - each one is secure-coding in its
     // own right - and the points behind them go as the buffer the framework names itself
     [coder encodeObject:_anchors forKey:@"anchors"];
+    [coder encodeObject:_trackerState forKey:@"trackerState"];
     [coder encodeInteger:(NSInteger)_rawFeaturePoints.count forKey:@"pointCount"];
     if (_rawFeaturePoints.count)
         [coder encodeBytes:(const uint8_t *)_rawFeaturePoints.points
@@ -57,6 +62,7 @@
         return nil;
     NSSet *anchorClasses = [NSSet setWithObjects:[ARAnchor class], [ARPlaneAnchor class], nil];
     _anchors = [coder decodeObjectOfClasses:anchorClasses forKey:@"anchors"] ?: @[];
+    _trackerState = [coder decodeObjectOfClass:[NSData class] forKey:@"trackerState"];
     NSUInteger count = (NSUInteger)[coder decodeIntegerForKey:@"pointCount"];
     if (count) {
         NSMutableData *points = [NSMutableData dataWithLength:count * sizeof(simd_float3)];

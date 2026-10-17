@@ -162,6 +162,18 @@ static inline simd_float4x4 CharonQuaternionMatrix(simd_quatf q)
 /// refused - the camera by the application's own authorisation, the gyroscope by hardware.
 - (BOOL)startWithError:(NSError **)error;
 
+/// Whether the gyroscope is there for orientation tracking, which needs nothing else.
++ (BOOL)isOrientationSupported;
+
+/// Starts the gyroscope alone, and reports the device's attitude as the camera's pose: the orientation tracking that
+/// AROrientationTrackingConfiguration asks for. There is no picture and no camera, so the world is not built.
+- (BOOL)startOrientationWithError:(NSError **)error;
+
+/// The world the tracker has placed, as bytes an archive keeps (the points, the planes and the identifiers' counter),
+/// and the state an archive gives back to a session that starts from it. See CharonARTracker.m for the format.
+- (NSData *)worldState;
+- (BOOL)restoreWorldState:(NSData *)state;
+
 /// A still photograph of the scene, at the largest size the primary camera's still output will give.
 ///
 /// This is the same camera the session captures from, asked for a single frame rather than a

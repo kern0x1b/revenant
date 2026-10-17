@@ -65,7 +65,6 @@
 - (NSUUID *)identifier { return _identifier; }
 
 - (ARConfiguration *)configuration { return _configuration; }
-- (ARFrame *)currentFrame { return nil; }
 
 #pragma mark - Running
 
@@ -88,8 +87,19 @@
         return;
     }
     [_tracker stop];
+    // The map a configuration starts from is restored before the camera starts, so no frame of this session has
+    // reached the tracker's world while it is being replaced. A configuration with no map (or none that the port
+    // keeps) has nothing to restore, and the tracker starts from nothing, as it always does.
+    ARWorldMap *map = [configuration respondsToSelector:@selector(initialWorldMap)]
+        ? [(id)configuration initialWorldMap] : nil;
+    if (map.trackerState)
+        [_tracker restoreWorldState:map.trackerState];
+    // Orientation tracking is the gyroscope alone: the camera is not started for it.
     NSError *error = nil;
-    if (![_tracker startWithError:&error]) {
+    BOOL started = [configuration isKindOfClass:[AROrientationTrackingConfiguration class]]
+        ? [_tracker startOrientationWithError:&error]
+        : [_tracker startWithError:&error];
+    if (!started) {
         // The hardware said no, so the application is told through the same channel it uses for
         // everything else, and the session stays paused.
         _configuration = configuration;
@@ -105,8 +115,10 @@
     }
     if (options & ARSessionRunOptionRemoveExistingAnchors)
         [_anchors removeAllObjects];
-    if ([_delegate respondsToSelector:@selector(session:didUpdateFrame:)])
-        ;   // the first frame is delivered by the tracker's first update
+    // The map's own anchors are the world the session starts with, so they are carried in after the options have
+    // had their say about the anchors that were there before.
+    if (map.anchors)
+        [_anchors addObjectsFromArray:map.anchors];
 }
 
 - (void)pause
@@ -156,6 +168,7 @@
 
     [self updateTrackedRaycastsForFrame:frame];
 
+    _currentFrame = frame;
     dispatch_queue_t queue = _delegateQueue ?: dispatch_get_main_queue();
     dispatch_async(queue, ^{
         if ([self.delegate respondsToSelector:@selector(session:didUpdateFrame:)])
@@ -323,8 +336,11 @@
         // paused session has a map of the world as it was when it stopped.
         ARPointCloud *points = [[ARPointCloud alloc] initWithPoints:_tracker.pointCloud
                                                              count:_tracker.pointCloud.length / sizeof(simd_float3)];
-        completionHandler([[ARWorldMap alloc] initWithAnchors:self.anchors
-                                              featurePoints:points], nil);
+        ARWorldMap *map = [[ARWorldMap alloc] initWithAnchors:self.anchors featurePoints:points];
+        // The tracker's own world goes with the map, so that a session that starts from it has the same points and
+        // planes the tracker placed, and not only the anchors and the points the map lists.
+        map.trackerState = [_tracker worldState];
+        completionHandler(map, nil);
     });
 }
 

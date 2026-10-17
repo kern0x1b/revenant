@@ -102,15 +102,9 @@
             NSStringFromClass([self class]), self, (unsigned long)_planeDetection];
 }
 
-// initialWorldMap is the one setting of this class that is not stored. It is declared by the SDK's own
-// header and is not answered here, which is what `@dynamic` says.
-//
-// initialWorldMap is here for a measured reason and not because it needs a sensor: it is the map a
-// session localises to, and -runWithConfiguration:options: (ARSession.m:77) reads the configuration
-// for nothing else, while no member of CharonARTracker takes a map. Its registry row answers absent,
-// which is what a @dynamic here makes true: respondsToSelector: answers NO. Removing the line would
-// not make the absence honest - clang then synthesises the pair of accessors from the SDK header's own
-// property, and they would store a map and return it while the session runs on from nothing.
+// initialWorldMap is stored, as the other settings are: a session that starts with the configuration restores the
+// map's tracker state into the tracker (ARSession.m), so the map is what the session starts from. It is not a relocalisation:
+// the tracker does not match the live frames against the map, and facts/ARKit/ConfigurationSettings.md says what that means.
 // The settings below are stored, as the release stores them: what a caller sets is what it reads back, and the
 // defaults are the ones a fresh configuration answers on the host (facts/ARKit/ConfigurationSettings.md). A session
 // does not act on any of them: the tracker builds no mesh, no face and no collaboration, and no object is matched.
@@ -123,7 +117,7 @@
 @synthesize appClipCodeTrackingEnabled = _appClipCodeTrackingEnabled;
 @synthesize sceneReconstruction = _sceneReconstruction;
 @dynamic maximumNumberOfTrackedImages;
-@dynamic initialWorldMap;
+@synthesize initialWorldMap = _initialWorldMap;
 
 + (BOOL)isSupported
 {
@@ -148,9 +142,9 @@
 
 + (BOOL)isSupported
 {
-    // The gyroscope alone, which is the one sensor this class needs and the one it was named for.
-    Class manager = NSClassFromString(@"CMMotionManager");
-    return [manager isAvailable];
+    // The gyroscope alone, which is the one sensor this class needs and the one it was named for. The tracker asks
+    // CMMotionManager's own deviceMotionAvailable, the same question the orientation session starts on.
+    return [CharonARTracker isOrientationSupported];
 }
 
 @end

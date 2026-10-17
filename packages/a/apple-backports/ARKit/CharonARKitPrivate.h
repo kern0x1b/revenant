@@ -140,6 +140,10 @@ static inline simd_float4x4 CharonInverse(simd_float4x4 m)
 /// Built from the anchors a session is carrying and the points behind them.
 - (instancetype)initWithAnchors:(NSArray<ARAnchor *> *)anchors
                    featurePoints:(nullable ARPointCloud *)featurePoints;
+/// The tracker's own world, as CharonARTracker's worldState gives it: the points and planes the tracker placed. A map
+/// archives it with itself, and a session that starts from the map restores it into the tracker.
+- (nullable NSData *)trackerState;
+- (void)setTrackerState:(nullable NSData *)trackerState;
 @end
 
 @interface ARTrackedRaycast (CharonPrivate)

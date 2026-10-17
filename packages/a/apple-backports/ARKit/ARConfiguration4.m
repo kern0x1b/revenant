@@ -84,7 +84,7 @@
 }
 
 // The four settings are stored, as ARWorldTrackingConfiguration's are (ARConfiguration2.m): what a caller sets is what
-// it reads back. initialWorldMap is not stored, as there.
+// it reads back. The body configuration's initialWorldMap stays @dynamic: a body map is built with the body estimator (facts/ARKit/ConfigurationSettings.md).
 @synthesize wantsHDREnvironmentTextures = _wantsHDREnvironmentTextures;
 @synthesize automaticImageScaleEstimationEnabled = _automaticImageScaleEstimationEnabled;
 @synthesize automaticSkeletonScaleEstimationEnabled = _automaticSkeletonScaleEstimationEnabled;
@@ -128,7 +128,7 @@
 - (void)setPlaneDetection:(ARPlaneDetection)planeDetection { _planeDetection = planeDetection; }
 
 
-@dynamic initialWorldMap;
+@synthesize initialWorldMap = _initialWorldMap;
 
 + (BOOL)isSupported
 {

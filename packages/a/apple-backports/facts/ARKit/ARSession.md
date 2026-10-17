@@ -66,3 +66,26 @@ this frame.
 session's own state changes, which the tracker raises as it starts and stops. `ARTrackable` is
 carried with them — an anchor that follows a thing in the world is what an anchor added at a pose
 does here.
+
+## Frames, orientation, and the world map
+
+Frames. A world session starts the release's own `AVCaptureVideoDataOutput` and its `AVCaptureSession`, with the tracker as
+the sample-buffer delegate on a queue of its own. Each camera frame is processed with the attitude the gyroscope last
+reported, and the tracker then calls the session, which hands the application a frame (`session:didUpdateFrame:`) and makes
+it the session's `currentFrame`. Before this, the session started no capture: no frame reached the tracker, so no frame
+was delivered.
+
+Orientation. `AROrientationTrackingConfiguration` starts the gyroscope alone (`CMMotionManager`'s device motion, in the
+arbitrary-yaw, z-vertical reference frame, which is the tracker's own world convention: gravity is along -z). Each motion
+update is a frame whose camera pose is the device's attitude, with the position at the origin and no picture (the image
+resolution is empty). Its `+isSupported` asks `deviceMotionAvailable` on a `CMMotionManager` instance; before this it
+called `isAvailable` on the class, which the class does not answer.
+
+World map. `getCurrentWorldMapWithCompletionHandler:` returns the anchors, the feature points and the tracker's own world
+(`worldState`). `initialWorldMap` on the world and positional configurations is restored into the tracker before the
+camera starts. Not a relocalisation: see `facts/ARKit/ConfigurationSettings.md`.
+
+Verification. The emulator has no camera and no gyroscope, so on it a world session and an orientation session are
+refused (`session:didFailWithError:`) when their `+isSupported` is NO, and the probe in `tests/backports/device/arkit-config`
+checks that answer. The camera frames and the gyroscope's attitude are not measured on this device by that probe; they
+are measured on a device, and until that run is recorded here the frame path is built and unverified on hardware.

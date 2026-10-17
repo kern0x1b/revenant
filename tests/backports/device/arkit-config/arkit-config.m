@@ -6,10 +6,12 @@
 //   - the classes the registry carries are there, and the one it does not carry is not (ARGeoTrackingConfiguration)
 //   - the defaults of the stored settings are the host's (facts/ARKit/ConfigurationSettings.md): 0, NO and nil
 //   - each stored setting reads back what was set, and detectionObjects keeps a copy of the set given
-//   - initialWorldMap is not answered on any configuration (owed)
+//   - world.initialWorldMap reads back the map given, and a world map archives and reads back (NSKeyedArchiver)
+//   - body.initialWorldMap is not answered (owed with the body estimator)
 //   - +isSupported: YES for the configurations a camera and a gyroscope run, NO for body, face and object scanning
 //   - the support queries the port answers NO (scene reconstruction, user face tracking, App Clip codes)
 //   - a session started with the body configuration is refused through session:didFailWithError:
+//   - a world session and an orientation session start exactly when their +isSupported is YES
 //
 // Nothing here is a host oracle: the host answers NO for every isSupported (it is a Mac), so the expectations for the
 // support answers are the port's own design, written out here, and the defaults are the host's measured ones.
@@ -101,9 +103,15 @@ int main(void)
         check(w.detectionObjects.count == 0, @"world.detectionObjects keeps a copy of the set given",
               [NSString stringWithFormat:@"%lu", (unsigned long)w.detectionObjects.count], @"0");
 
+        printf("world map\n");
+        ARWorldMap *map = [[ARWorldMap alloc] init];
+        w.initialWorldMap = map;
+        check(w.initialWorldMap == map, @"world.initialWorldMap reads back the map given", @"another map", @"the same map");
+        NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:map];
+        ARWorldMap *back = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
+        check([back isKindOfClass:[ARWorldMap class]], @"a world map archives and reads back as an ARWorldMap",
+              back ? NSStringFromClass([back class]) : @"nil", @"ARWorldMap");
         printf("owed\n");
-        check(![w respondsToSelector:NSSelectorFromString(@"initialWorldMap")], @"world.initialWorldMap is not answered",
-              yesno([w respondsToSelector:NSSelectorFromString(@"initialWorldMap")]), @"NO");
         check(![b respondsToSelector:NSSelectorFromString(@"initialWorldMap")], @"body.initialWorldMap is not answered",
               yesno([b respondsToSelector:NSSelectorFromString(@"initialWorldMap")]), @"NO");
 
@@ -131,6 +139,34 @@ int main(void)
         check(delegate.error != nil, @"a body session is refused through session:didFailWithError:",
               delegate.error ? @"an error" : @"no error", @"an error");
         [session pause];
+
+        // A session starts exactly when its configuration's +isSupported is YES, whatever the hardware answers: the
+        // refusal and the start are the same answer given two ways, so a mismatch is a session that starts a
+        // configuration the port does not support, or refuses one it does.
+        printf("sessions agree with +isSupported\n");
+        ARWorldTrackingConfiguration *worldConfig = [[ARWorldTrackingConfiguration alloc] init];
+        ARSession *worldSession = [[ARSession alloc] init];
+        ArkitConfigSessionDelegate *worldDelegate = [[ArkitConfigSessionDelegate alloc] init];
+        worldSession.delegate = worldDelegate;
+        [worldSession runWithConfiguration:worldConfig];
+        waitFor(3);
+        [worldSession pause];
+        check((worldDelegate.error == nil) == [ARWorldTrackingConfiguration isSupported],
+              @"a world session starts exactly when its +isSupported is YES",
+              [NSString stringWithFormat:@"started %@", yesno(worldDelegate.error == nil)],
+              [NSString stringWithFormat:@"started %@", yesno([ARWorldTrackingConfiguration isSupported])]);
+
+        AROrientationTrackingConfiguration *orientation = [[AROrientationTrackingConfiguration alloc] init];
+        ARSession *orientationSession = [[ARSession alloc] init];
+        ArkitConfigSessionDelegate *orientationDelegate = [[ArkitConfigSessionDelegate alloc] init];
+        orientationSession.delegate = orientationDelegate;
+        [orientationSession runWithConfiguration:orientation];
+        waitFor(3);
+        [orientationSession pause];
+        check((orientationDelegate.error == nil) == [AROrientationTrackingConfiguration isSupported],
+              @"an orientation session starts exactly when its +isSupported is YES",
+              [NSString stringWithFormat:@"started %@", yesno(orientationDelegate.error == nil)],
+              [NSString stringWithFormat:@"started %@", yesno([AROrientationTrackingConfiguration isSupported])]);
 
         printf("arkitconfig: %d checks\n", checks);
         printf("%s\n", failures == 0 ? "pass" : "fail");
