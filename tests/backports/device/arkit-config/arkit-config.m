@@ -3,12 +3,12 @@
 // the answers are the library's own, read by the program the way an application reads them.
 //
 // What is checked, each printed as `check <name> ok` or `FAIL <name>: got <x>, want <y>`:
-//   - the classes the registry carries are there, and the one it does not carry is not (ARGeoTrackingConfiguration)
+//   - the classes the registry carries are there, ARGeoTrackingConfiguration among them, and its new answers an instance
 //   - the defaults of the stored settings are the host's (facts/ARKit/ConfigurationSettings.md): 0, NO and nil
 //   - each stored setting reads back what was set, and detectionObjects keeps a copy of the set given
 //   - world.initialWorldMap reads back the map given, and a world map archives and reads back (NSKeyedArchiver)
 //   - body.initialWorldMap is not answered (owed with the body estimator)
-//   - +isSupported: YES for the configurations a camera and a gyroscope run, NO for body, face and object scanning
+//   - +isSupported: YES for the configurations a camera and a gyroscope run, NO for body, geographic, face and object scanning
 //   - the support queries the port answers NO (scene reconstruction, user face tracking, App Clip codes)
 //   - a session started with the body configuration is refused through session:didFailWithError:
 //   - a world session and an orientation session start exactly when their +isSupported is YES
@@ -57,8 +57,10 @@ int main(void)
                                  @"ARFaceTrackingConfiguration", @"ARObjectScanningConfiguration"]) {
             check(NSClassFromString(name) != nil, [name stringByAppendingString:@" is there"], @"nil", @"a class");
         }
-        check(NSClassFromString(@"ARGeoTrackingConfiguration") == nil, @"ARGeoTrackingConfiguration is not carried",
-              @"a class", @"nil");
+        check(NSClassFromString(@"ARGeoTrackingConfiguration") != nil, @"ARGeoTrackingConfiguration is there",
+              @"nil", @"a class");
+        check([[ARGeoTrackingConfiguration new] isKindOfClass:NSClassFromString(@"ARGeoTrackingConfiguration")],
+              @"ARGeoTrackingConfiguration new answers an instance of it", @"not one", @"one");
 
         printf("defaults\n");
         ARWorldTrackingConfiguration *w = [[ARWorldTrackingConfiguration alloc] init];
@@ -120,6 +122,8 @@ int main(void)
         check([AROrientationTrackingConfiguration isSupported], @"orientation +isSupported",
               yesno([AROrientationTrackingConfiguration isSupported]), @"YES");
         check(![ARBodyTrackingConfiguration isSupported], @"body +isSupported", yesno([ARBodyTrackingConfiguration isSupported]), @"NO");
+        check(![ARGeoTrackingConfiguration isSupported], @"geo +isSupported (an A12 chip is needed; this device has an A5)",
+              yesno([ARGeoTrackingConfiguration isSupported]), @"NO");
         check(![ARFaceTrackingConfiguration isSupported], @"face +isSupported", yesno([ARFaceTrackingConfiguration isSupported]), @"NO");
         check(![ARObjectScanningConfiguration isSupported], @"object scanning +isSupported",
               yesno([ARObjectScanningConfiguration isSupported]), @"NO");

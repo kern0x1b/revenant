@@ -53,8 +53,8 @@ gives the same answer because it defines none.
 - **The matte**: `ARMatteGenerator` is a person segmentation the port does not compute.
 - **The collaboration data**: a collaborating session is not run (`ARWorldTrackingConfiguration.collaborationEnabled`
   is owed in `registry/ARKit/ios13configurations.json`).
-- **The geo status**: a geo-tracking session reports one, and this port runs none; its configuration,
-  `ARGeoTrackingConfiguration`, is not carried yet.
+- **The geo status**: a geo-tracking session reports one, and this port runs none, because its configuration is
+  not supported on this device (the geo section below).
 
 ## Measured on the host
 
@@ -78,6 +78,26 @@ with the host's own class. Measured facts it rests on:
 
 Controls: two different classes differ in their property shapes, and a name no framework has is not a class. The
 mutant that makes `ARGeometryElement`'s line count 4 instead of 2 turns the check red.
+
+## The geo configuration
+
+`ARGeoTrackingConfiguration` is carried (`ARKit/ARGeoTrackingConfiguration.m`): `+new` and `-init` answer an object
+of the class, and `+isSupported` answers NO, so a session started with it is refused through
+`session:didFailWithError:`.
+
+The host's Catalyst ARKit gives the same answers. Measured with a one-file program compiled with the host's flags
+(`-target $(uname -m)-apple-ios14.0-macabi`, the iOSSupport frameworks): the class is present; `+isSupported` is NO;
+`+new` and `-init` each return an `ARGeoTrackingConfiguration`; `+checkAvailabilityWithCompletionHandler:` and
+`+supportsAppClipCodeTracking` are declared.
+
+The NO on the device is the documented requirement, not a measurement. Apple documents geographic tracking as needing
+an A12 chip or later, and this device has an A5 (the iPhone 4S). The host is a Mac, and its NO says nothing about the
+device, so the device probe (`tests/backports/device/arkit-config`) checks that the class answers NO on the 4S and that
+a session started with it is refused.
+
+The class's settings (`environmentTexturing`, `planeDetection`, `detectionImages`, and the rest the SDK declares) and
+its two availability checks are owed (`registry/ARKit/ios14shells.json`). `worldAlignment` is declared
+`*unavailable ios=14.0` in the SDK (`spec/ARKit/declarations.tsv` line 229), so no row is owed for it.
 
 ## What is not carried, and why it is not a fake
 
