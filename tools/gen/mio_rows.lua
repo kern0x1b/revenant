@@ -1,7 +1,9 @@
 -- The registry rows for exactly what the ModelIO objects build. It replaces tools/corpus/mio-rows.py, and its output is byte-equal to
 -- that script's on the same rows.
 --
---     xmake l tools/gen/mio_rows.lua ROWS.TSV
+--     xmake l tools/gen/mio_rows.lua ROWS.TSV SDK_RELEASE
+--
+-- SDK_RELEASE is the release the rows were read from; the rows name it, so it is passed and not written here.
 --
 -- ROWS.TSV is surface-diff's rows (tools/corpus/surface-diff-latest.py --rows). The file it writes, mio-rows.tsv, sits beside it.
 --
@@ -105,8 +107,8 @@ local function row_text(cells)
     return table.concat(cells, "\t") .. "\n"
 end
 
-function main(rows_path)
-    assert(rows_path, "usage: xmake l tools/gen/mio_rows.lua ROWS.TSV")
+function main(rows_path, release)
+    assert(rows_path and release, "usage: xmake l tools/gen/mio_rows.lua ROWS.TSV SDK_RELEASE")
     local rows = load(rows_path)
     local classes, methods = {}, {}
     for _, row in ipairs(rows) do
@@ -135,7 +137,7 @@ function main(rows_path)
             row.api, "class", row.band, row.band,
             "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried: a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
             "the class the release does not have, so a caller that allocates one gets this port s own; what it DOES is the carried surface below and nothing beyond it",
-            "clang s own AST of the 26.2 headers as read by tools/corpus/surface-diff-latest.py --rows; the ios introduced on the node is the band, and release-split places the object",
+            "clang s own AST of the " .. release .. " headers as read by tools/corpus/surface-diff-latest.py --rows; the ios introduced on the node is the band, and release-split places the object",
             FACTS,
         })
     end
@@ -145,7 +147,7 @@ function main(rows_path)
             row.api, kind, row.band, row.band,
             "carried so a caller naming it is CALLABLE; the answer is the honest one for a machine with no GPU, no asset library and no provider",
             "the member implemented in the band object the generator wrote from the AST; an object answer is nil, a BOOL is NO and a number is 0, and nothing is invented",
-            "clang s own AST of the 26.2 headers; the member list is the AST s ObjCMethodDecl list, so a compiler helper such as .cxx_destruct can never become a row",
+            "clang s own AST of the " .. release .. " headers; the member list is the AST s ObjCMethodDecl list, so a compiler helper such as .cxx_destruct can never become a row",
             FACTS,
         })
         if row.band == "" or count_dots(row.band) ~= 1 then
