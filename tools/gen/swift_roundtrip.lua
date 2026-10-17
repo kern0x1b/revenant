@@ -199,7 +199,7 @@ end
 -- Compares the SDK's model rows with ours. Returns a result: the row counts, the rows equal on every signature cell, the rows
 -- missing from ours, the count of ours with no SDK row, the rows that differ, counted per cell, and one example per cell. A row
 -- whose only difference is a by-design one is equal (counted in by_design as well): its difference is not a mismatch.
-function compare(sdk_rows, our_rows, witnessed)
+function compare(sdk_rows, our_rows, witnessed, attributed)
     local ours, duplicates = {}, 0
     for _, row in ipairs(our_rows) do
         local key = key_of(row)
@@ -210,7 +210,7 @@ function compare(sdk_rows, our_rows, witnessed)
         end
     end
     local result = {sdk = #sdk_rows, ours = #our_rows, equal = 0, missing = {}, extra = 0, duplicates = duplicates,
-                    by_design = 0, witnessed = 0, projected = 0, causes = {}, examples = {}}
+                    by_design = 0, witnessed = 0, projected = 0, attributed = 0, causes = {}, examples = {}}
     local matched = {}
     for _, row in ipairs(sdk_rows) do
         local key = key_of(row)
@@ -219,6 +219,9 @@ function compare(sdk_rows, our_rows, witnessed)
             -- a projected value is synthesized from its property wrapper, so the skeleton does not declare it: by design
             if swift_render.projected(row) then
                 result.projected = result.projected + 1
+            elseif swift_render.attributed_row(row, attributed) then
+                -- a row naming a module that depends on this one belongs to that module in the SDK: the skeleton leaves it out
+                result.attributed = result.attributed + 1
             else
                 table.insert(result.missing, label_of(row))
             end

@@ -83,6 +83,59 @@ function public_modules(sdk)
     return out
 end
 
+-- The SDK's import graph: each module's direct imports (a set of module names), read from the import lines of its swiftinterface. A
+-- submodule is its module (Metal.MTLDevice is Metal), an @_exported import counts as an import. A module with no interface (a C-only
+-- module, CoreFoundation) imports none. Returns the map from module to its set.
+function import_graph(sdk)
+    local out = {}
+    for _, filepath in ipairs(files.glob(path.join(sdk, "**", "*.swiftinterface"))) do
+        local module = string.match(filepath, "([^/]+)%.swiftmodule/[^/]+%.swiftinterface$")
+        if module and out[module] == nil then
+            local imports = {}
+            local handle = assert(io.open(filepath, "rb"), "cannot read " .. filepath)
+            for line in handle:lines() do
+                -- an import line may carry the export attribute and an access level before its keyword (@_exported public import X)
+                local rest = string.gsub(line, "^@_exported%s+", "")
+                rest = string.gsub(rest, "^public%s+", "")
+                local target = string.match(rest, "^import%s+([%w_]+)")
+                if target then
+                    imports[target] = true
+                end
+            end
+            handle:close()
+            out[module] = imports
+        end
+    end
+    return out
+end
+
+-- The modules that depend on a module in the import graph: every module that reaches it through imports (the module itself excepted).
+-- A declaration of this module cannot name one of them: in the SDK the declaration belongs to the dependent module (CoreFoundation's
+-- rows that name CoreGraphics are CoreGraphics's, since CoreGraphics imports CoreFoundation). Returns the set (name -> true).
+function dependents_of(graph, module)
+    local reverse = {}
+    for from, targets in pairs(graph) do
+        for to in pairs(targets) do
+            reverse[to] = reverse[to] or {}
+            table.insert(reverse[to], from)
+        end
+    end
+    local out, queue = {}, {module}
+    local seen = {[module] = true}
+    local head = 1
+    while head <= #queue do
+        for _, from in ipairs(reverse[queue[head]] or {}) do
+            if not seen[from] then
+                seen[from] = true
+                out[from] = true
+                table.insert(queue, from)
+            end
+        end
+        head = head + 1
+    end
+    return out
+end
+
 -- The Swift module names of the SDK as a set (name -> true): the names an import of the rendered code may name.
 function module_set(sdk)
     local out = {}

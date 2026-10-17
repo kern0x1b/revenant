@@ -99,6 +99,50 @@ local function has_keys(set)
     return false
 end
 
+-- The modules a row names: its owner (an extension's) and the module qualifiers of its type, parameters, conformances, superclass and
+-- generic signature.
+local function named_modules(row)
+    local out = {}
+    local function scan(text)
+        if text == nil then
+            return
+        end
+        for name in string.gmatch(text, "[%.%w_]*[%w_]+") do
+            local module = module_of(name)
+            if module then
+                table.insert(out, module)
+            end
+        end
+    end
+    if row.owner_module ~= NO_VALUE then
+        table.insert(out, row.owner_module)
+    end
+    scan(row.type)
+    scan(row.params)
+    scan(row.conformances)
+    scan(row.superclass)
+    scan(row.generic_sig)
+    -- a typealias names its type in alias (RealityFoundation's Value = RealityKit.AudioResource), an enum its raw type in raw
+    scan(row.alias)
+    scan(row.raw)
+    return out
+end
+
+-- Whether a row names a module that depends on this one (attributed: the set swift_model.dependents_of gives for the module). Its
+-- declaration belongs to that module in the SDK (CoreFoundation's rows that name CoreGraphics are CoreGraphics's), so the skeleton
+-- leaves it out and the round trip counts the SDK's row as attributed elsewhere (swift_roundtrip.compare).
+function attributed_row(row, attributed)
+    if attributed == nil then
+        return false
+    end
+    for _, module in ipairs(named_modules(row)) do
+        if attributed[module] then
+            return true
+        end
+    end
+    return false
+end
+
 -- The imports a module needs: the module qualifiers of every type, conformance, superclass and generic signature that name a Swift
 -- module of the SDK (known: the set of their names), less the module's own name and the Swift standard library (its declarations
 -- are in scope without an import). A qualifier that is no module (a generic parameter such as T, the clang importer's C) is not
@@ -110,8 +154,10 @@ local function imports_of(rows, framework, known, public)
     local function import_of(module)
         return public[module] or module
     end
+    -- a public name that is the framework itself is no import: RealityFoundation is RealityKit's implementation, so its public name
+    -- RealityKit re-exports RealityFoundation and imports it back (a circular dependency); SwiftUICore's public name is SwiftUI likewise
     local function add(module)
-        if seen[module] == nil then
+        if module ~= framework and seen[module] == nil then
             seen[module] = true
             table.insert(out, module)
         end
@@ -122,20 +168,16 @@ local function imports_of(rows, framework, known, public)
         end
         for name in string.gmatch(text, "[%.%w_]*[%w_]+") do
             local module = module_of(name)
-            module = module and import_of(module)
             if module and known[module] and module ~= framework and module ~= "Swift" then
-                add(module)
+                add(import_of(module))
             end
         end
     end
     for _, r in ipairs(rows) do
         -- an extension of another module's type needs that module imported even when no member names it
         local owner = r.owner_module
-        if owner ~= NO_VALUE then
-            owner = import_of(owner)
-            if owner ~= framework then
-                add(owner)
-            end
+        if owner ~= NO_VALUE and owner ~= framework then
+            add(import_of(owner))
         end
         scan(r.type)
         scan(r.params)
@@ -687,10 +729,10 @@ end
 -- declares: a row the renderer leaves out (an untyped one, an opaque typealias) is not in it. And the set of the witnesses it declares
 -- for an ObjC or Foundation protocol ("container<TAB>name", WITNESSES): members the model does not give, which the round trip reads as
 -- by design, not as extra.
-function render(rows, framework, known, classes, public)
+function render(rows, framework, known, classes, public, attributed)
     local typed = {}
     for _, row in ipairs(rows) do
-        if not untyped(row) and not projected(row) then
+        if not untyped(row) and not projected(row) and not attributed_row(row, attributed) then
             table.insert(typed, row)
         end
     end
@@ -723,7 +765,8 @@ function render(rows, framework, known, classes, public)
     end
     -- the imports: the modules the model names, and Foundation when a witness spells one of its types (the module itself excepted)
     local modules = imports_of(rows, framework, known, public or {})
-    if has_keys(witnessed) and framework ~= "Foundation" and not contains(modules, "Foundation") then
+    local foundation_depends = attributed ~= nil and attributed["Foundation"]
+    if has_keys(witnessed) and framework ~= "Foundation" and not foundation_depends and not contains(modules, "Foundation") then
         table.insert(modules, "Foundation")
         table.sort(modules, order.less)
     end

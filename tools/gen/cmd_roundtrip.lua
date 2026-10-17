@@ -13,7 +13,7 @@ local emit = import("emit", {anonymous = true})
 
 -- The first part of one module's round trip: its model, rendered to its source. Returns the part the batches and the second part read, or nil
 -- and the reason the SDK's model has none.
-local function prepare(folder, out_dir, name, known, classes, public, headers)
+local function prepare(folder, out_dir, name, known, classes, public, headers, graph)
     local sdk_rows, reason = swift_model.model(folder, name)
     if sdk_rows == nil then
         return nil, reason
@@ -24,11 +24,13 @@ local function prepare(folder, out_dir, name, known, classes, public, headers)
     local source = path.join(dir, name .. ".swift")
     -- the generated file and its report spell the SDK's non-ASCII identifiers as the SDK does; they are never committed
     local identifiers = swift_model.non_ascii_identifiers(sdk_rows)
-    local text, _, witnessed = swift_render.render(sdk_rows, name, known, classes, public)
+    -- the modules that depend on this one: a row that names one of them is that module's declaration (render, compare)
+    local attributed = swift_model.dependents_of(graph, name)
+    local text, _, witnessed = swift_render.render(sdk_rows, name, known, classes, public, attributed)
     emit.file(source, text, identifiers)
     local underlying = headers and swift_roundtrip.underlying_of(headers, module_dir, name) or nil
     return {name = name, module_dir = module_dir, source = source, sdk_rows = sdk_rows, identifiers = identifiers,
-            underlying = underlying, witnessed = witnessed}
+            underlying = underlying, witnessed = witnessed, attributed = attributed}
 end
 
 -- The second part of one module's round trip, once its compile and dump have run in the batches: its result table.
@@ -49,7 +51,7 @@ local function finish(prep)
     -- the dump of the compiled skeleton names its generic parameters canonically too (tau, depth, index), as the SDK's ABI dump does:
     -- its rows take the same spelling as the SDK's model, so the compare sees one spelling and the report stays ASCII
     our_rows = swift_canonical.rows(our_rows)
-    result.compare = swift_roundtrip.compare(prep.sdk_rows, our_rows, prep.witnessed)
+    result.compare = swift_roundtrip.compare(prep.sdk_rows, our_rows, prep.witnessed, prep.attributed)
     for _, row in ipairs(prep.sdk_rows) do
         if swift_render.untyped(row) then
             result.untyped = (result.untyped or 0) + 1
@@ -86,6 +88,8 @@ local function report_of(name, result)
                                       c.witnessed))
     table.insert(lines, string.format("  projected: %d rows, a property wrapper's $name, synthesized by the compiler (not declared, not missing)",
                                       c.projected))
+    table.insert(lines, string.format("  attributed: %d rows naming a module that depends on this one (the SDK declares them there, not missing)",
+                                      c.attributed))
     if result.untyped then
         table.insert(lines, string.format("  model gap: %d declarations with no type in the dump (the digester gives the "
                                           .. "error type; not rendered, so missing)", result.untyped))
@@ -121,6 +125,8 @@ function run(args)
     local triple = swift_model.triple_of(args.sdk)
     local known = swift_model.module_set(args.sdk)
     local public = swift_model.public_modules(args.sdk)
+    -- the SDK's import graph: a module's skeleton names no module that depends on it (prepare)
+    local graph = swift_model.import_graph(args.sdk)
     os.mkdir(args.out)
     local started = os.mclock()
     -- the digester's dumps of every module, run as one batch first: the superclass chains of every module are read from them, and each
@@ -143,7 +149,7 @@ function run(args)
         local entry = {name = name}
         try {
             function ()
-                entry.prep, entry.reason = prepare(folder, args.out, name, known, classes, public, args.headers)
+                entry.prep, entry.reason = prepare(folder, args.out, name, known, classes, public, args.headers, graph)
             end,
             catch {
                 function (err)
