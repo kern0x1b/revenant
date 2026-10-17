@@ -26,8 +26,11 @@ it, and the facts say so in the object.
 
 Two of those placements are worth naming, because they are not the annotation:
 
-- `kCGImagePropertyBCEncoder` and `kCGImagePropertyBCFormat` are annotated iOS 12.0 and their symbols first
-  appear in a held rung at iOS **13.4**, so they are a 13.4-band object (`ImageIONames134.m`) and not a 12.0 one.
+- `kCGImagePropertyBCEncoder` and `kCGImagePropertyBCFormat` are annotated iOS 12.0, and their symbols first
+  appear in a held rung at iOS **13.4** (the 13.4 arm64 cache exports both, and the cache index answers 13.4 for
+  both), so they are a 13.4-band object (`ImageIONames134.m`) and not a 12.0 one.
+- `kCGImagePropertyAVISDictionary` is in no held rung at all, so its own annotation of iOS 16.0 places it in
+  `ImageIONames160b.m`, the one name of that band.
 - `kCGImagePropertyASTCBlockSize`, `kCGImagePropertyASTCEncoder`, `kCGImagePropertyEncoder` and
   `kCGImagePropertyPVREncoder` are annotated iOS 10.0 and their symbols first appear at iOS **10.0.1**, which
   is why there is a `ImageIONames1001.m` and no `ImageIONames120.m` addition.

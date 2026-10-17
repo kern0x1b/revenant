@@ -3,8 +3,7 @@
 // The iOS 16.0 band's ImageIO name constants, 1 of them that the port did not carry, one object per
 // release band because release-split refuses an object whose symbols first appear in more than one release.
 //
-// kCGImagePropertyAVISDictionary is in no held rung below 16.0, so its own annotation of iOS 16.0 places it here. The two BC names
-// the port also did not carry are in ImageIONames134.m: their symbols first appear in the held iOS 13.4 rung.
+// The AVIS name, kCGImagePropertyAVISDictionary, is in no held rung at all, so its own annotation of iOS 16.0 places it.
 //
 // EVERY VALUE WAS READ FROM THE HOST S OWN ImageIO with dlsym, one process per symbol, and printed as
 // text and as bytes by tests/backports/host/imageio-names, which reads this object s values by LINKING it

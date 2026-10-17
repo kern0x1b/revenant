@@ -36,7 +36,8 @@ local SPEC_LEDGER = path.join(ROOT, PORT, "spec", "ImageIO", "ledger.tsv")
 -- suffix -> release the object's symbols are placed at, and one line saying why it is an object of its own
 local BANDS = {
     ["1001"] = {"10.0.1", "the release's own caches first export these four symbols at iOS 10.0.1, and the 10.0.1 band has no object of its own yet"},
-    ["160b"] = {"16.0", "the two BC names are annotated iOS 12.0 but their symbols first appear in a held rung at iOS 16.0, and kCGImagePropertyAVISDictionary is in no held rung at all, so its own annotation of iOS 16.0 places it beside them"},
+    ["134"] = {"13.4", "the two BC names, kCGImagePropertyBCEncoder and kCGImagePropertyBCFormat, are annotated iOS 12.0, and the first held rung that exports their symbols is iOS 13.4, the release the cache index answers for both"},
+    ["160b"] = {"16.0", "the AVIS name, kCGImagePropertyAVISDictionary, is in no held rung at all, so its own annotation of iOS 16.0 places it"},
     ["174"] = {"17.4", "no held rung carries the two TIFF position names - the ladder ends at 10.3.4 - so their own availability places them"},
     ["180"] = {"18.0", "fourteen of these are first exported by the iOS 18.0 caches and eleven are in no held rung with an iOS 18.0 annotation, so one object holds the whole of that band's answer"},
     ["260b"] = {"26.0", "the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for"},
