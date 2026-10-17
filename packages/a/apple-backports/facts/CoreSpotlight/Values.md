@@ -5,7 +5,7 @@ them and encodes them, and no index is involved. They are carried here, in `Core
 `CoreSpotlight/CSSearchQueryContext.m`, and the answers are the host's, measured with
 `tests/backports/host/corespotlight-values`: one program, built once against the macOS CoreSpotlight
 framework and once against the port's two sources, whose output must be the same line for line after the
-object addresses are replaced. The run has 86 lines, and a planted control (copy drops the contact
+object addresses are replaced. The run has 87 lines, and a planted control (copy drops the contact
 identifier, the attribute list defaults to nil) differs from the host on 7 lines, so the comparison can fail.
 
 The surface is the rendered header of CSPerson and CSSearchQuery.h from the 26.2 SDK. The release has
