@@ -410,11 +410,6 @@ private func clampedIntProduct(_ lhs: Int64, _ rhs: Int64) -> Int64 {
 extension DispatchTime {
 
     fileprivate func polyfillDistance(to other: DispatchTime) -> DispatchTimeInterval {
-#if canImport(Darwin) && compiler(>=5.1)
-        if #available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *) {
-            return distance(to: other)
-        }
-#endif
         let start = rawValue
         let end = other.rawValue
         if end >= start {
