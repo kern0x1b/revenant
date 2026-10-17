@@ -174,6 +174,19 @@ high8, 19-bit next, 1-bit bind, 27-bit auth split) applied to `__auth_ptr` would
 address, and the block's head would then say how many bones it has and in what order. Until that
 reader exists the honest answer is that this table was not read, which is what the registry records.
 
+## The host's answer for the three-dimensional definition is empty
+
+The Catalyst ARKit on this Mac, which is the port's host oracle, answers the same question the image does, and it
+answers with nothing. `+[ARSkeletonDefinition defaultBody3DSkeletonDefinition]` returns an object, and that object
+has `jointCount` 0, no `jointNames` and no `parentIndices`. Measured by a one-file program compiled with the host's
+flags (`-target $(uname -m)-apple-ios14.0-macabi`, the iOSSupport frameworks), on this Mac, against the 16.4 SDK.
+
+So neither the image nor the host gives the three-dimensional joints, and the port cannot build the definition from
+either. The two-dimensional table above is built from the image and checked against the host; the three-dimensional
+one has no host data to check against. `defaultBody3DSkeletonDefinition` and `neutralBodySkeleton3D` stay owed
+(`registry/ARKit/ios13skeleton.json`). The host's `neutralBodySkeleton3D` returns an `ARSkeleton3D`, whose transform
+count was not read; it does not change the answer, because the definition it belongs to has no joints.
+
 ## What a reader needs to reproduce all of this
 
 The readers used are the project's, and the two tools this work added are in `tools/corpus/`:
