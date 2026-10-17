@@ -113,7 +113,7 @@ held rung carrying `NSURLSession` or `NSURLSessionTaskDelegate` at **7.0**, abov
 `minimum` of 6.0 reaches, and the two rungs' own name indexes carry neither name nor any of these three
 selectors - 0 of the 317,453 names at 4.3 and 0 of the 568,965 at 6.1.3, with `UIView`, `NSObject` and
 `setObject:forKey:` present in both as the control. That is
-`~/.charon/cache-index/<release>.names.gz`, the index `tools/cache-index/build.py` writes, read here by
+`~/.charon/cache-index/<release>.names.gz`, the index `tools/cache-index/build.lua` writes, read here by
 `tools/cache-index/first-rung.lua`'s own `_names_of()` over the bytes it holds. `Foundation17ReleaseAbsences.md` closed the same
 gap for 4.3 and 6.0 by class census, and found no class named `URLSession` in either.
 

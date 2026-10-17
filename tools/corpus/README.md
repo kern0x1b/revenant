@@ -123,8 +123,6 @@ on a decision, so none has been deleted.
   `gen-imageio-property-map.py`, `gen-ledger-objects.py`, `gen-mio.py`, `generate-ledger-objects.py`, `mio-rows.py`,
   `surface-diff-latest.py`.
   Whether each is still needed is the coordinator's call.
-- `tools/cache-index/build.py` (outside this directory) is the Python that would regenerate the cache
-  ladders through the dyld index.
 
 `tools/corpus/tests/test_corpus.py` is still in the light guard; `tools/corpus/tests/corpus_test.lua` is the Lua
 suite for the ported tools (30 fixture checks, the text matchers and json_order). The coordinator swaps the guard entry when the Python

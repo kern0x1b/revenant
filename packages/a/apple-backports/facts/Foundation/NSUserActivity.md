@@ -149,7 +149,7 @@ The release side is measured too, and it is the half that decides the status wor
 `NSUserActivity` nor `NSUserActivityDelegate` is in the 4.3 or the 6.1.3 rung's own name index - 0 of
 the 317,453 names at 4.3 and 0 of the 568,965 at 6.1.3, with `UIView`, `NSObject` and `setObject:forKey:`
 present in both as the control. That is `~/.charon/cache-index/<release>.names.gz` - the index
-`tools/cache-index/build.py` writes, read here by `tools/cache-index/first-rung.lua`'s own `_names_of()`
+`tools/cache-index/build.lua` writes, read here by `tools/cache-index/first-rung.lua`'s own `_names_of()`
 over the bytes it holds.
 
 **Both rows are `absent`**, which is the tree's word for "not there at all, so `respondsToSelector:`

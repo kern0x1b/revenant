@@ -5,7 +5,7 @@ local macho = import("apple.macho", {rootdir = path.join(os.scriptdir(), "..", "
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 --
 -- Every name one rung of the dyld ladder carries, one per line on stdout, for
--- tools/cache-index/build.py to sort, compress and key. SOURCE is what dyld.held_source() names for
+-- tools/cache-index/build.lua to sort, compress and key. SOURCE is what dyld.held_source() names for
 -- the release: the file dyld_shared_cache_<arch>, or a libraries_<arch> folder beside it.
 --
 -- WHY THIS EXISTS: the first held rung of a name was found by running

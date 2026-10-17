@@ -16,8 +16,9 @@
 //
 // All fourteen agree on class and metaclass, so the earliest is the class's own. `first-rung.lua` answers
 // 11.0 for all fourteen and is right about the CLASSES and wrong about what a link needs: it reads the
-// names file, which build.py:8 writes with `strings -a <cache> | grep -xF NAME`, so it finds a class that
-// is in the cache and absent from its export trie. That is the difference this split rests on, and
+// names file, which build.lua writes from names.lua's reading of every rung (its string sections, its whole symbol
+// table and its export trie: a superset of `strings -a <cache> | grep -xF NAME`), so it finds a class that is in the cache and absent
+// from its export trie. That is the difference this split rests on, and
 // MPSNNFilterNode12.m and MPSNNGraphNodes16.m each carry their own measurement.
 //
 // WHAT THIS FILE IS. The graph itself, the padding policy, the elementwise filter nodes, the

@@ -55,7 +55,7 @@ from" - **which was wrong, and this is the measurement that replaces it.** The l
 10.x and 11.x range, so "does the release's own class answer this getter between 10.0 and 13.0" is
 answerable here.
 
-The reading is the cache index `tools/cache-index/build.py` writes, one file per held rung: every
+The reading is the cache index `tools/cache-index/build.lua` writes, one file per held rung: every
 registered selector (`__TEXT,__objc_methname`), every class name (`__TEXT,__objc_classname`), every C
 string literal (`__TEXT,__cstring`), the export trie and the whole symbol table. Every number below is
 `tools/cache-index/first-rung.lua`'s own `_names_of()` over those files - names as **bytes**, the header
@@ -95,7 +95,7 @@ run over any subset is:
 
 **One hole in the index, so a reader is not sent into it.** `--rungs` cannot answer over the whole
 ladder yet: 8.4 has no index file, so the query stops there with a `FileNotFoundError` on
-`8.4.names.gz` (`python3 tools/cache-index/build.py --only 8.4` builds that one rung). Every rung this
+`8.4.names.gz` (`xmake l tools/cache-index/build.lua --only 8.4` builds that one rung). Every rung this
 table names has its file, so the table stands without it.
 
 **What this reading does and does not decide.** It does not report any one class's own method list, so

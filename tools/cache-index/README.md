@@ -11,7 +11,7 @@ once with the load at 19–22, which is the bottleneck.
 
 Two tools, both read-only towards the caches:
 
-    python3 tools/cache-index/build.py                 # read each cache once, write the index
+    xmake l tools/cache-index/build.lua                 # read each cache once, write the index
     xmake l tools/cache-index/first-rung.lua NAME...   # name <TAB> first held rung, or NONE
     xmake l tools/cache-index/first-rung.lua --self-test
 
@@ -26,7 +26,7 @@ Two tools, both read-only towards the caches:
 | **AFTER**, build the index once, all 50 rungs | 32.5 minutes of reading, niced, at load 15-19 |
 | **AFTER**, 500 names, `first-rung.lua` | **1.90 s** (five runs: 2.00, 1.94, 1.90, 1.92, 1.90) |
 | **AFTER**, 500 names, again after every index is current | 0.1 s to check 50 headers, nothing to read |
-| **AFTER**, a single name | 1.9 s, and 0.1 s of that is the python start-up |
+| **AFTER**, a single name | 1.9 s, and 0.1 s of that is interpreter start-up |
 | index on disk | 448 MB for the 50 per-release files, 76 MB for the merged table |
 
 The 500 names are a random sample of 500 real names drawn from the table (seed 1), not a
@@ -52,8 +52,8 @@ measurements.
 
 ## Cost, and when not to run it
 
-One process at a time, one release at a time, and `build.py` renices itself **and its child** to 19,
-so it is safe to start from a loaded session. A cold build over the 50 held rungs reads 24.6 GB once
+One process at a time, one release at a time, and the reading child (`names.lua`) runs under `nice -n 19`. The driver is not reniced, so on a
+loaded machine start it as `nice -n 19 xmake l tools/cache-index/build.lua`. A cold build over the 50 held rungs reads 24.6 GB once
 and takes minutes. It is not a build, so it does not go through `coordination/heavy.sh`, but it is not
 free either. Afterwards every lookup is a read of a few MB.
 
@@ -187,8 +187,8 @@ things it uses are all already in the tree or in the base system, and each is na
 | --- | --- | --- |
 | `dyld.open_cache`, `dyld.load`, `dyld.held_ladder` ordering | `modules/apple/dyld.lua`, this repository | the cache format, the export trie, the ladder |
 | `macho.read`, `macho.images`, `macho.image` | `modules/apple/macho.lua`, this repository | Mach-O load commands, segments, sections, symbol tables |
-| `gzip` / `zlib` (GzipFile, `decompressobj`) | CPython standard library | the compressed index |
-| `bisect` | CPython standard library | the search |
+| `gzip` (`gzip -6 -n`, `gzip -dc`), `sort`, `stat`, `wc`, `nice` | base system | the compressed index, byte-order dedupe, the staleness key, the counts |
+| `byteorder` (`less`, `sort`) | `modules/byteorder.lua`, this repository | byte order, the search over the merged table |
 | `nm -gU`, `otool -ov` | cctools, base system | measurements quoted above, never in the tool's own path |
 
 `names.lua` is the only file that reads a cache, and it does so by calling the two modules above: it
@@ -211,5 +211,4 @@ cache's header is `dyld_v1` and its images sit at the addresses the image table 
 takes a whole symbol table (`dyld.lua`'s own `cached_library()` over the **external range only**,
 widened). Neither re-implements a parser.
 
-`build.py` restates only the directory walk and the architecture preference order, because the ladder
-is Lua and `build.py` is python3. It calls `names.lua` for the reading.
+`build.lua` takes its ladder from `dyld.held_ladder`, as the rest of the port does, and calls `names.lua` for the reading.

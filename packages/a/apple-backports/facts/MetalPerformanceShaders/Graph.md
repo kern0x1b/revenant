@@ -42,8 +42,8 @@ registry is consulted **only as a last resort**, and only for a row whose status
 rows saying `introduced 11.0` never got a say, and `misplaced()` refused the single object.
 
 **`first-rung.lua` answers a different question and is right about the classes.** It reads
-`~/.charon/cache-index/<release>.names.gz`, which `tools/cache-index/build.py:8` writes with
-`strings -a <cache> | grep -xF NAME` — every string in the cache, in any image, in any section. So it finds
+`~/.charon/cache-index/<release>.names.gz`, which `tools/cache-index/build.lua` writes from `names.lua`'s reading of every rung: its string sections, its whole symbol
+table and its export trie, a superset of `strings -a <cache> | grep -xF NAME`. So it finds
 a class that is *in* the cache and *not exported from* it, and answers 11.0 for all fourteen. That is a
 correct answer to "when did the class arrive" and not the answer `misplaced()` needs, which is "from which
 release can a port that defines this name be linked".

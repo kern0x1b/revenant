@@ -5,7 +5,7 @@ the **command a reader can run and its output beside it**, which is what the que
 `source` that names a measurement and not a command is an assertion.
 
 Every name below was read out of one index of the armv7 shared cache of 6.1.3, or asked of the ladder.
-Neither is a whole-cache scan: the index is built once by `tools/cache-index/build.py` and every lookup
+Neither is a whole-cache scan: the index is built once by `tools/cache-index/build.lua` and every lookup
 below is a read of a few megabytes.
 
 ## The two questions, and which one answers what
