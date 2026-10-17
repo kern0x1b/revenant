@@ -269,6 +269,8 @@ static NSString *CharonSpotlightCategory(void)
 
 @synthesize charonName = _charonName;
 @synthesize charonStore = _charonStore;
+// Weak, as the header declares it: the index keeps no delegate alive, and a delegate that is freed reads back as nil.
+@synthesize indexDelegate = _indexDelegate;
 
 + (BOOL)isIndexingAvailable
 {
@@ -402,6 +404,21 @@ static NSString *CharonSpotlightCategory(void)
     }
     if (completionHandler)
         completionHandler(state, nil);
+}
+
+// The release answers this on a background queue, never before it returns. It answers -1003 for a bundle the index holds
+// nothing for, with or without an index delegate (measured: the delegate's data callback is not asked). This port has no
+// external provider to ask, so every request gets that answer: CSIndexErrorCodeRemoteConnectionError with no user info,
+// as the release gives it.
+- (void)fetchDataForBundleIdentifier:(NSString *)bundleIdentifier
+                      itemIdentifier:(NSString *)itemIdentifier
+                         contentType:(UTType *)contentType
+                   completionHandler:(void (^)(NSData *, NSError *))completionHandler
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        if (completionHandler)
+            completionHandler(nil, [NSError errorWithDomain:CSIndexErrorDomain code:CSIndexErrorCodeRemoteConnectionError userInfo:nil]);
+    });
 }
 
 @end

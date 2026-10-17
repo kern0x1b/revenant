@@ -436,3 +436,7 @@ SpriteKit	1	line	#import <Foundation/Foundation.h>
 SpriteKit	2	line	#import <objc/NSObject.h>	
 SpriteKit	3	line	@class SKScene;	
 SpriteKit	4	body	SKSceneDelegate	
+CoreSpotlight	1	line	#import <CoreSpotlight/CoreSpotlight.h>	
+CoreSpotlight	2	line	#import <Foundation/Foundation.h>	
+CoreSpotlight	3	line	#import <objc/NSObject.h>	
+CoreSpotlight	4	forward	CSSearchableIndexDelegate	

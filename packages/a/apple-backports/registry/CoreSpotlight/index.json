@@ -1,0 +1,35 @@
+{
+  "framework": "CoreSpotlight",
+  "entries": [
+    {
+      "api": "CSSearchableIndex.indexDelegate",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the index holds its delegate weakly: nil by default, the object that was set otherwise, and nil again once that object is freed. The index never messages the delegate (see the facts)",
+      "facts": "facts/CoreSpotlight/IndexDelegate.md",
+      "source": "the macOS CoreSpotlight framework of the host (tests/backports/host/corespotlight-index, identical to the port's 6 lines, with a planted control the same comparison tells apart); the rendered header of CSSearchableIndex.h from the 26.2 SDK for the surface"
+    },
+    {
+      "api": "CSSearchableIndexDelegate",
+      "kind": "protocol",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the protocol is declared as the release's header declares it, so an application can conform to it and set the delegate; the index does not message the reindex methods or the data callbacks, because it never asks for a reindex and holds no item of another bundle to ask for",
+      "facts": "facts/CoreSpotlight/IndexDelegate.md",
+      "source": "the macOS CoreSpotlight framework of the host (tests/backports/host/corespotlight-index, whose delegate calls are measured); the rendered header of CSSearchableIndex.h from the 26.2 SDK for the declarations"
+    },
+    {
+      "api": "-[CSSearchableIndex fetchDataForBundleIdentifier:itemIdentifier:contentType:completionHandler:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "answers on a background queue, after the call returns, with no data and an error in CSIndexErrorDomain with code CSIndexErrorCodeRemoteConnectionError (-1003) and no user info, which is the release's answer for a bundle the index holds nothing for, with or without a delegate. The SDK declares the method for macOS 13 only; the port has it on iOS too, and it has no item of another application to return",
+      "facts": "facts/CoreSpotlight/IndexDelegate.md",
+      "source": "the macOS CoreSpotlight framework of the host (tests/backports/host/corespotlight-index, measured for an unknown bundle identifier); the rendered header of CSSearchableIndex.h from the 26.2 SDK for the declaration"
+    }
+  ]
+}
