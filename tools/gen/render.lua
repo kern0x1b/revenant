@@ -16,6 +16,7 @@ local bands = import("bands", {anonymous = true})
 local property_map = import("property_map", {anonymous = true})
 local filter_builders = import("filter_builders", {anonymous = true})
 local protocol_headers = import("protocol_headers", {anonymous = true})
+local mio_objects = import("mio_objects", {anonymous = true})
 
 local function sorted_by_key(list, field)
     local tagged = {}
@@ -316,6 +317,12 @@ function render(tree, fw, corpus, sdk_release)
     -- the CIFilter convenience constructors of CoreImage (tools/gen/filter_builders.lua): one object per band of the measured table
     for name, text in pairs(filter_builders.objects(tree, fw)) do
         assert(files[name] == nil, "constructor object " .. name .. " is also emitted from the spec of " .. fw)
+        files[name] = text
+    end
+    -- the ModelIO band objects (tools/gen/mio_objects.lua): one object per release band of the SDK's surface rows, which are the
+    -- framework's committed input and not the SDK's headers, so the rows' release names the file
+    for name, text in pairs(mio_objects.objects(tree, fw, sdk_release)) do
+        assert(files[name] == nil, "ModelIO object " .. name .. " is also emitted from the spec of " .. fw)
         files[name] = text
     end
     return files

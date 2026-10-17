@@ -74,11 +74,12 @@ local function count_dots(text)
     return count
 end
 
--- The rows of an input as {kind, api, band}, for a class or a method that has a band.
+-- The rows of an input as {kind, api, band}, for a class or a method that has a band. surface-diff writes no header line, so the first
+-- line is a row.
 local function load(filepath)
     local rows = {}
     local lines = tsv.lines(read_bytes(filepath))
-    for index = 2, #lines do
+    for index = 1, #lines do
         local fields = tsv.fields(lines[index])
         if #fields >= 4 and (fields[2] == "class" or fields[2] == "method") and fields[4] ~= "" then
             table.insert(rows, {kind = fields[2], api = fields[3], band = fields[4], position = #rows + 1})

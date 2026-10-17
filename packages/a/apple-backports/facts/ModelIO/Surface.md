@@ -161,8 +161,8 @@ was not: the generator had carried `setDouble4x4Array:count:` and, because a row
 `setFloat4x4Array:count:` - so the one the ledger still measured as missing was the one with nothing
 behind it, and its row claimed an implementation that was not there.
 
-`ModelIO/MDLMatrix4x4Array11.m` builds the class instead, and `MDIO110.m` no longer holds the empty
-`@implementation MDLMatrix4x4Array` and the two categories that answered `nil`. It is a **flat array**, not
+`ModelIO/MDLMatrix4x4Array11.m` builds the class instead, and the generated `MDIO110.m` (written to `.gen/ModelIO`,
+no longer committed) holds no `@implementation MDLMatrix4x4Array` and no categories that answered `nil`. It is a **flat array**, not
 an animated value - the 16.4 header declares it over `NSObject<NSCopying>` with `elementCount` and no time
 at all - so the storage is the matrices, in the precision the last setter named:
 

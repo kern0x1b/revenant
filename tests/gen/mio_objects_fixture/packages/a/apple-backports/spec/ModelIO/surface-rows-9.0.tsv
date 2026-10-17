@@ -1,0 +1,17 @@
+ModelIO	class	MDLAsset	9.0
+ModelIO	method	+[MDLAsset canExportFileExtension:]	9.0
+ModelIO	method	-[MDLAsset setName:other:]	9.0
+ModelIO	method	-[MDLAsset setName:]	9.0
+ModelIO	method	-[MDLAsset tracked]	9.0
+ModelIO	method	-[MDLAsset .cxx_destruct]	9.0
+ModelIO	class	MDLMesh	9.0
+ModelIO	method	-[MDLMesh generatorThing:]	10.0
+ModelIO	method	-[MDLMesh vertexCount]	10.0
+ModelIO	class	MDLNew	10.0
+ModelIO	method	-[MDLNew newThing:]	10.0
+ModelIO	method	-[MDLNew allocator]	10.0
+ModelIO	class	MDLAliased	10.0
+ModelIO	method	-[MDLAliased aliasedThing:]	10.0
+ModelIO	method	-[MDLAliased aliasedOther]	10.0
+ModelIO	constant	kFixtureName	9.0
+ModelIO	method	-[MDLNew init]	

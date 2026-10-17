@@ -1,12 +1,9 @@
--- The per-release-band ModelIO objects, from surface-diff's rows. It replaces tools/corpus/gen-mio.py, and its output is byte-equal
--- to that script's on the same rows and the same tree.
+-- The ModelIO objects of render: one object per release band, written from the SDK's surface-diff rows and the hand-written sources of the
+-- ModelIO folder. It replaces tools/corpus/gen-mio.py, and it is called by render (tools/gen/render.lua) like every other generated object,
+-- so gen --framework ModelIO writes them under .gen/ModelIO, and they are built with the package.
 --
---     xmake l tools/gen/mio_objects.lua ROWS.TSV OUTDIR SDK_RELEASE
---
--- SDK_RELEASE is the release the rows were read from, 26.2 for the iPhoneOS 26.2 headers; it is the text the objects name it by.
---
--- ROWS.TSV is what surface-diff writes (tools/corpus/surface-diff-latest.py --rows): framework, kind, api, introduced, one row per
--- declared API of the SDK's headers, read by clang's own AST.
+-- The rows are committed as spec/ModelIO/surface-rows-<release>.tsv: surface-diff's --rows output, one row per declared API (framework,
+-- kind, api, introduced). surface-diff writes NO header line, so every line is a row.
 --
 -- THE AST IS THE AUTHORITY FOR WHICH SELECTORS EXIST. The member set comes from clang's JSON AST of the headers, so .cxx_destruct,
 -- allocator, retain, release and the rest, which the COMPILER generates for a C++ class, are never in the input and cannot be carried.
@@ -18,18 +15,19 @@
 -- No @interface is emitted: ModelIO.h already declares the class, and re-declaring it is "duplicate interface definition for class".
 -- A carried class is completed with an @implementation.
 --
--- THE TREE'S OWN SOURCES are read first, so a class the tree already defines is not defined twice. The member set this reads from the
--- sources holds the sign of each member, not its selector, so the check that drops a member the tree already builds never matches; the
--- Python this replaces did the same, and the port keeps it so that its output stays byte-equal. The count the run prints shows it.
+-- THE HAND-WRITTEN SOURCES are read first, so a class they define is not defined again, and a member they implement is dropped. Both are
+-- read from the folder's own .m files and never from .gen, which this generator writes. See defined_in_tree().
 
 local tsv = import("tsv", {anonymous = true})
+local layout = import("layout", {anonymous = true})
 local json = import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
-local ROOT = path.join(os.scriptdir(), "..", "..")
-local HEADER_MAP = path.join(ROOT, "packages", "a", "apple-backports", "spec", "ModelIO", "hdr-map.json")
+local FRAMEWORK = "ModelIO"
 
--- The selectors of NSObject's protocol, and the helpers the rules below drop. Every rule is printed with how many names it removed.
+-- The selectors of NSObject's protocol, and the helpers the rules below drop. The names are matched as the Python matched them: a
+-- keyword with its colon, so performSelector:withObject: is matched by its first keyword performSelector: (the rule below it never
+-- fires, as it did not in the Python; it is kept so the lists are the same).
 local NSOBJECT_BASICS = {}
 for _, name in ipairs({"init", "dealloc", "retain", "release", "autorelease", "hash", "self", "class", "superclass", "zone",
                        "isEqual:", "copyWithZone:", "doesNotRecognizeSelector:", "respondsToSelector:", "conformsToProtocol:",
@@ -56,9 +54,9 @@ local function trim(text)
     return string.match(text, "^%s*(.-)%s*$")
 end
 
-local function set_size(set)
+local function count_of(text, character)
     local count = 0
-    for _ in pairs(set) do
+    for _ in string.gmatch(text, character) do
         count = count + 1
     end
     return count
@@ -79,8 +77,7 @@ local function band_before(a, b)
     return false
 end
 
--- The ObjC selector of an API string: its sign, class, first keyword, the number of keywords, and the text between the class and ].
--- nil when it is not an instance or class method.
+-- The sign, the class, the first keyword (trimmed), the number of colons, and the text after the class. nil when it is not a method.
 local function sel(api)
     local sign, rest = string.match(api, "^([%-+])%[(.*)%]$")
     if not sign then
@@ -92,11 +89,17 @@ local function sel(api)
     end
     local sig = string.match(rest, "^[A-Za-z_][A-Za-z0-9_]*%s*(.*)$")
     local first = trim(string.match(sig, "^([^:]*)"))
-    local count = 0
-    for _ in string.gmatch(sig, ":") do
-        count = count + 1
+    return sign, cls, first, count_of(sig, ":"), sig
+end
+
+-- The parts the rules and the tree check read: the sign, the class, the name the DROP rules match (the first keyword with its colon
+-- when the selector has one), and the whole selector with no spaces, which is what a method's header declares.
+local function parts_of(api)
+    local sign, cls, first, count, sig = sel(api)
+    if not sign then
+        return nil
     end
-    return sign, cls, first, count, sig
+    return {sign = sign, cls = cls, name = first .. (count > 0 and ":" or ""), selector = (string.gsub(sig, "%s", ""))}
 end
 
 -- The text of the block comments of a source, each one a space, as the regular expression /\*.*?\*/ replaces them.
@@ -141,65 +144,104 @@ local function blocks_of(text)
     return blocks
 end
 
--- The member tokens of a block: the sign of each method that starts a line, with a colon when its selector has one. This is what
--- the Python's regular expression yields, and it reads the sign, not the name (see the header).
-local function member_tokens(block)
-    local tokens = {}
+-- The selector a method header declares, from its text: each keyword with its colon, or the one name of a unary method. Parenthesised
+-- types go first, so the parameter names are the identifiers with no colon after a keyword.
+local function header_selector(header)
+    local bare = string.gsub(header, "%b()", " ")
+    local selector = ""
+    for name, rest in string.gmatch(bare, "([A-Za-z_][A-Za-z0-9_]*)(%s*:?)") do
+        if string.find(rest, ":", 1, true) then
+            selector = selector .. name .. ":"
+        elseif selector == "" then
+            selector = name
+        end
+    end
+    return selector
+end
+
+-- The sign and the whole selector of each method that starts a line of a block, as "-setName:other:". The header runs to its { or ;.
+local function member_selectors(block)
+    local found = {}
     local at = 1
     while at <= #block do
         local starts_line = at == 1 or string.sub(block, at - 1, at - 1) == "\n"
-        local _, last, sign, colon = nil, nil, nil, nil
+        local last, sign = nil, nil
         if starts_line then
-            _, last, sign, colon = string.find(block, "^%s*([%-+])%s*%([^%)]*%)%s*[A-Za-z_][A-Za-z0-9_]*%s*(:?)", at)
+            local _, found_last, found_sign = string.find(block, "^%s*([%-+])%s*%([^%)]*%)%s*[A-Za-z_][A-Za-z0-9_]*", at)
+            last, sign = found_last, found_sign
         end
         if last then
-            table.insert(tokens, sign .. (colon ~= "" and ":" or ""))
+            local stop = string.find(block, "[{;]", at) or (#block + 1)
+            table.insert(found, sign .. header_selector(string.sub(block, at, stop - 1)))
             at = last + 1
         else
             at = at + 1
         end
     end
-    return tokens
+    return found
 end
 
--- What the tree already builds for this framework: the classes and the member tokens of its own @implementation blocks. A category
--- (@implementation X (Y)) does not own the class, and it takes the class out of the set, as the Python does.
-local function already_defined(pkg)
-    local classes, members = {}, {}
-    if not os.isdir(pkg) then
-        return classes, members
+-- The class a block of @implementation names, and whether the block is a category. CHARON_ALIAS_CLASS(Name) names the class Name, the one
+-- the release's name stands for (charon_alias.h), so a block of it is a block of Name.
+local function class_of(block)
+    local name, rest = string.match(block, "^@implementation%s+CHARON_ALIAS_CLASS%(%s*([A-Za-z_][A-Za-z0-9_]*)%s*%)(.*)")
+    if not name then
+        name, rest = string.match(block, "^@implementation%s+([A-Za-z_][A-Za-z0-9_]*)(.*)")
+    end
+    if not name then
+        return nil, false
+    end
+    return name, string.match(rest, "^%s*%(") ~= nil
+end
+
+-- What the hand-written folder already defines, from its own .m files: the classes it owns, and each method it implements as
+-- members["class\t-selector"] = the file that implements it.
+--
+-- A plain @implementation owns its class in whichever file it sits. A category (@implementation X (Y)) owns nothing, and it does not take
+-- the class back: the Python this replaces discarded the class from its set whenever a category of it appeared in the same folder, so
+-- MDLAsset (defined in MDLAsset9.m, with a category in the same file) and MDLMesh (defined in MDLMesh9.m, with categories in
+-- MDLMeshGenerators9.m) were both declared again in a band object, and the duplicate class symbol killed the load.
+-- A class the file declares with CHARON_ALIAS(Name) at the start of a line is owned too: the device build exports its symbol under the
+-- release's name from that file, so a band object declares it again only with a second symbol of the same name.
+local function defined_in_tree(folder)
+    local owned, members = {}, {}
+    if not os.isdir(folder) then
+        return owned, members
     end
     local names = {}
-    for _, file in ipairs(os.files(path.join(pkg, "*.m"))) do
+    for _, file in ipairs(os.files(path.join(folder, "*.m"))) do
         table.insert(names, path.filename(file))
     end
     byteorder.sort(names)
     for _, name in ipairs(names) do
-        local text = without_comments(read_bytes(path.join(pkg, name)))
+        local text = without_comments(read_bytes(path.join(folder, name)))
+        for alias in string.gmatch("\n" .. text, "\nCHARON_ALIAS%(%s*([A-Za-z_][A-Za-z0-9_]*)%s*%)") do
+            owned[alias] = true
+        end
         for _, block in ipairs(blocks_of(text)) do
-            local cls = string.match(block, "^@implementation%s+([A-Za-z_][A-Za-z0-9_]*)")
+            local cls, is_category = class_of(block)
             if cls then
-                classes[cls] = true
-                if string.match(block, "^@implementation%s+[A-Za-z_][A-Za-z0-9_]*%s*%(") then
-                    classes[cls] = nil
+                if not is_category then
+                    owned[cls] = true
                 end
-                for _, token in ipairs(member_tokens(block)) do
-                    members[cls .. "\t" .. token] = true
+                for _, selector in ipairs(member_selectors(block)) do
+                    local key = cls .. "\t" .. selector
+                    members[key] = members[key] or name
                 end
             end
         end
     end
-    return classes, members
+    return owned, members
 end
 
--- The rows that are a class or a method with a band: framework, kind, api, introduced, as the rows file has them.
+-- The rows of the input, as {kind, api, band, position}: a class or a method with a band. surface-diff writes no header, so every line is
+-- a row; a line that is not a class or a method (a constant, a protocol) is skipped.
 local function load(filepath)
     local rows = {}
-    local lines = tsv.lines(read_bytes(filepath))
-    for index = 2, #lines do
-        local fields = tsv.fields(lines[index])
+    for _, line in ipairs(tsv.lines(read_bytes(filepath))) do
+        local fields = tsv.fields(line)
         if #fields >= 4 and (fields[2] == "class" or fields[2] == "method") and fields[4] ~= "" then
-            table.insert(rows, {kind = fields[2], api = fields[3], band = fields[4]})
+            table.insert(rows, {kind = fields[2], api = fields[3], band = fields[4], position = #rows + 1})
         end
     end
     return rows
@@ -236,19 +278,7 @@ local function selector_signature(api)
     return sign .. " (id)" .. table.concat(out, " ")
 end
 
--- The class-to-header map of the SDK, read once from the spec.
-local header_cache = nil
-local function headers_map()
-    if header_cache == nil then
-        header_cache = {}
-        if os.isfile(HEADER_MAP) then
-            header_cache = json.decode(read_bytes(HEADER_MAP))
-        end
-    end
-    return header_cache
-end
-
--- The methods of one class, from the band's members, as their one-line stubs.
+-- The methods of one class, from a band's members, as their one-line stubs.
 local function stubs_of(cls, members)
     local out = {}
     for _, member in ipairs(members) do
@@ -263,82 +293,69 @@ local function stubs_of(cls, members)
     return out
 end
 
-function main(rows_path, outdir, release)
-    assert(rows_path and outdir and release, "usage: xmake l tools/gen/mio_objects.lua ROWS.TSV OUTDIR SDK_RELEASE")
-    local rows = load(rows_path)
-    os.mkdir(outdir)
-    local have_classes, have_members = already_defined(outdir)
-    if set_size(have_classes) > 0 then
-        print(string.format("  the tree already defines %d classes and %d members for this framework; they are NOT", set_size(have_classes), set_size(have_members)))
-        print("  re-emitted, and only the MISSING members of those classes go in a category in a new object")
+-- The class-to-header map of the SDK, read from the committed spec beside the rows.
+local function headers_of(snap)
+    if not os.isfile(path.join(snap, "hdr-map.json")) then
+        return {}
     end
+    return json.decode(read_bytes(path.join(snap, "hdr-map.json")))
+end
+
+-- The whole plan for one framework and SDK release: the objects' text (files) and the accounting the run reports. objects() returns the
+-- files for render; the accounting is for the tests and the run's report.
+--
+-- sdk_release is the SDK's release, which names the rows file and the objects' text.
+function plan(tree, fw, sdk_release)
+    local result = {files = {}, methods = 0, kept = 0, dropped = {}, tree_dropped = {}}
+    if fw ~= FRAMEWORK then
+        return result
+    end
+    assert(sdk_release, "the ModelIO objects need the SDK's release")
+    local snap = layout.snap_dir(tree, fw)
+    local rows_path = path.join(snap, "surface-rows-" .. sdk_release .. ".tsv")
+    assert(os.isfile(rows_path), "no surface rows for SDK " .. sdk_release .. ": " .. rows_path)
+    local rows = load(rows_path)
+    local own_classes, have_members = defined_in_tree(path.join(tree, layout.constants().SOURCES_ROOT, fw))
+    local headers = headers_of(snap)
 
     local classes, methods = {}, {}
-    local class_count, api_seen = 0, {}
     for _, row in ipairs(rows) do
         if row.kind == "class" then
-            if classes[row.api] == nil and not api_seen[row.api] then
-                api_seen[row.api] = true
-                class_count = class_count + 1
-            end
             classes[row.api] = row.band
         else
             table.insert(methods, row)
         end
     end
+    result.methods = #methods
 
-    local dropped, dropped_order = {}, {}
-    local function drop(label, api)
-        if dropped[label] == nil then
-            dropped[label] = {}
-            table.insert(dropped_order, label)
-        end
-        table.insert(dropped[label], api)
-    end
     local kept = {}
     for _, row in ipairs(methods) do
-        local sign, cls, first, count = sel(row.api)
-        if not sign then
-            drop("not an ObjC selector", row.api)
+        local parts = parts_of(row.api)
+        local rule = nil
+        if not parts then
+            rule = "not an ObjC selector"
         else
-            local name = first .. (count > 0 and ":" or "")
-            local matched = false
-            for _, rule in ipairs(DROP) do
-                if not matched and rule[2](name) then
-                    drop(rule[1], row.api)
-                    matched = true
+            for _, candidate in ipairs(DROP) do
+                if rule == nil and candidate[2](parts.name) then
+                    rule = candidate[1]
                 end
             end
-            if not matched then
-                table.insert(kept, row)
-            end
+        end
+        if rule then
+            table.insert(result.dropped, {rule = rule, api = row.api})
+        else
+            table.insert(kept, row)
         end
     end
+    result.kept = #kept
 
-    print(string.format("  the AST declares %d methods and %d classes", #methods, class_count))
-    print("  DROPPED, per rule:")
-    local labels = {}
-    for _, rule in ipairs(DROP) do
-        table.insert(labels, rule[1])
-    end
-    table.insert(labels, "not an ObjC selector")
-    for _, label in ipairs(labels) do
-        local names = dropped[label] or {}
-        print(string.format("    %-28s %4d   %s", label, #names, names[1] or ""))
-    end
-    print(string.format("  KEPT %d methods; every one came from the AST, so no compiler helper entered", #kept))
-    local dropped_total = 0
-    for _, label in ipairs(dropped_order) do
-        dropped_total = dropped_total + #dropped[label]
-    end
-    print(string.format("  %d + %d = %d accounted for", #kept, dropped_total, #methods))
-
+    -- A member the hand-written folder already implements is not emitted again. The key is the class, the sign and the whole selector.
     local by_band, band_order = {}, {}
-    local skipped = 0
     for _, row in ipairs(kept) do
-        local sign, cls, first, count = sel(row.api)
-        if sign and have_members[cls .. "\t" .. first .. (count > 0 and ":" or "")] then
-            skipped = skipped + 1
+        local parts = parts_of(row.api)
+        local file = have_members[parts.cls .. "\t" .. parts.sign .. parts.selector]
+        if file then
+            table.insert(result.tree_dropped, {cls = parts.cls, selector = parts.sign .. parts.selector, file = file, api = row.api})
         else
             if by_band[row.band] == nil then
                 by_band[row.band] = {}
@@ -347,39 +364,38 @@ function main(rows_path, outdir, release)
             table.insert(by_band[row.band], row)
         end
     end
-    print(string.format("  members dropped because the tree already builds them: %d", skipped))
 
-    local own_band, seen_band, bands = {}, {}, {}
+    local own_band, bands, seen = {}, {}, {}
     for api, band in pairs(classes) do
         own_band[band] = own_band[band] or {}
         table.insert(own_band[band], api)
     end
     for _, band in ipairs(band_order) do
-        seen_band[band] = true
+        seen[band] = true
     end
     for band in pairs(own_band) do
-        seen_band[band] = true
+        seen[band] = true
     end
-    for band in pairs(seen_band) do
+    for band in pairs(seen) do
         table.insert(bands, band)
     end
     table.sort(bands, band_before)
 
-    local written = {}
     for _, band in ipairs(bands) do
         local own = {}
         for _, cls in ipairs(own_band[band] or {}) do
-            if not have_classes[cls] then
+            if not own_classes[cls] then
                 table.insert(own, cls)
             end
         end
         byteorder.sort(own)
 
+        -- a class the tree already owns gets a category here, for the members it is missing
         local members = by_band[band] or {}
         local later_seen, later_all = {}, {}
         for _, member in ipairs(members) do
             local sign, cls = sel(member.api)
-            if sign and classes[cls] ~= nil and have_classes[cls] and not later_seen[cls] then
+            if sign and classes[cls] ~= nil and own_classes[cls] and not later_seen[cls] then
                 later_seen[cls] = true
                 table.insert(later_all, cls)
             end
@@ -393,20 +409,19 @@ function main(rows_path, outdir, release)
             if a.api ~= b.api then
                 return byteorder.less(a.api, b.api)
             end
-            return false
+            return a.position < b.position
         end)
 
-        if #own == 0 and #ordered == 0 then
-            print(string.format("  %-6s NOTHING: no class and no member first appears here, so no file is written", band))
-        else
+        if #own > 0 or #ordered > 0 then
             local tag = string.gsub(band, "%.", "")
-            local body = {"#import <ModelIO/ModelIO.h>"}
+            local is_own = {}
+            for _, cls in ipairs(own) do
+                is_own[cls] = true
+            end
             local emitted, emitted_seen = {}, {}
             for _, cls in ipairs(own) do
-                if not emitted_seen[cls] then
-                    emitted_seen[cls] = true
-                    table.insert(emitted, cls)
-                end
+                emitted_seen[cls] = true
+                table.insert(emitted, cls)
             end
             for _, cls in ipairs(later_all) do
                 if not emitted_seen[cls] then
@@ -416,7 +431,6 @@ function main(rows_path, outdir, release)
             end
             byteorder.sort(emitted)
 
-            local headers = headers_map()
             local header_lines, header_seen, unknown = {}, {}, false
             for _, cls in ipairs(emitted) do
                 if headers[cls] then
@@ -429,6 +443,8 @@ function main(rows_path, outdir, release)
                 end
             end
             byteorder.sort(header_lines)
+
+            local body = {"#import <ModelIO/ModelIO.h>"}
             for _, header in ipairs(header_lines) do
                 table.insert(body, "#import <ModelIO/" .. header .. ">")
             end
@@ -438,7 +454,7 @@ function main(rows_path, outdir, release)
             for _, line in ipairs({
                 "#import <objc/runtime.h>", "",
                 "// The iOS " .. band .. " band of ModelIO, generated by tools/gen/mio_objects.lua from clang s own AST of",
-                "// the " .. release .. " headers. One band per object: release-split refuses a file whose members first",
+                "// the " .. sdk_release .. " headers. One band per object: release-split refuses a file whose members first",
                 "// appear in more than one release.", "",
                 "// Every answer here is the honest one for a machine with no GPU, no asset library and no",
                 "// provider: an object answer is nil, a BOOL is NO, a number is 0. Nothing is invented and",
@@ -457,34 +473,24 @@ function main(rows_path, outdir, release)
                 table.insert(body, "")
             end
             for _, cls in ipairs(later_all) do
-                do
-                    local is_own = false
-                    for _, own_cls in ipairs(own) do
-                        if own_cls == cls then
-                            is_own = true
-                        end
+                if not is_own[cls] then
+                    table.insert(body, "// " .. cls .. " arrived at " .. band .. ", so its later members are a CATEGORY: two objects cannot both hold")
+                    table.insert(body, "// @implementation " .. cls .. ", and release-split wants one release per object.")
+                    table.insert(body, "@implementation " .. cls .. " (Charon" .. tag .. ")")
+                    for _, stub in ipairs(stubs_of(cls, ordered)) do
+                        table.insert(body, stub)
                     end
-                    if not is_own then
-                        table.insert(body, "// " .. cls .. " arrived at " .. band .. ", so its later members are a CATEGORY: two objects cannot both hold")
-                        table.insert(body, "// @implementation " .. cls .. ", and release-split wants one release per object.")
-                        table.insert(body, "@implementation " .. cls .. " (Charon" .. tag .. ")")
-                        for _, stub in ipairs(stubs_of(cls, ordered)) do
-                            table.insert(body, stub)
-                        end
-                        table.insert(body, "@end")
-                        table.insert(body, "")
-                    end
+                    table.insert(body, "@end")
+                    table.insert(body, "")
                 end
             end
-            local name = "MDIO" .. tag .. ".m"
-            local text = string.gsub(table.concat(body, "\n"), "%s+$", "") .. "\n"
-            io.writefile(path.join(outdir, name), text, {encoding = "binary"})
-            table.insert(written, {band, name, #own, #ordered})
+            result.files["MDIO" .. tag .. ".m"] = string.gsub(table.concat(body, "\n"), "%s+$", "") .. "\n"
         end
     end
-    print("  FILES:")
-    for _, entry in ipairs(written) do
-        print(string.format("    %-6s %-14s %2d classes, %3d members", entry[1], entry[2], entry[3], entry[4]))
-    end
+    return result
 end
 
+-- The objects of a framework, as {file name = text}, for render. Only ModelIO has them.
+function objects(tree, fw, sdk_release)
+    return plan(tree, fw, sdk_release).files
+end
