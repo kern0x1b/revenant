@@ -5,15 +5,11 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-# **The four band files are NOT in the build**, and the reason is in facts/Accelerate/vImageGeometry.md: the
-# vertical's stored values still differ from the release's own by a unit or two of the stored value on a large
-# fraction of the samples, the cause is not attributed, and an object with no registry entry is kept in every
-# band from 4.3 and fails check_registry on the built symbols it has no row for. They are in
-# `.agent-work/pending-shears/` for the same reason daa379927 put them there, and this harness builds them from
-# there so the measurement can be re-run; the headers they include stay at their build paths, where they build
-# nothing on their own.
-SHEARS=${SHEARS:-$here/../../../../.agent-work/pending-shears}
+# The four band files (vImageShear70/80/100/150.m) are in the build, with their thirty-six registry rows
+# (commit 2f0211c2ef), and this harness compiles them from the package they ship in. They used to live in
+# `.agent-work/pending-shears/`, a folder nothing tracks, which is why the sweep found them missing.
 ACCELERATE=$here/../../../../packages/a/apple-backports/Accelerate
+SHEARS=${SHEARS:-$ACCELERATE}
 build=${SHEAR_BUILD:-$(runs_folder charon-shear-host)}
 rm -rf "$build"
 mkdir -p "$build"
