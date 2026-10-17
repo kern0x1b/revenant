@@ -99,7 +99,8 @@ function run(args)
         end
     end
     local swift_status, swift_detail, swift_measured = roundtrip.run({sdk = args.sdk, coordination = args.coordination,
-                                                                      out = path.join(args.out, "swift"), framework = args.framework})
+                                                                      out = path.join(args.out, "swift"), framework = args.framework,
+                                                                      tree = args.tree, headers = args.headers})
     for key, count in pairs(swift_measured) do
         measured[key] = count
     end

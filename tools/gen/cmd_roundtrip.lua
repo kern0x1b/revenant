@@ -2,6 +2,7 @@
 -- the digester and compares that dump's model with the SDK's (swift_roundtrip.lua). Per module it prints one line, then its causes,
 -- and writes the same text to --out/<F>/report.txt. Build products, never committed. --sdk is the SDK, --out the folder, --framework
 -- runs one module. The digester and the compiler run through heavy.sh; --coordination names the corpus folder heavy.sh sits beside.
+-- --headers (the generated headers tree, optional) gives each module's own ObjC part to its compile (swift_roundtrip.underlying_of).
 
 local swift_model = import("swift_model", {anonymous = true})
 local swift_canonical = import("swift_canonical", {anonymous = true})
@@ -12,7 +13,7 @@ local emit = import("emit", {anonymous = true})
 
 -- The first part of one module's round trip: its model, rendered to its source. Returns the part the batches and the second part read, or nil
 -- and the reason the SDK's model has none.
-local function prepare(folder, out_dir, name, known, classes, public)
+local function prepare(folder, out_dir, name, known, classes, public, headers)
     local sdk_rows, reason = swift_model.model(folder, name)
     if sdk_rows == nil then
         return nil, reason
@@ -24,7 +25,9 @@ local function prepare(folder, out_dir, name, known, classes, public)
     -- the generated file and its report spell the SDK's non-ASCII identifiers as the SDK does; they are never committed
     local identifiers = swift_model.non_ascii_identifiers(sdk_rows)
     emit.file(source, swift_render.render(sdk_rows, name, known, classes, public), identifiers)
-    return {name = name, module_dir = module_dir, source = source, sdk_rows = sdk_rows, identifiers = identifiers}
+    local underlying = headers and swift_roundtrip.underlying_of(headers, module_dir, name) or nil
+    return {name = name, module_dir = module_dir, source = source, sdk_rows = sdk_rows, identifiers = identifiers,
+            underlying = underlying}
 end
 
 -- The second part of one module's round trip, once its compile and dump have run in the batches: its result table.
@@ -135,7 +138,7 @@ function run(args)
         local entry = {name = name}
         try {
             function ()
-                entry.prep, entry.reason = prepare(folder, args.out, name, known, classes, public)
+                entry.prep, entry.reason = prepare(folder, args.out, name, known, classes, public, args.headers)
             end,
             catch {
                 function (err)
@@ -148,7 +151,8 @@ function run(args)
     local compiles, dumps = {}, {}
     for _, entry in ipairs(parts) do
         if entry.prep then
-            table.insert(compiles, swift_roundtrip.compile_item(triple, args.sdk, entry.prep.source, entry.prep.module_dir, entry.name))
+            table.insert(compiles, swift_roundtrip.compile_item(triple, args.sdk, entry.prep.source, entry.prep.module_dir, entry.name,
+                                                                 entry.prep.underlying))
         end
     end
     local left = heavy_batch.run(heavy, args.out, "compile", compiles, true)

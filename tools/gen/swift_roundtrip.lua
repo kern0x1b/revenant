@@ -100,13 +100,38 @@ function diagnostics(text)
     return count, first
 end
 
+-- The folder a module's own ObjC part is compiled from, as the compiler's framework search path, or nil when the generated headers have
+-- none for it. The folder holds a link to that one framework and nothing else: the headers tree has every framework, and a search path
+-- over all of them shadows the SDK's (CoreFoundation's headers then fail to build). The module's own name is its clang module, so the
+-- compile imports it as the underlying module (compile_item).
+function underlying_of(headers, module_dir, name)
+    local framework = path.join(headers, "Frameworks", name .. ".framework")
+    if not os.isfile(path.join(framework, "Modules", "module.modulemap")) then
+        return nil
+    end
+    local folder = path.join(module_dir, "underlying")
+    os.mkdir(folder)
+    local link = path.join(folder, name .. ".framework")
+    -- the link's target is absolute: a relative one is read from the link's folder, and the compile would not find the framework
+    if not os.exists(link) then
+        os.ln(path.absolute(framework), link)
+    end
+    return folder
+end
+
 -- The compile of a rendered source under its module name into module_dir, as a batch item (heavy_batch.run): its shell text, with both
 -- output streams in <module_dir>/compile.log. The compiler admits a module with errors (so the dump can still be read when the errors are
--- not error types).
-function compile_item(triple, sdk, source, module_dir, name)
+-- not error types). underlying (underlying_of's folder, or nil) is the framework search path of the module's own ObjC part: the module
+-- imports it as its underlying clang module, so its Swift declarations see the ObjC ones.
+function compile_item(triple, sdk, source, module_dir, name, underlying)
     local words = {"xcrun", "swiftc", "-parse-as-library", "-Xfrontend", "-experimental-allow-module-with-compiler-errors", "-emit-module",
                    "-module-name", name, "-target", triple, "-sdk", sdk, "-emit-module-path", path.join(module_dir, name .. ".swiftmodule"),
                    source}
+    if underlying ~= nil then
+        table.insert(words, "-F")
+        table.insert(words, underlying)
+        table.insert(words, "-import-underlying-module")
+    end
     local quoted = {}
     for i, word in ipairs(words) do
         quoted[i] = heavy_batch.quote(word)
