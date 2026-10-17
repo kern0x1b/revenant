@@ -315,6 +315,12 @@ local function render_member(row, indent, access)
     end
     if row.mutating == "Mutating" then prefix = prefix .. "mutating " end
     local gparams, gwhere = generic_clause(row.generic_sig, row.outer_names)
+    -- a subscript of a protocol states its accessors (get, or get and set): the compiler refuses one that does not
+    local accessors = ""
+    if leaf == "subscript" and access == "" then
+        local has_set = row.accessors ~= NO_VALUE and string.find(row.accessors, "set", 1, true)
+        accessors = has_set and " { get set }" or " { get }"
+    end
     local signature
     if leaf == "init" then
         signature = "init" .. (gparams or "") .. "(" .. table.concat(params, ", ") .. ")"
@@ -332,7 +338,7 @@ local function render_member(row, indent, access)
     if avail then
         table.insert(lines, pad .. avail)
     end
-    table.insert(lines, pad .. prefix .. signature .. (access == "" and "" or trap(label)))
+    table.insert(lines, pad .. prefix .. signature .. (access == "" and accessors or trap(label)))
     return lines
 end
 
