@@ -205,9 +205,9 @@ end
 local function inheritance_of(superclass, conformances, extra)
     local out = {}
     if superclass ~= nil and superclass ~= NO_VALUE then
-        for s in string.gmatch(superclass, "[^,]+") do
-            table.insert(out, spell(s))
-        end
+        -- a class has one superclass: the cell lists the chain above the class, direct superclass first ("UIKit.UIView,
+        -- UIKit.UIResponder, ..."), and the list is "multiple inheritance from classes" (502 errors in 37 modules of the coordinator's sdk run)
+        table.insert(out, spell(string.match(superclass, "^[^,]+")))
     end
     for _, c in ipairs(extra or {}) do
         table.insert(out, spell(c))
