@@ -1,7 +1,7 @@
 #!/bin/sh
 # generate.sh - regenerate every generated file of this framework.
 #
-# The generated files are the .m under packages/a/apple-backports/Intents/ and the six JSONs under
+# The generated files are the class objects, built into .gen/Intents (not committed), and the six JSONs under
 # packages/a/apple-backports/registry/Intents/. Each opens with a line saying it is generated, so
 # this is how one is reproduced, diffed against a rerun, or audited.
 #
@@ -35,7 +35,7 @@ work=${WORK:-$root/.agent-work/intents-generation}
 PORT_SDK=${PORT_SDK:-$(ls -d "$HOME"/.xmake/packages/i/iphoneos-sdk/*/*/iPhoneOS*.sdk 2>/dev/null | head -1)}
 SDK_262=${SDK_262:-$HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk}
 CORPUS=${CORPUS:-$HOME/Git/projects/ios/coordination/corpus/sdk-26.2-surface.tsv}
-classes=$root/packages/a/apple-backports/Intents
+objects=$root/.gen/Intents
 registry=${REGISTRY_OUT:-$root/packages/a/apple-backports/registry/Intents}
 # The manifest is this script's own input, so it is named here and not out of the registry it regenerates:
 # a check run sends REGISTRY_OUT at a scratch and must still read the committed manifest.
@@ -47,66 +47,14 @@ mkdir -p "$work" "$registry"
 [ -d "$SDK_262" ] || { echo "no iPhoneOS 26.2 SDK; set SDK_262" >&2; exit 1; }
 [ -f "$CORPUS" ] || { echo "no corpus surface; set CORPUS" >&2; exit 1; }
 
-# The two ASTs. The newer one is read only for a class the port's SDK does not declare at all.
-echo "#import <Intents/Intents.h>" > "$work/umbrella.m"
-port_version=$(basename "$PORT_SDK" | sed 's/iPhoneOS//; s/\.sdk//')
-newer_version=$(basename "$SDK_262" | sed 's/iPhoneOS//; s/\.sdk//')
-# The dump is keyed by what it was read from: the SDK's own header mtimes and the umbrella that
-# imports them.  The plain `[ -f ]` test that was here meant that a run with a different SDK, or
-# after a header changed, read a dump of something else and generated from it, and it meant that a
-# second run in the same turn paid the parse again - measured, 10 minutes for the pair, and it is
-# the whole cost of a rerun.  So the key is written beside the dump and compared, and a mismatch
-# re-reads.
-ast_dump() {           # ast_dump SDK VERSION OUT
-    # The key is the newest header mtime, the number of headers, and the umbrella's own: a
-    # changed header or a changed import list re-reads, and nothing else does.
-    # The umbrella's own **content hash**, not its mtime: generate.sh rewrites the umbrella on
-    # every run, so an mtime in the key is always new and the dump is never reused.  Measured, one
-    # rerun paid the 10-minute parse for exactly that reason.
-    key=$( { find "$1/System/Library/Frameworks" -name '*.h' -print0 | xargs -0 stat -f '%m' 2>/dev/null | sort -rn | head -1
-             find "$1/System/Library/Frameworks" -name '*.h' | wc -l
-             shasum "$work/umbrella.m" | cut -d' ' -f1; } | tr '\n' ' ')
-    if [ -f "$3" ] && [ -f "$3.key" ] && [ "$(cat "$3.key")" = "$key" ]; then
-        echo "    ast $3: reused, $(wc -c < "$3" | tr -d ' ') bytes"
-        return 0
-    fi
-    echo "    ast $3: reading $1"
-    xcrun clang -target "arm64-apple-ios$2" -isysroot "$1" \
-        -fsyntax-only -x objective-c -Wno-everything -Xclang -ast-dump=json "$work/umbrella.m" \
-        > "$3"
-    echo "$key" > "$3.key"
-}
-ast_dump "$PORT_SDK" "$port_version" "$work/ast-port.json"
-ast_dump "$SDK_262" "$newer_version" "$work/ast-262.json"
+# The class objects are built by objects.lua, the same script the build runs (modules/apple/backports.lua generate()), into the
+# generated folder .gen/Intents: they are not committed. Its two ASTs and its reports stay in $work, and the registry reads the reports.
+xmake l "$here/objects.lua" --sdk "$SDK_262" --port-sdk "$PORT_SDK" --out "$root/.gen/Intents" --work "$work"
 
 carried=$groups/intents-classes.txt
 # The generator's own vocabulary of why a member is not answered, written out so an absent entry's
 # reason is the cause the generator recorded and not the owner class's group.
 xmake l "$here/gen-causes.lua" --out "$work/causes.json"
-# group:release:file:newer:protocols
-for entry in 10_0_1:10.0.1:ios10:no:yes \
-            10_3:10.3:ios10:no:yes \
-            11_0:11.0:ios11:no:no \
-            12_0:12.0:ios12:yes:no \
-            16_0:16.0:ios16:yes:no \
-            18_0:18.0:ios18:yes:no; do
-    group=${entry%%:*}; rest=${entry#*:}; release=${rest%%:*}; rest=${rest#*:}
-    file=${rest%%:*}; rest=${rest#*:}; newer=${rest%%:*}; protocols=${rest##*:}
-    echo "=== $group ($release)"
-    extra=""
-    [ "$newer" = yes ] && extra="--dump-newer $work/ast-262.json"
-    [ "$group" = 16_0 ] && continue
-    xmake l "$here/gen-intents.lua" --sdk "$PORT_SDK" \
-        --dump "$work/ast-port.json" $extra --classes "$groups/$group.txt" --release "$release" \
-        --carried "$carried" --intents "$carried" --out "$classes/IN$group.m" \
-        --report "$work/report-$group.json"
-done
-# The 16.0 group last, so its ALONE class is emitted with it.
-xmake l "$here/gen-intents.lua" --sdk "$PORT_SDK" --dump "$work/ast-port.json" \
-    --dump-newer "$work/ast-262.json" --classes "$groups/16_0.txt" --release 16.0 \
-    --carried "$carried" --intents "$carried" --out "$classes/IN16_0.m" \
-    --report "$work/report-16_0.json"
-
 # The registry, one file per group, written from what each generator emitted and the corpus's own
 # rows. The first two groups share a file, and the protocols are written once, there.
 python3 "$here/gen-registry.py" --corpus "$CORPUS" --classes "$groups/10_0_1.txt" "$groups/10_3.txt" \
@@ -169,4 +117,4 @@ if missing:
     sys.exit(1)
 print("  %d constant rows, all of them present" % len(manifest))
 PY
-echo "regenerated: $(ls "$classes"/IN*.m | wc -l) object files, $(ls "$registry"/ios*.json | wc -l) registry files"
+echo "regenerated: $(ls "$objects"/IN*.m | wc -l) object files in .gen/Intents, $(ls "$registry"/ios*.json | wc -l) registry files"

@@ -59,8 +59,10 @@ parameter was given.
 Ten classes are hand written in `CharonIntents100.m` (the iOS 10.0.1 group) and one in
 `CharonIntents110.m` (the 11.0 group); the other 104 of the 10.0.1 group, the 22 of the 10.3
 group and the 56 generated classes of the 11.0 group are generated into `IN10_0.m`, `IN10_3.m`
-and `IN11_0.m` by `tools/intents/gen-intents.py` from the SDK's own declarations. What is hand
-written and why:
+and `IN11_0.m` by `tools/intents/gen-intents.lua` from the SDK's own declarations. The generated
+objects are built at build time into `.gen/Intents/` by `tools/intents/objects.lua` (from
+`CHARON_GEN_SDK`, the iPhoneOS 26.2 SDK) and are not committed; `IN17_0.m` and the hand-written
+files stay in the folder. What is hand written and why:
 
 * **`INIntent`** makes a UUID string `identifier` where the intent is made. The system assigns
   that identifier when the interaction carrying the intent is donated; there is no system, and

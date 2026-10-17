@@ -862,6 +862,12 @@ function generate(root)
         raise("the generated layer needs CHARON_GEN_SDK: the iPhoneOS SDK whose release the spec snapshot is measured on (gen --sdk)")
     end
     os.runv(os.programfile(), {"l", path.join(tree, "tools", "gen.lua"), "gen", "--tree", tree, "--all", "--sdk", sdk})
+    -- the Intents class objects (IN<group>.m) are built into .gen/Intents from the same SDK, by their own generator (tools/intents/objects.lua),
+    -- and are not committed; a root with no Intents folder has none to build
+    if os.isdir(path.join(root, "Intents")) then
+        os.runv(os.programfile(), {"l", path.join(tree, "tools", "intents", "objects.lua"), "--sdk", sdk,
+            "--out", path.join(root, ".gen", "Intents"), "--work", path.join(tree, ".agent-work", "intents-generation")})
+    end
 end
 
 function sources(root, library)
