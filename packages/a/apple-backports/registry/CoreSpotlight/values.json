@@ -1,0 +1,25 @@
+{
+  "framework": "CoreSpotlight",
+  "entries": [
+    {
+      "api": "CSPerson",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a person is a value: the display name, the handles in the order given, the handle identifier and the contact identifier, which is copied on set. Two persons are equal when those four agree (a nil name is not an empty one); copy gives a new person with the same four values. description reads <CSPerson:ADDRESS NAME <HANDLE, HANDLE> with no closing angle bracket, as the host's does",
+      "facts": "facts/CoreSpotlight/Values.md",
+      "source": "the macOS CoreSpotlight framework of the host (tests/backports/host/corespotlight-values, 77 lines identical to the port's, with a planted control that the same comparison tells apart); the rendered header of CSPerson from the 26.2 SDK for the surface"
+    },
+    {
+      "api": "CSSearchQueryContext",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a query context holds the attributes to fetch (an empty list by default, and nil is stored as the empty list), the filter queries (nil by default, copied on set), the keyboard language and the source options (0 by default). A context compares by identity (two contexts with the default values are not equal), and copy gives a new context with the same four values; it codes and decodes all four",
+      "facts": "facts/CoreSpotlight/Values.md",
+      "source": "the macOS CoreSpotlight framework of the host (tests/backports/host/corespotlight-values, the same comparison as CSPerson); the rendered header of CSSearchQuery.h from the 26.2 SDK for the surface"
+    }
+  ]
+}
