@@ -9,104 +9,48 @@ import Foundation
 
 extension NotificationCenter {
 
-    /// A namespace for disambiguation when both OpenCombine and Foundation are imported.
-    ///
-    /// Foundation extends `NotificationCenter` with new methods and nested types.
-    /// If you import both OpenCombine and Foundation, you will not be able
-    /// to write `NotificationCenter.Publisher`,
-    /// because Swift is unable to understand which `Publisher`
-    /// you're referring to — the one declared in Foundation or in Combine.
-    ///
-    /// So you have to write `NotificationCenter.OCombine.Publisher`.
-    ///
-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
-    ///
-    /// You can omit this whenever Combine is not available (e. g. on Linux).
-    public struct OCombine {
+    /// A publisher that emits elements when broadcasting notifications.
+    public struct Publisher: Combine.Publisher {
 
+        public typealias Output = Notification
+
+        public typealias Failure = Never
+
+        /// The notification center this publisher uses as a source.
         public let center: NotificationCenter
 
-        public init(_ center: NotificationCenter) {
-            self.center = center
-        }
+        /// The name of notifications published by this publisher.
+        public let name: Notification.Name
 
-        /// A publisher that emits elements when broadcasting notifications.
-        public struct Publisher: Combine.Publisher {
+        /// The object posting the named notification.
+        public let object: AnyObject?
 
-            public typealias Output = Notification
-
-            public typealias Failure = Never
-
-            /// The notification center this publisher uses as a source.
-            public let center: NotificationCenter
-
-            /// The name of notifications published by this publisher.
-            public let name: Notification.Name
-
-            /// The object posting the named notification.
-            public let object: AnyObject?
-
-            /// Creates a publisher that emits events when broadcasting notifications.
-            ///
-            /// - Parameters:
-            ///   - center: The notification center to publish notifications for.
-            ///   - name: The name of the notification to publish.
-            ///   - object: The object posting the named notification. If `nil`,
-            ///     the publisher emits elements for any object producing a notification
-            ///     with the given name.
-            public init(center: NotificationCenter,
-                        name: Notification.Name,
-                        object: AnyObject? = nil) {
-                self.center = center
-                self.name = name
-                self.object = object
-            }
-
-            public func receive<Downstream: Subscriber>(subscriber: Downstream)
-                where Downstream.Failure == Never, Downstream.Input == Notification
-            {
-                let subscription = Notification.Subscription(center: center,
-                                                             name: name,
-                                                             object: object,
-                                                             downstream: subscriber)
-                subscriber.receive(subscription: subscription)
-            }
-        }
-
-        /// Returns a publisher that emits events when broadcasting notifications.
+        /// Creates a publisher that emits events when broadcasting notifications.
         ///
         /// - Parameters:
+        ///   - center: The notification center to publish notifications for.
         ///   - name: The name of the notification to publish.
-        ///   - object: The object posting the named notification. If `nil`, the publisher
-        ///     emits elements for any object producing a notification with the given
-        ///     name.
-        /// - Returns: A publisher that emits events when broadcasting notifications.
-        public func publisher(for name: Notification.Name,
-                              object: AnyObject? = nil) -> Publisher {
-            return .init(center: center, name: name, object: object)
+        ///   - object: The object posting the named notification. If `nil`,
+        ///     the publisher emits elements for any object producing a notification
+        ///     with the given name.
+        public init(center: NotificationCenter,
+                    name: Notification.Name,
+                    object: AnyObject? = nil) {
+            self.center = center
+            self.name = name
+            self.object = object
+        }
+
+        public func receive<Downstream: Subscriber>(subscriber: Downstream)
+            where Downstream.Failure == Never, Downstream.Input == Notification
+        {
+            let subscription = Notification.Subscription(center: center,
+                                                         name: name,
+                                                         object: object,
+                                                         downstream: subscriber)
+            subscriber.receive(subscription: subscription)
         }
     }
-
-    /// A publisher that emits elements when broadcasting notifications.
-    public typealias Publisher = OCombine.Publisher
-}
-
-extension NotificationCenter {
-
-    /// A namespace for disambiguation when both OpenCombine and Foundation are imported.
-    ///
-    /// Foundation extends `NotificationCenter` with new methods and nested types.
-    /// If you import both OpenCombine and Foundation, you will not be able
-    /// to write `NotificationCenter.default.publisher(for: name)`,
-    /// because Swift is unable to understand which `publisher` method
-    /// you're referring to — the one declared in Foundation or in Combine.
-    ///
-    /// So you have to write `NotificationCenter.default.ocombine.publisher(for: name)`.
-    ///
-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
-    ///
-    /// You can omit this whenever Combine is not available (e. g. on Linux).
-    public var ocombine: OCombine { return .init(self) }
 
     /// Returns a publisher that emits events when broadcasting notifications.
     ///
@@ -116,14 +60,14 @@ extension NotificationCenter {
     ///     emits elements for any object producing a notification with the given name.
     /// - Returns: A publisher that emits events when broadcasting notifications.
     public func publisher(for name: Notification.Name,
-                          object: AnyObject? = nil) -> OCombine.Publisher {
-        return ocombine.publisher(for: name, object: object)
+                          object: AnyObject? = nil) -> Publisher {
+        return Publisher(center: self, name: name, object: object)
     }
 }
 
-extension NotificationCenter.OCombine.Publisher: Equatable {
-    public static func == (lhs: NotificationCenter.OCombine.Publisher,
-                           rhs: NotificationCenter.OCombine.Publisher) -> Bool {
+extension NotificationCenter.Publisher: Equatable {
+    public static func == (lhs: NotificationCenter.Publisher,
+                           rhs: NotificationCenter.Publisher) -> Bool {
         return lhs.center == rhs.center &&
                lhs.name == rhs.name &&
                lhs.object === rhs.object
