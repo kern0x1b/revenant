@@ -342,6 +342,22 @@ local function render_member(row, indent, access)
     return lines
 end
 
+-- The standard library's protocols a type may be named after (an enum Error conforms to Error): an unqualified conformance of that name is
+-- spelled Swift.Error, since inside the type the name is the type itself (the compiler: "'Error' has a raw type that depends on itself").
+local STDLIB_PROTOCOLS = {}
+for word in string.gmatch("Error Copyable Escapable Sendable Equatable Hashable Comparable Codable Decodable Encodable Identifiable "
+                          .. "CaseIterable CustomStringConvertible RawRepresentable Sequence Collection MutableCollection", "%S+") do
+    STDLIB_PROTOCOLS[word] = true
+end
+
+-- A conformance as the skeleton spells it: a standard library protocol qualified with its module, any other name as it is.
+local function stdlib_qualified(conformance)
+    if STDLIB_PROTOCOLS[conformance] then
+        return "Swift." .. conformance
+    end
+    return conformance
+end
+
 -- The conformances of a class row as a list, less the Actor conformance: an actor is declared with its keyword, not with a
 -- conformance. Returns the list and whether the class is an actor.
 local function conformances_of_row(row)
@@ -353,7 +369,7 @@ local function conformances_of_row(row)
         if row.kind == "swift-class" and string.match(c, "([^.]+)$") == "Actor" then
             actor = true
         else
-            table.insert(out, c)
+            table.insert(out, stdlib_qualified(c))
         end
     end
     return out, actor
