@@ -19,6 +19,13 @@
 #import <ARKit/ARKit.h>
 #import <objc/runtime.h>
 
+// The SDK marks ARWorldMap's -init unavailable: an application gets a map from a session's
+// getCurrentWorldMapWithCompletionHandler:. The probe needs an empty map to store, so it reaches the
+// port's own initialiser (CharonARKitPrivate.h), declared here the way that header declares it.
+@interface ARWorldMap (ProbeInit)
+- (instancetype)initWithAnchors:(NSArray<ARAnchor *> *)anchors featurePoints:(nullable ARPointCloud *)featurePoints;
+@end
+
 static int checks;
 static int failures;
 
@@ -106,7 +113,7 @@ int main(void)
               [NSString stringWithFormat:@"%lu", (unsigned long)w.detectionObjects.count], @"0");
 
         printf("world map\n");
-        ARWorldMap *map = [[ARWorldMap alloc] init];
+        ARWorldMap *map = [[ARWorldMap alloc] initWithAnchors:@[] featurePoints:nil];
         w.initialWorldMap = map;
         check(w.initialWorldMap == map, @"world.initialWorldMap reads back the map given", @"another map", @"the same map");
         NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:map];
