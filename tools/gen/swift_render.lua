@@ -331,6 +331,92 @@ end
 -- The declaration of one member: a method, a function, a property, a constant or an associated type. indent spaces lead each line.
 -- access is the modifier the enclosing declaration needs ("public ", "open ") so the digester sees the member again; a protocol
 -- requirement carries none (it is public by nature), and neither does an enum case or an associated type, which take none.
+-- The terms of a where text, split at the commas outside brackets and parentheses, each trimmed.
+local function where_terms(gwhere)
+    local out = {}
+    if gwhere == nil then
+        return out
+    end
+    local depth, start = 0, 1
+    for i = 1, #gwhere do
+        local ch = string.sub(gwhere, i, i)
+        if ch == "<" or ch == "(" or ch == "[" then
+            depth = depth + 1
+        elseif ch == ">" or ch == ")" or ch == "]" then
+            depth = depth - 1
+        elseif ch == "," and depth == 0 then
+            table.insert(out, (string.gsub(string.sub(gwhere, start, i - 1), "^%s+", "")))
+            start = i + 1
+        end
+    end
+    table.insert(out, (string.gsub(string.sub(gwhere, start), "^%s+", "")))
+    return out
+end
+
+-- Whether a name occurs in a text as a whole identifier.
+local function names_in(text, name)
+    return string.find(text, "%f[%w_]" .. name .. "%f[^%w_]") ~= nil
+end
+
+-- The parameter types of a method with each `some C` replaced by a generic parameter the signature leaves unused, and the where text with
+-- the constraint C on that parameter. A parameter spelled some X declares its own implicit parameter, so the explicit one is never used
+-- and the compiler refuses the clause ("generic parameter 'W0' is not used in function signature": 820 errors in RegexBuilder's
+-- buildPartialBlock<W0, W1, C1>(accumulated: some RegexComponent, next: some RegexComponent) -> Regex<...>). The unused parameters are
+-- taken in order: the constraint the clause states for one of them (W0 : X) is kept, else the constraint is the parameter's own type (the
+-- digester states none for the some parameters). Returns the types and the where text (either may be nil).
+local function generic_for_some(types, gparams, gwhere, result)
+    if gparams == nil then
+        return types, gwhere
+    end
+    local body = string.match(gparams, "^<(.*)>$")
+    local constraint_of = {}
+    local terms = where_terms(gwhere)
+    for _, term in ipairs(terms) do
+        local name, bound = string.match(term, "^([%w_]+)%s*:%s*(.-)%s*$")
+        if name then
+            constraint_of[name] = bound
+        end
+    end
+    local unused = {}
+    for item in string.gmatch(body, "[^,]+") do
+        local name = string.match(item, "([%w_]+)%s*$")
+        local used = names_in(result, name)
+        for _, t in ipairs(types) do
+            if string.sub(t, 1, 5) ~= "some " and names_in(t, name) then
+                used = true
+            end
+        end
+        if not used then
+            table.insert(unused, name)
+        end
+    end
+    local out, extra = {}, {}
+    for i, t in ipairs(types) do
+        out[i] = t
+        -- a parameter whose type ends in some X (X the rest of the type: "some X", or "() -> some X" for a closure's result)
+        local head, bound = string.match(t, "^(.-)some ([^%s].-)$")
+        if head ~= nil and not string.find(bound, "some ", 1, true) then
+            for k, name in ipairs(unused) do
+                if constraint_of[name] == nil or constraint_of[name] == bound then
+                    out[i] = head .. name
+                    if constraint_of[name] == nil then
+                        table.insert(extra, name .. " : " .. bound)
+                    end
+                    table.remove(unused, k)
+                    break
+                end
+            end
+        end
+    end
+    if #extra == 0 then
+        return out, gwhere
+    end
+    for _, e in ipairs(extra) do
+        table.insert(terms, e)
+    end
+    return out, table.concat(terms, ", ")
+end
+
 local function render_member(row, indent, access)
     local pad = string.rep(" ", indent)
     local avail = availability_of(row)
@@ -376,6 +462,8 @@ local function render_member(row, indent, access)
     -- a method or a function
     local leaf, labels = name_parts(row.name)
     local types = pipe_list(row.params)
+    local gparams, gwhere = generic_clause(row.generic_sig, row.outer_names)
+    types, gwhere = generic_for_some(types, gparams, gwhere, row.type ~= NO_VALUE and spell(row.type) or "")
     local params = {}
     local first = leaf == "init" and 2 or 1
     for i = first, #types do
@@ -396,7 +484,6 @@ local function render_member(row, indent, access)
         if row.init_kind == "Convenience" then prefix = prefix .. "convenience " end
     end
     if row.mutating == "Mutating" then prefix = prefix .. "mutating " end
-    local gparams, gwhere = generic_clause(row.generic_sig, row.outer_names)
     -- a subscript of a protocol states its accessors (get, or get and set): the compiler refuses one that does not
     local accessors = ""
     if leaf == "subscript" and access == "" then
