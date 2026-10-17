@@ -120,7 +120,7 @@ on a decision, so none has been deleted.
 - `api-ledger.py`, `api-ledger-swift.py` and their selftests: `const-values.py`, `tests/backports/host/videotoolbox-frameprocessor/check_port.py`,
   `tools/corpus/tests/test_corpus.py` still calls them.
 - Python tools in this directory that no step above names: `gen-cifilter-builtins.py`,
-  `gen-imageio-property-map.py`, `gen-ledger-objects.py`, `gen-mio.py`, `mio-rows.py`,
+  `gen-imageio-property-map.py`, `gen-ledger-objects.py`,
   `surface-diff-latest.py`.
   Whether each is still needed is the coordinator's call.
 
