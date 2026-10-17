@@ -29,7 +29,9 @@ iOS 6.1.3 reads them, so the answers only matter to an application that builds t
   `", "` inside angle brackets. The closing angle bracket of the outer form is not printed. The port keeps
   this text as measured. A nil name or a nil handle list prints as `(null)`, because `componentsJoinedByString:` on nil is nil.
 - Secure coding: `supportsSecureCoding` is YES, and a person coded and decoded reads back the same four values
-  (a nil name stays nil). The archive's key names are the port's own; they are not measured against the host,
+  (a nil name stays nil). Both classes decode with `decodeObjectForKey:`, the coder call of the earliest release (documented from iOS 2):
+  `decodeObjectOfClass:forKey:` and `decodeObjectOfClasses:forKey:` are read by other files of the tree but no
+  backport defines them and the registry names neither, so the 6.1.3 release is not shown to have them. The archive's key names are the port's own; they are not measured against the host,
   and nothing in the tree reads them.
 
 ## CSSearchQueryContext (iOS 10)

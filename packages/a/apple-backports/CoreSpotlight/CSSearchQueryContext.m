@@ -46,9 +46,9 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [self init])) {
-        self.fetchAttributes = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSArray class], [NSString class], nil] forKey:@"fetchAttributes"];
-        self.filterQueries = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSArray class], [NSString class], nil] forKey:@"filterQueries"];
-        _keyboardLanguage = [coder decodeObjectOfClass:[NSString class] forKey:@"keyboardLanguage"];
+        self.fetchAttributes = [coder decodeObjectForKey:@"fetchAttributes"];
+        self.filterQueries = [coder decodeObjectForKey:@"filterQueries"];
+        _keyboardLanguage = [coder decodeObjectForKey:@"keyboardLanguage"];
         _sourceOptions = (CSSearchQuerySourceOptions)[coder decodeIntegerForKey:@"sourceOptions"];
     }
     return self;

@@ -91,10 +91,10 @@ static BOOL CharonSpotlightValuesEqual(id a, id b)
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {
-        _displayName = [coder decodeObjectOfClass:[NSString class] forKey:@"displayName"];
-        _handles = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSArray class], [NSString class], nil] forKey:@"handles"];
-        _handleIdentifier = [coder decodeObjectOfClass:[NSString class] forKey:@"handleIdentifier"];
-        _contactIdentifier = [coder decodeObjectOfClass:[NSString class] forKey:@"contactIdentifier"];
+        _displayName = [coder decodeObjectForKey:@"displayName"];
+        _handles = [coder decodeObjectForKey:@"handles"];
+        _handleIdentifier = [coder decodeObjectForKey:@"handleIdentifier"];
+        _contactIdentifier = [coder decodeObjectForKey:@"contactIdentifier"];
     }
     return self;
 }
