@@ -89,10 +89,11 @@
       "kind": "constant",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build the constant kCGColorConversionTRCSize",
-      "effect": "until built: the symbol is not exported",
-      "source": "the SDK 16.4 headers of CoreGraphics"
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the colour conversion objects that read it are not carried",
+      "effect": "the constant is there with the text the release gives it; no colour conversion of the port reads it",
+      "facts": "facts/CoreGraphics/ColourKeys.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
     },
     {
       "api": "CGDataProviderGetInfo()",
@@ -139,60 +140,66 @@
       "kind": "constant",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build the constant kCGPDFContextAccessPermissions",
-      "effect": "until built: the symbol is not exported",
-      "source": "the SDK 16.4 headers of CoreGraphics"
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the PDF functions that read the key are not carried",
+      "effect": "the constant is there with the text the release gives it; no PDF context of the port reads the key",
+      "facts": "facts/CoreGraphics/PDFNames.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
     },
     {
       "api": "kCGPDFOutlineChildren",
       "kind": "constant",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build the constant kCGPDFOutlineChildren",
-      "effect": "until built: the symbol is not exported",
-      "source": "the SDK 16.4 headers of CoreGraphics"
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the outline functions that read the key are not carried",
+      "effect": "the constant is there with the text the release gives it; no PDF function of the port reads it",
+      "facts": "facts/CoreGraphics/PDFNames.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
     },
     {
       "api": "kCGPDFOutlineDestination",
       "kind": "constant",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build the constant kCGPDFOutlineDestination",
-      "effect": "until built: the symbol is not exported",
-      "source": "the SDK 16.4 headers of CoreGraphics"
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the outline functions that read the key are not carried",
+      "effect": "the constant is there with the text the release gives it; no PDF function of the port reads it",
+      "facts": "facts/CoreGraphics/PDFNames.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
     },
     {
       "api": "kCGPDFOutlineDestinationRect",
       "kind": "constant",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build the constant kCGPDFOutlineDestinationRect",
-      "effect": "until built: the symbol is not exported",
-      "source": "the SDK 16.4 headers of CoreGraphics"
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the outline functions that read the key are not carried",
+      "effect": "the constant is there with the text the release gives it; no PDF function of the port reads it",
+      "facts": "facts/CoreGraphics/PDFNames.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
     },
     {
       "api": "kCGPDFOutlineTitle",
       "kind": "constant",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build the constant kCGPDFOutlineTitle",
-      "effect": "until built: the symbol is not exported",
-      "source": "the SDK 16.4 headers of CoreGraphics"
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the outline functions that read the key are not carried",
+      "effect": "the constant is there with the text the release gives it; no PDF function of the port reads it",
+      "facts": "facts/CoreGraphics/PDFNames.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
     },
     {
       "api": "kCGAdaptiveMaximumBitDepth",
       "kind": "constant",
       "introduced": "11.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build the constant kCGAdaptiveMaximumBitDepth",
-      "effect": "until built: the symbol is not exported",
-      "source": "the SDK 16.4 headers of CoreGraphics"
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the bitmap context that takes it is not carried",
+      "effect": "the constant is there with the text the release gives it; no bitmap context of the port reads it",
+      "facts": "facts/CoreGraphics/ColourKeys.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; 11.0 is the SDK 26.2 header's API_AVAILABLE, not a measurement: release-split finds no held cache (11.0 to 18.0) that names it"
     },
     {
       "api": "kCGColorSpaceExtendedLinearDisplayP3",
