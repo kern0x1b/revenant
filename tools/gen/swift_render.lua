@@ -629,6 +629,13 @@ function untyped(row)
     return row.type == UNTYPED
 end
 
+-- Whether a declaration is a projected value: a property wrapper's `$name` (a Binding, a Parameter's $url). The compiler synthesizes it
+-- from the wrapper, and refuses a declaration of it ("the '$' prefix is reserved for implicitly-synthesized declarations"), so render
+-- leaves it out and the round trip counts the SDK's row as projected (swift_roundtrip.compare), not as missing.
+function projected(row)
+    return string.sub(row.name, 1, 1) == "$"
+end
+
 -- Groups the model rows into a tree: a type row becomes a node keyed by its api, its members and nested types attach to it, and a
 -- declaration whose container is a type the model has no row for attaches to nothing (it is not rendered). Returns the top nodes and
 -- the top-level members (functions, constants at module level).
@@ -667,7 +674,7 @@ end
 function render(rows, framework, known, classes, public)
     local typed = {}
     for _, row in ipairs(rows) do
-        if not untyped(row) then
+        if not untyped(row) and not projected(row) then
             table.insert(typed, row)
         end
     end

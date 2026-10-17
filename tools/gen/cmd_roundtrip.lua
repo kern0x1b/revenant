@@ -84,6 +84,8 @@ local function report_of(name, result)
     table.insert(lines, string.format("  by design: %d rows, stored properties rendered computed (not a mismatch)", c.by_design))
     table.insert(lines, string.format("  witnesses: %d members the skeleton declares for an ObjC or Foundation protocol the model gives none (not extra)",
                                       c.witnessed))
+    table.insert(lines, string.format("  projected: %d rows, a property wrapper's $name, synthesized by the compiler (not declared, not missing)",
+                                      c.projected))
     if result.untyped then
         table.insert(lines, string.format("  model gap: %d declarations with no type in the dump (the digester gives the "
                                           .. "error type; not rendered, so missing)", result.untyped))

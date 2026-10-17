@@ -5,6 +5,7 @@
 -- (an error type), so its first error is the result and no row is compared. The build products are never committed.
 
 local heavy_batch = import("heavy_batch", {anonymous = true})
+local swift_render = import("swift_render", {anonymous = true})
 local json = import("core.base.json")
 
 local NO_VALUE = "-"
@@ -209,13 +210,18 @@ function compare(sdk_rows, our_rows, witnessed)
         end
     end
     local result = {sdk = #sdk_rows, ours = #our_rows, equal = 0, missing = {}, extra = 0, duplicates = duplicates,
-                    by_design = 0, witnessed = 0, causes = {}, examples = {}}
+                    by_design = 0, witnessed = 0, projected = 0, causes = {}, examples = {}}
     local matched = {}
     for _, row in ipairs(sdk_rows) do
         local key = key_of(row)
         local other = ours[key]
         if other == nil then
-            table.insert(result.missing, label_of(row))
+            -- a projected value is synthesized from its property wrapper, so the skeleton does not declare it: by design
+            if swift_render.projected(row) then
+                result.projected = result.projected + 1
+            else
+                table.insert(result.missing, label_of(row))
+            end
         else
             matched[key] = true
             local differs, designed = false, false
