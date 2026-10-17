@@ -143,21 +143,61 @@ function attributed_row(row, attributed)
     return false
 end
 
+-- The standard library's protocols a type may be named after (an enum Error conforms to Error): an unqualified conformance of that name is
+-- spelled Swift.Error, since inside the type the name is the type itself (the compiler: "'Error' has a raw type that depends on itself").
+local STDLIB_PROTOCOLS = {}
+for word in string.gmatch("Error Copyable Escapable Sendable Equatable Hashable Comparable Codable Decodable Encodable Identifiable "
+                          .. "CaseIterable CustomStringConvertible RawRepresentable Sequence Collection MutableCollection", "%S+") do
+    STDLIB_PROTOCOLS[word] = true
+end
+
+-- The Foundation protocols a skeleton names bare in the model (AVAudioCompressedBuffer: "NSCopying" with no import of Foundation, and
+-- LocalizedError in Messages): spelled Foundation.X, and Foundation is imported for them (imports_of).
+local FOUNDATION_PROTOCOLS = {}
+for word in string.gmatch("NSCopying NSMutableCopying NSSecureCoding LocalizedError", "%S+") do
+    FOUNDATION_PROTOCOLS[word] = true
+end
+
+-- A conformance as the skeleton spells it: a standard library protocol qualified with its module, any other name as it is.
+local function stdlib_qualified(conformance)
+    if STDLIB_PROTOCOLS[conformance] then
+        return "Swift." .. conformance
+    end
+    if FOUNDATION_PROTOCOLS[conformance] then
+        return "Foundation." .. conformance
+    end
+    return conformance
+end
+
+-- The conformance list of a row as the skeleton spells it (stdlib_qualified on each item), for the imports: a Foundation protocol named
+-- bare still needs Foundation imported.
+local function qualified_conformances(text)
+    if text == nil or text == NO_VALUE then
+        return text
+    end
+    local items = {}
+    for c in string.gmatch(text, "[^,]+") do
+        table.insert(items, stdlib_qualified(c))
+    end
+    return table.concat(items, ",")
+end
+
 -- The imports a module needs: the module qualifiers of every type, conformance, superclass and generic signature that name a Swift
 -- module of the SDK (known: the set of their names), less the module's own name and the Swift standard library (its declarations
 -- are in scope without an import). A qualifier that is no module (a generic parameter such as T, the clang importer's C) is not
 -- imported. public maps an implementation module to its public one: the compiler refuses an import of the first ("is an
 -- implementation detail of"), and the public module re-exports its declarations, so the qualifier stays and only the import
 -- changes.
-local function imports_of(rows, framework, known, public)
+local function imports_of(rows, framework, known, public, attributed)
     local seen, out = {}, {}
     local function import_of(module)
         return public[module] or module
     end
     -- a public name that is the framework itself is no import: RealityFoundation is RealityKit's implementation, so its public name
-    -- RealityKit re-exports RealityFoundation and imports it back (a circular dependency); SwiftUICore's public name is SwiftUI likewise
+    -- RealityKit re-exports RealityFoundation and imports it back (a circular dependency); SwiftUICore's public name is SwiftUI likewise.
+    -- A module that depends on this one is no import either: it is the cycle attributed_row leaves out the rows for
     local function add(module)
-        if module ~= framework and seen[module] == nil then
+        if module ~= framework and not (attributed and attributed[module]) and seen[module] == nil then
             seen[module] = true
             table.insert(out, module)
         end
@@ -181,7 +221,7 @@ local function imports_of(rows, framework, known, public)
         end
         scan(r.type)
         scan(r.params)
-        scan(r.conformances)
+        scan(qualified_conformances(r.conformances))
         scan(r.superclass)
         scan(r.generic_sig)
     end
@@ -382,22 +422,6 @@ local function render_member(row, indent, access)
     end
     table.insert(lines, pad .. prefix .. signature .. (access == "" and accessors or trap(label)))
     return lines
-end
-
--- The standard library's protocols a type may be named after (an enum Error conforms to Error): an unqualified conformance of that name is
--- spelled Swift.Error, since inside the type the name is the type itself (the compiler: "'Error' has a raw type that depends on itself").
-local STDLIB_PROTOCOLS = {}
-for word in string.gmatch("Error Copyable Escapable Sendable Equatable Hashable Comparable Codable Decodable Encodable Identifiable "
-                          .. "CaseIterable CustomStringConvertible RawRepresentable Sequence Collection MutableCollection", "%S+") do
-    STDLIB_PROTOCOLS[word] = true
-end
-
--- A conformance as the skeleton spells it: a standard library protocol qualified with its module, any other name as it is.
-local function stdlib_qualified(conformance)
-    if STDLIB_PROTOCOLS[conformance] then
-        return "Swift." .. conformance
-    end
-    return conformance
 end
 
 -- The conformances of a class row as a list, less the Actor conformance: an actor is declared with its keyword, not with a
@@ -764,7 +788,7 @@ function render(rows, framework, known, classes, public, attributed)
         table.insert(body, l)
     end
     -- the imports: the modules the model names, and Foundation when a witness spells one of its types (the module itself excepted)
-    local modules = imports_of(rows, framework, known, public or {})
+    local modules = imports_of(rows, framework, known, public or {}, attributed)
     local foundation_depends = attributed ~= nil and attributed["Foundation"]
     if has_keys(witnessed) and framework ~= "Foundation" and not foundation_depends and not contains(modules, "Foundation") then
         table.insert(modules, "Foundation")

@@ -136,10 +136,44 @@ function dependents_of(graph, module)
     return out
 end
 
--- The Swift module names of the SDK as a set (name -> true): the names an import of the rendered code may name.
-function module_set(sdk)
+-- The clang modules of the SDK a Swift file imports by name (name -> true) and that have no swiftinterface: a framework's modulemap
+-- (_LocationEssentials, Matter, whose frameworks are .tbd only) and the modules the SDK's usr/include modulemap declares (os_object).
+-- The skeleton names them in its types and needs them imported.
+function clang_modules(sdk)
     local out = {}
+    for _, filepath in ipairs(files.glob(path.join(sdk, "System", "Library", "Frameworks", "*.framework", "Modules", "module.modulemap"))) do
+        local handle = assert(io.open(filepath, "rb"), "cannot read " .. filepath)
+        for line in handle:lines() do
+            local name = string.match(line, "^%s*framework%s+module%s+([%w_]+)")
+            if name then
+                out[name] = true
+            end
+        end
+        handle:close()
+    end
+    local usr = path.join(sdk, "usr", "include", "module.modulemap")
+    if os.isfile(usr) then
+        local handle = assert(io.open(usr, "rb"), "cannot read " .. usr)
+        for line in handle:lines() do
+            local name = string.match(line, "^%s*extern%s+module%s+([%w_]+)")
+            if name then
+                out[name] = true
+            end
+        end
+        handle:close()
+    end
+    return out
+end
+
+-- The Swift module names of the SDK as a set (name -> true): the names an import of the rendered code may name. The swiftinterface
+-- modules, the clang modules (clang_modules), and the compiler's Builtin module: the stdlib modules name its types (Distributed's
+-- Builtin.Executor), and it is importable with -enable-builtin-module (swift_roundtrip.compile_item) and has no interface in the SDK.
+function module_set(sdk)
+    local out = {Builtin = true}
     for _, name in ipairs(modules(sdk)) do
+        out[name] = true
+    end
+    for name in pairs(clang_modules(sdk)) do
         out[name] = true
     end
     return out

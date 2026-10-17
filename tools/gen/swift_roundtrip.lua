@@ -127,9 +127,11 @@ end
 -- not error types). underlying (underlying_of's folder, or nil) is the framework search path of the module's own ObjC part: the module
 -- imports it as its underlying clang module, so its Swift declarations see the ObjC ones.
 function compile_item(triple, sdk, source, module_dir, name, underlying)
-    local words = {"xcrun", "swiftc", "-parse-as-library", "-Xfrontend", "-experimental-allow-module-with-compiler-errors", "-emit-module",
-                   "-module-name", name, "-target", triple, "-sdk", sdk, "-emit-module-path", path.join(module_dir, name .. ".swiftmodule"),
-                   source}
+    -- -enable-builtin-module: the explicit import of Builtin (the skeleton's import Builtin, for the stdlib modules' Builtin.Executor) is
+    -- refused without it; the flag changes nothing else
+    local words = {"xcrun", "swiftc", "-parse-as-library", "-Xfrontend", "-experimental-allow-module-with-compiler-errors",
+                   "-Xfrontend", "-enable-builtin-module", "-emit-module", "-module-name", name, "-target", triple, "-sdk", sdk,
+                   "-emit-module-path", path.join(module_dir, name .. ".swiftmodule"), source}
     if underlying ~= nil then
         table.insert(words, "-F")
         table.insert(words, underlying)
