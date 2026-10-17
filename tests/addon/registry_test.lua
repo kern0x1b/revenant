@@ -1373,14 +1373,12 @@ function wiring(backports, root, found)
     -- sentence somebody wrote.  Each is `config .. "/" .. dep`, which is what the recipe's clause
     -- has to gain.  A config that is not in this table and builds a library whose declared
     -- dependency no clause builds is a failure, with no exception.
+    -- The scenekit and arkit rows are closed: the recipe's links and libraries clauses now name OpenGLES,
+    -- Accelerate and Graphics for the arkit and scenekit configs, so the arm finds no gap in them.
     local owed = {
         ["avkit/GraphicsBackports"] = true,
         ["usernotificationsui/GraphicsBackports"] = true,
         ["notificationcenter/GraphicsBackports"] = true,
-        ["scenekit/OpenGLESBackports"] = true,
-        ["arkit/OpenGLESBackports"] = true,
-        ["arkit/AccelerateBackports"] = true,
-        ["arkit/GraphicsBackports"] = true,
     }
     local count, gaps = 0, {}
     for _, name in ipairs(order) do
