@@ -421,8 +421,9 @@ end
 
 -- Renders one node (a type row, its nested types and its members). Own types get a declaration; a type of another module gets an
 -- extension, since its declaration belongs to its module. access is the modifier the enclosing declaration needs for a typealias
--- ("public ", or "" in a protocol, which refuses an access modifier on its members).
-local function render_node(node, indent, framework, classes, rendered, access)
+-- ("public ", or "" in a protocol, which refuses an access modifier on its members). hoisted (a list of lines) collects the extensions
+-- of a nested type: Swift refuses an extension inside a type, so those are declared at file scope (render).
+local function render_node(node, indent, framework, classes, rendered, access, hoisted)
     local row = node.row
     local pad = string.rep(" ", indent)
     local lines = {}
@@ -506,26 +507,41 @@ local function render_node(node, indent, framework, classes, rendered, access)
         end
     end
     for _, child in ipairs(node.children) do
-        for _, l in ipairs(render_node(child, indent + 4, framework, classes, rendered, member_access)) do
+        for _, l in ipairs(render_node(child, indent + 4, framework, classes, rendered, member_access, hoisted)) do
             table.insert(lines, l)
         end
     end
     table.insert(lines, pad .. "}")
 
-    -- a protocol's extension members live in an extension of their own
+    -- a protocol's extension members live in an extension of their own. A nested protocol's is declared at file scope, under the
+    -- protocol's qualified name (the module, its containers, its name), since an extension inside a type is refused
     if #extensions > 0 then
         local name = external and (row.owner_module .. "." .. ident(row.name)) or ident(row.name)
-        table.insert(lines, "")
-        table.insert(lines, pad .. "extension " .. name .. " {")
+        local block, ext_pad, ext_indent = lines, pad, indent + 4
+        if indent > 0 and not external then
+            name = framework .. "." .. (row.container ~= NO_VALUE and (row.container .. ".") or "") .. ident(row.name)
+            block, ext_pad, ext_indent = hoisted, "", 4
+        end
+        table.insert(block, "")
+        table.insert(block, ext_pad .. "extension " .. name .. " {")
         for _, member in ipairs(extensions) do
             rendered[swift_shard.key_of(member)] = true
-            for _, l in ipairs(render_member(member, indent + 4, "public ")) do
-                table.insert(lines, l)
+            for _, l in ipairs(render_member(member, ext_indent, "public ")) do
+                table.insert(block, l)
             end
         end
-        table.insert(lines, pad .. "}")
+        table.insert(block, ext_pad .. "}")
     end
     mark_witnessed_opaque(node, rendered)
+    -- an external type's extension nested in a type moves whole to file scope: its declaration belongs to its module, and the
+    -- qualified name it has there is its own
+    if indent > 0 and external then
+        table.insert(hoisted, "")
+        for _, l in ipairs(lines) do
+            table.insert(hoisted, l)
+        end
+        return {}
+    end
     return lines
 end
 
@@ -593,15 +609,20 @@ function render(rows, framework, known, classes, public)
             table.insert(lines, l)
         end
     end
+    local hoisted = {}
     for _, node in ipairs(top) do
         -- a declaration that renders to nothing (an opaque typealias) leaves no blank line behind
-        local block = render_node(node, 0, framework, classes, rendered, "public ")
+        local block = render_node(node, 0, framework, classes, rendered, "public ", hoisted)
         if #block > 0 then
             table.insert(lines, "")
             for _, l in ipairs(block) do
                 table.insert(lines, l)
             end
         end
+    end
+    -- the extensions of nested types, at file scope (render_node)
+    for _, l in ipairs(hoisted) do
+        table.insert(lines, l)
     end
     return table.concat(lines, "\n") .. "\n", rendered
 end
