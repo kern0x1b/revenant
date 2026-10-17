@@ -404,7 +404,7 @@ Each of the four carries SensorKit's own `SRErrorDomain` and its own `SRErrorDat
 guarded by `respondsToSelector:` on the delegate, so a subscriber that implements one is messaged and
 one that does not is not messaged at all, never messaged wrongly.
 
-| never sent - status `inert`, not `implemented` | why |
+| never sent, and `implemented` as the answer | why the real system sends nothing here |
 | --- | --- |
 | `sensorReader:fetchingRequest:didFetchResult:` | it hands over a result and `-fetch:` has none: the request fails instead |
 | `sensorReader:didCompleteFetch:` | it says a fetch finished, and no fetch in this port ever does |
@@ -419,14 +419,23 @@ nothing - **the port does not fabricate a result, a device list or a status chan
 fire**, and that is the line every one of those six rows rests on. Each row's `reason` carries its own
 mechanism and each one's `source` names the harness that measured the absence.
 
-**Those six are `inert`, and `implemented` was wrong for them.** `registry/README.md` defines `inert` as
-*declared, does nothing, and says so once in the log the first time it is used* - which is exactly a
-method the protocol declares and nothing sends. `implemented` says the port's reader reaches a
-subscriber, and for these six it does not; a row that claims `implemented` while its own effect says
-"never messaged" is a row contradicting itself, which is what `registry-coherence` reported and is right.
-`inert` is also the safer of the two to want: a caller that waits on `sensorReader:didCompleteFetch:`
-waits for ever on this release, and that is the failure the four failure callbacks exist to avoid. The
-four the reader really sends stay `implemented`.
+**Those six are `implemented`, because the real system does nothing for them on this device.** The
+registry's README lets a row be `implemented` when the real system does nothing on a device without the part,
+with facts that say so. Each of the six is documented by the SDK as a callback for a success or a change:
+`sensorReader:didCompleteFetch:` after a fetch has completed successfully, `sensorReader:fetchingRequest:didFetchResult:`
+once for each result, `sensorReader:didFetchDevices:` as the success of `-fetchDevices`, and
+`sensorReader:didChangeAuthorizationStatus:` when the status has changed (SRSensorReader.h, the doc comment on
+each declaration). The port fails or refuses every request that would produce one of those, and sends the failure
+the SDK gives for it, so none of the six is ever sent. The four failure callbacks are the ones the reader sends.
+
+The two recording callbacks rest on a reading, which is not a measurement. The header says
+`sensorReaderWillStartRecording:` and `sensorReaderDidStopRecording:` come "after" a request to start or stop, and
+does not say whether a refused request is announced before the failure. The port reads a refused request as not
+announced. The reading is named here so a later check can overturn it; the registry rows say the same.
+
+Why `implemented` and not `owed`: an owed row would claim the port will build the callback, and the port will not
+build one that a success would send, because a success does not occur on this device. The owed status would
+keep the six red forever and hide that they are answered.
 
 **The protocol itself is now carried, and it is the header that had to be real.** The delegate is the
 application's own object, so nothing in the port adopts `SRSensorReaderDelegate` - which is why the port

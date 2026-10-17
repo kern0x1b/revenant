@@ -1519,33 +1519,33 @@
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build -[SRSensorReaderDelegate sensorReader:didChangeAuthorizationStatus:]",
-      "effect": "until built: respondsToSelector: answers NO",
+      "status": "implemented",
+      "reason": "the SDK's doc comment says the reader sends it when the authorization status has changed. The port's status is fixed at SRAuthorizationStatusDenied (-authorizationStatus) and nothing in the port changes it, so no change is ever sent",
+      "effect": "never sent: a delegate that implements it is not called. Measured by tests/backports/host/sensorkit-reader, which reads the send sites in SRSensorReader.m",
       "facts": "facts/SensorKit/SensorKit.md",
-      "source": "SRSensorReader.h of SDK 26.2 for the declaration; the absence of a send measured by tests/backports/host/sensorkit-reader"
+      "source": "SRSensorReader.h of SDK 26.2, the declaration and its doc comment; SensorKit/SRSensorReader.m for the fixed status"
     },
     {
       "api": "-[SRSensorReaderDelegate sensorReader:didCompleteFetch:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build -[SRSensorReaderDelegate sensorReader:didCompleteFetch:]",
-      "effect": "until built: respondsToSelector: answers NO",
+      "status": "implemented",
+      "reason": "the SDK's doc comment says the reader sends it when a fetch has completed successfully. Every fetch in the port fails (-fetch: sends fetchingRequest:failedWithError:), so no fetch completes successfully and none is reported complete",
+      "effect": "never sent: the request's failure is sent in its place, through sensorReader:fetchingRequest:failedWithError:. Measured by tests/backports/host/sensorkit-reader",
       "facts": "facts/SensorKit/SensorKit.md",
-      "source": "SRSensorReader.h of SDK 26.2 for the declaration; the absence of a send measured by tests/backports/host/sensorkit-reader"
+      "source": "SRSensorReader.h of SDK 26.2, the doc comment on the declaration; SensorKit/SRSensorReader.m for -fetch:, which fails"
     },
     {
       "api": "-[SRSensorReaderDelegate sensorReader:didFetchDevices:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build -[SRSensorReaderDelegate sensorReader:didFetchDevices:]",
-      "effect": "until built: respondsToSelector: answers NO",
+      "status": "implemented",
+      "reason": "the device list is the success of -fetchDevices. The port fails that fetch (sensorReader:fetchDevicesDidFailWithError:) and will not fabricate a device list, so the list is never handed over",
+      "effect": "never sent: the failure is sent in its place. Measured by tests/backports/host/sensorkit-reader",
       "facts": "facts/SensorKit/SensorKit.md",
-      "source": "SRSensorReader.h of SDK 26.2 for the declaration; the absence of a send measured by tests/backports/host/sensorkit-reader"
+      "source": "SRSensorReader.h of SDK 26.2 for the declaration; SensorKit/SRSensorReader.m for -fetchDevices"
     },
     {
       "api": "-[SRSensorReaderDelegate sensorReader:fetchDevicesDidFailWithError:]",
@@ -1563,11 +1563,11 @@
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build -[SRSensorReaderDelegate sensorReader:fetchingRequest:didFetchResult:]",
-      "effect": "until built: respondsToSelector: answers NO",
+      "status": "implemented",
+      "reason": "the SDK calls it once for each result of a fetch. The port's -fetch: has no result, because there is no store, so the request fails and no result is handed over",
+      "effect": "never sent: the request's failure is sent in its place, through sensorReader:fetchingRequest:failedWithError:. Measured by tests/backports/host/sensorkit-reader",
       "facts": "facts/SensorKit/SensorKit.md",
-      "source": "SRSensorReader.h of SDK 26.2 for the declaration; the absence of a send measured by tests/backports/host/sensorkit-reader"
+      "source": "SRSensorReader.h of SDK 26.2, the doc comment on the declaration; SensorKit/SRSensorReader.m for -fetch:"
     },
     {
       "api": "-[SRSensorReaderDelegate sensorReader:fetchingRequest:failedWithError:]",
@@ -1607,22 +1607,22 @@
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build -[SRSensorReaderDelegate sensorReaderDidStopRecording:]",
-      "effect": "until built: respondsToSelector: answers NO",
+      "status": "implemented",
+      "reason": "the SDK's doc comment says the reader sends it after a request to stop recording. The port refuses that request at once, because nothing records, and reports it as sensorReader:stopRecordingFailedWithError:. The header does not say whether a refused request is announced first; the port reads it as not announced, which is a reading of the header and not a measurement (facts/SensorKit/SensorKit.md)",
+      "effect": "never sent: the refusal is sent, through sensorReader:stopRecordingFailedWithError:. Measured by tests/backports/host/sensorkit-reader",
       "facts": "facts/SensorKit/SensorKit.md",
-      "source": "SRSensorReader.h of SDK 26.2 for the declaration; the absence of a send measured by tests/backports/host/sensorkit-reader"
+      "source": "SRSensorReader.h of SDK 26.2, the doc comment on the declaration; SensorKit/SRSensorReader.m for -stopRecording"
     },
     {
       "api": "-[SRSensorReaderDelegate sensorReaderWillStartRecording:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
-      "status": "owed",
-      "reason": "build -[SRSensorReaderDelegate sensorReaderWillStartRecording:]",
-      "effect": "until built: respondsToSelector: answers NO",
+      "status": "implemented",
+      "reason": "the SDK's doc comment says the reader sends it after a request to start recording. The port refuses that request at once and reports it as sensorReader:startRecordingFailedWithError:. The header does not say whether a refused request is announced first; the port reads it as not announced, which is a reading of the header and not a measurement (facts/SensorKit/SensorKit.md)",
+      "effect": "never sent: the refusal is sent, through sensorReader:startRecordingFailedWithError:. Measured by tests/backports/host/sensorkit-reader",
       "facts": "facts/SensorKit/SensorKit.md",
-      "source": "SRSensorReader.h of SDK 26.2 for the declaration; the absence of a send measured by tests/backports/host/sensorkit-reader"
+      "source": "SRSensorReader.h of SDK 26.2, the doc comment on the declaration; SensorKit/SRSensorReader.m for -startRecording"
     },
     {
       "api": "-[SRSleepSession init]",
