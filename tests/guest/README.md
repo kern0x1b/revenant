@@ -35,3 +35,10 @@ Each prints one line per check and exits with the number of failures.
 Sign the results (ldid -S), put them in the rootfs of the device to boot, and
 run them there as the test program of a boot; the install paths `remap.c` opens
 are the `-install_name` values above.
+
+A test started from `/etc/launchd.conf` must return from `launchctl` at once. launchctl waits for
+each child that launchd.conf starts, and launchd loads the LaunchDaemons only after that, so a test
+that blocks there keeps the Mach services it needs (for Core Image, com.apple.cvmsServ, which
+launchd registers with its daemon's plist) from appearing. A test has to start after those services
+are registered, as a device's applications do; the emulator runner does both: it forks, the parent
+exits, the child calls `setsid`, and it starts the test once the services are registered.
