@@ -81,6 +81,24 @@ local function module_of(name)
     return head
 end
 
+-- Whether a list holds the value.
+local function contains(list, value)
+    for _, item in ipairs(list) do
+        if item == value then
+            return true
+        end
+    end
+    return false
+end
+
+-- Whether a set has any key (xmake's Lua has no next).
+local function has_keys(set)
+    for _ in pairs(set) do
+        return true
+    end
+    return false
+end
+
 -- The imports a module needs: the module qualifiers of every type, conformance, superclass and generic signature that name a Swift
 -- module of the SDK (known: the set of their names), less the module's own name and the Swift standard library (its declarations
 -- are in scope without an import). A qualifier that is no module (a generic parameter such as T, the clang importer's C) is not
@@ -419,11 +437,58 @@ local function mark_witnessed_opaque(node, rendered)
     end
 end
 
+-- The members a conforming type must declare for an ObjC or Foundation protocol the model gives it none of. An ObjC protocol's requirements
+-- are imported without Swift witnesses, so the skeleton's own conformance needs them declared: a class that adopts NSCopying without
+-- copy(with:) fails to compile ("does not conform to protocol 'NSCopying'", the most frequent error of the coordinator's sdk run). name
+-- is the member as the model names it, text its declaration (a "required " is dropped for a struct, which has no required initializer).
+local WITNESSES = {
+    NSCopying = {{name = "copy(with:)", text = "func copy(with zone: NSZone?) -> Any"}},
+    NSCoding = {{name = "init(coder:)", text = "required init?(coder: Foundation.NSCoder)"},
+                {name = "encode(with:)", text = "func encode(with coder: Foundation.NSCoder)"}},
+    NSSecureCoding = {{name = "supportsSecureCoding", text = "static var supportsSecureCoding: Swift.Bool"}},
+    NSItemProviderWriting = {{name = "writableTypeIdentifiersForItemProvider", text = "static var writableTypeIdentifiersForItemProvider: [Swift.String]"},
+                             {name = "loadData(withTypeIdentifier:forItemProviderCompletionHandler:)",
+                              text = "func loadData(withTypeIdentifier typeIdentifier: Swift.String, forItemProviderCompletionHandler completionHandler: @escaping (Foundation.Data?, Swift.Error?) -> Swift.Void) -> Foundation.Progress?"}},
+    Decodable = {{name = "init(from:)", text = "required init(from decoder: Swift.Decoder) throws"}},
+    Encodable = {{name = "encode(to:)", text = "func encode(to encoder: Swift.Encoder) throws"}},
+    ContiguousBytes = {{name = "withUnsafeBytes(_:)", text = "func withUnsafeBytes<R>(_ body: (Swift.UnsafeRawBufferPointer) throws -> R) rethrows -> R"}},
+}
+
+-- The witness members of a type's own declaration, as lines indented by indent, for each conformance it declares (less those its
+-- superclass chain provides: provided, a set or nil) that WITNESSES lists and the model gives no member of that name. Each one is
+-- recorded in witnessed as "container<TAB>name" (the key the round trip reads: the member's container and name, the declaration's api).
+local function witnesses_of(node, indent, access, provided, witnessed)
+    local row = node.row
+    local lines = {}
+    local api = row.container ~= NO_VALUE and (row.container .. "." .. row.name) or row.name
+    local have = {}
+    for _, member in ipairs(node.members) do
+        have[member.name] = true
+    end
+    for _, conformance in ipairs(conformances_of_row(row)) do
+        local witnesses = WITNESSES[string.match(conformance, "([^.]+)$")]
+        if witnesses ~= nil and not (provided and provided[conformance]) then
+            for _, witness in ipairs(witnesses) do
+                if not have[witness.name] then
+                    have[witness.name] = true
+                    local text = witness.text
+                    if row.kind ~= "swift-class" then
+                        text = string.gsub(text, "^required ", "")
+                    end
+                    table.insert(lines, string.rep(" ", indent) .. access .. text .. trap(api .. "." .. witness.name))
+                    witnessed[api .. "\t" .. witness.name] = true
+                end
+            end
+        end
+    end
+    return lines
+end
+
 -- Renders one node (a type row, its nested types and its members). Own types get a declaration; a type of another module gets an
 -- extension, since its declaration belongs to its module. access is the modifier the enclosing declaration needs for a typealias
 -- ("public ", or "" in a protocol, which refuses an access modifier on its members). hoisted (a list of lines) collects the extensions
 -- of a nested type: Swift refuses an extension inside a type, so those are declared at file scope (render).
-local function render_node(node, indent, framework, classes, rendered, access, hoisted)
+local function render_node(node, indent, framework, classes, rendered, access, hoisted, witnessed)
     local row = node.row
     local pad = string.rep(" ", indent)
     local lines = {}
@@ -506,8 +571,14 @@ local function render_node(node, indent, framework, classes, rendered, access, h
             table.insert(lines, l)
         end
     end
+    if not external and row.kind ~= "swift-protocol" then
+        local provided = classes ~= nil and row.kind == "swift-class" and chain_provides(row.superclass, classes) or nil
+        for _, l in ipairs(witnesses_of(node, indent + 4, member_access, provided, witnessed)) do
+            table.insert(lines, l)
+        end
+    end
     for _, child in ipairs(node.children) do
-        for _, l in ipairs(render_node(child, indent + 4, framework, classes, rendered, member_access, hoisted)) do
+        for _, l in ipairs(render_node(child, indent + 4, framework, classes, rendered, member_access, hoisted, witnessed)) do
             table.insert(lines, l)
         end
     end
@@ -584,7 +655,9 @@ end
 -- SDK's Swift module names (a set: name -> true). classes is the class index (swift_model.class_index) or nil: with it, a class lists
 -- only the conformances its superclass chain does not already provide. public is the implementation modules' public modules
 -- (swift_model.public_modules), or nil for none. Returns the text and the set of the keys (swift_shard.key_of) of the rows the text
--- declares: a row the renderer leaves out (an untyped one, an opaque typealias) is not in it.
+-- declares: a row the renderer leaves out (an untyped one, an opaque typealias) is not in it. And the set of the witnesses it declares
+-- for an ObjC or Foundation protocol ("container<TAB>name", WITNESSES): members the model does not give, which the round trip reads as
+-- by design, not as extra.
 function render(rows, framework, known, classes, public)
     local typed = {}
     for _, row in ipairs(rows) do
@@ -593,36 +666,47 @@ function render(rows, framework, known, classes, public)
         end
     end
     rows = swift_canonical.rows(typed)
-    local rendered = {}
-    local lines = {
-        "// GENERATED by tools/gen.lua swiftcode. Do not edit.",
-        "// The Swift skeleton of " .. framework .. ", rendered from the declaration model.",
-    }
-    for _, module in ipairs(imports_of(rows, framework, known, public or {})) do
-        table.insert(lines, "import " .. module)
-    end
+    local rendered, witnessed = {}, {}
+    -- the body is rendered first: the imports come after it, since a witness may name Foundation, which the model's rows do not
+    local body = {}
     local top, top_members = group(rows)
     for _, row in ipairs(top_members) do
         rendered[swift_shard.key_of(row)] = true
-        table.insert(lines, "")
+        table.insert(body, "")
         for _, l in ipairs(render_member(row, 0, "public ")) do
-            table.insert(lines, l)
+            table.insert(body, l)
         end
     end
     local hoisted = {}
     for _, node in ipairs(top) do
         -- a declaration that renders to nothing (an opaque typealias) leaves no blank line behind
-        local block = render_node(node, 0, framework, classes, rendered, "public ", hoisted)
+        local block = render_node(node, 0, framework, classes, rendered, "public ", hoisted, witnessed)
         if #block > 0 then
-            table.insert(lines, "")
+            table.insert(body, "")
             for _, l in ipairs(block) do
-                table.insert(lines, l)
+                table.insert(body, l)
             end
         end
     end
     -- the extensions of nested types, at file scope (render_node)
     for _, l in ipairs(hoisted) do
+        table.insert(body, l)
+    end
+    -- the imports: the modules the model names, and Foundation when a witness spells one of its types (the module itself excepted)
+    local modules = imports_of(rows, framework, known, public or {})
+    if has_keys(witnessed) and framework ~= "Foundation" and not contains(modules, "Foundation") then
+        table.insert(modules, "Foundation")
+        table.sort(modules, order.less)
+    end
+    local lines = {
+        "// GENERATED by tools/gen.lua swiftcode. Do not edit.",
+        "// The Swift skeleton of " .. framework .. ", rendered from the declaration model.",
+    }
+    for _, module in ipairs(modules) do
+        table.insert(lines, "import " .. module)
+    end
+    for _, l in ipairs(body) do
         table.insert(lines, l)
     end
-    return table.concat(lines, "\n") .. "\n", rendered
+    return table.concat(lines, "\n") .. "\n", rendered, witnessed
 end

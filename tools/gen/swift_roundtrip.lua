@@ -14,6 +14,8 @@ local SIGNATURE = {"type", "params", "generic_sig", "conformances", "superclass"
                    "overriding", "init_kind", "availability"}
 -- The tab joins the key's cells: no declaration name holds one.
 local KEY_SEPARATOR = "\t"
+-- The key a witness is recorded by in the renderer (swift_render's witnessed set): the container and the name, tab-joined.
+local WITNESS_SEPARATOR = "\t"
 -- The cells that are lists (comma-joined): compared as sets. The dump's order of a list is not a difference of the declaration, and
 -- the dump repeats a platform attribute once per platform (Available, Available, ...), which is one attribute in ours.
 local LIST_CELLS = {conformances = true, attributes = true}
@@ -196,7 +198,7 @@ end
 -- Compares the SDK's model rows with ours. Returns a result: the row counts, the rows equal on every signature cell, the rows
 -- missing from ours, the count of ours with no SDK row, the rows that differ, counted per cell, and one example per cell. A row
 -- whose only difference is a by-design one is equal (counted in by_design as well): its difference is not a mismatch.
-function compare(sdk_rows, our_rows)
+function compare(sdk_rows, our_rows, witnessed)
     local ours, duplicates = {}, 0
     for _, row in ipairs(our_rows) do
         local key = key_of(row)
@@ -207,7 +209,7 @@ function compare(sdk_rows, our_rows)
         end
     end
     local result = {sdk = #sdk_rows, ours = #our_rows, equal = 0, missing = {}, extra = 0, duplicates = duplicates,
-                    by_design = 0, causes = {}, examples = {}}
+                    by_design = 0, witnessed = 0, causes = {}, examples = {}}
     local matched = {}
     for _, row in ipairs(sdk_rows) do
         local key = key_of(row)
@@ -245,9 +247,14 @@ function compare(sdk_rows, our_rows)
             end
         end
     end
-    for key in pairs(ours) do
+    for key, row in pairs(ours) do
         if not matched[key] then
-            result.extra = result.extra + 1
+            -- a witness the skeleton declares for an ObjC or Foundation protocol is a member the SDK's model does not give: by design
+            if witnessed and witnessed[row.container .. WITNESS_SEPARATOR .. row.name] then
+                result.witnessed = result.witnessed + 1
+            else
+                result.extra = result.extra + 1
+            end
         end
     end
     return result

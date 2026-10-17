@@ -24,10 +24,11 @@ local function prepare(folder, out_dir, name, known, classes, public, headers)
     local source = path.join(dir, name .. ".swift")
     -- the generated file and its report spell the SDK's non-ASCII identifiers as the SDK does; they are never committed
     local identifiers = swift_model.non_ascii_identifiers(sdk_rows)
-    emit.file(source, swift_render.render(sdk_rows, name, known, classes, public), identifiers)
+    local text, _, witnessed = swift_render.render(sdk_rows, name, known, classes, public)
+    emit.file(source, text, identifiers)
     local underlying = headers and swift_roundtrip.underlying_of(headers, module_dir, name) or nil
     return {name = name, module_dir = module_dir, source = source, sdk_rows = sdk_rows, identifiers = identifiers,
-            underlying = underlying}
+            underlying = underlying, witnessed = witnessed}
 end
 
 -- The second part of one module's round trip, once its compile and dump have run in the batches: its result table.
@@ -48,7 +49,7 @@ local function finish(prep)
     -- the dump of the compiled skeleton names its generic parameters canonically too (tau, depth, index), as the SDK's ABI dump does:
     -- its rows take the same spelling as the SDK's model, so the compare sees one spelling and the report stays ASCII
     our_rows = swift_canonical.rows(our_rows)
-    result.compare = swift_roundtrip.compare(prep.sdk_rows, our_rows)
+    result.compare = swift_roundtrip.compare(prep.sdk_rows, our_rows, prep.witnessed)
     for _, row in ipairs(prep.sdk_rows) do
         if swift_render.untyped(row) then
             result.untyped = (result.untyped or 0) + 1
@@ -81,6 +82,8 @@ local function report_of(name, result)
     table.insert(lines, string.format("  sdk %d declarations, ours %d, equal %d, missing %d, extra %d, duplicate keys %d",
                                       c.sdk, c.ours, c.equal, #c.missing, c.extra, c.duplicates))
     table.insert(lines, string.format("  by design: %d rows, stored properties rendered computed (not a mismatch)", c.by_design))
+    table.insert(lines, string.format("  witnesses: %d members the skeleton declares for an ObjC or Foundation protocol the model gives none (not extra)",
+                                      c.witnessed))
     if result.untyped then
         table.insert(lines, string.format("  model gap: %d declarations with no type in the dump (the digester gives the "
                                           .. "error type; not rendered, so missing)", result.untyped))
