@@ -22,7 +22,7 @@ face class of any kind.
 | `AROrientationTrackingConfiguration` | YES | a gyroscope | has one |
 | `ARPositionalTrackingConfiguration` | YES | a camera and a location service | has both |
 | `ARImageTrackingConfiguration` | YES | a camera | has one |
-| `ARBodyTrackingConfiguration` | YES | a camera, and the front one for the body | has one |
+| `ARBodyTrackingConfiguration` | **NO** | a neural estimator of the body, which this port does not build (A12 or later, documented) | has none |
 | `ARFaceTrackingConfiguration` | **NO** | a depth sensor across the face | has none |
 | `ARObjectScanningConfiguration` | **NO** | scene depth, to read a mesh from | has none |
 
@@ -32,11 +32,14 @@ though Apple gates them on one:
 - **A face is measured, not inferred.** `ARFaceAnchor`'s geometry is a depth map across the face,
   and `ARFaceTrackingConfiguration` is refused on a device with no TrueDepth. This one is a genuine
   hardware wall, and the answer is the one Apple documents.
-- **A body is inferred, not measured.** A body is a pose estimated from the frames the camera
-  already gives; there is no sensor of its own. So the configuration answers YES on a device with a
-  front camera, and the estimator is the work, not the hardware. The same holds for
-  `ARMatteGenerator` (person segmentation on the frames) and `AREnvironmentProbeAnchor` (a cube map
-  of the light, assembled from the frames).
+- **A body is estimated, and this port does not estimate one.** A body is a pose the release
+  estimates from the frames the camera already gives, with a neural network; there is no sensor of its
+  own. The port builds no estimator, so a session of the configuration would never report a body, and
+  its answer is NO. Apple documents body tracking as needing an A12 chip or later, which this device is
+  not; that is the documented requirement, not a measurement (`facts/ARKit/ConfigurationSettings.md`).
+  The same reasoning covers `ARMatteGenerator` (person segmentation on the frames) and
+  `AREnvironmentProbeAnchor` (a cube map of the light, assembled from the frames): neither is estimated
+  here, and the rows of each say so.
 
 What `ARSession` does with the answer: a session run with a configuration whose `+isSupported` is NO
 does not start, and the application is told through `session:didFailWithError:` with the reason the

@@ -102,8 +102,8 @@
             NSStringFromClass([self class]), self, (unsigned long)_planeDetection];
 }
 
-// The settings a caller sets that this device cannot honour behind. Each is declared by the SDK's
-// own header and is not answered here, which is what `@dynamic` says.
+// initialWorldMap is the one setting of this class that is not stored. It is declared by the SDK's own
+// header and is not answered here, which is what `@dynamic` says.
 //
 // initialWorldMap is here for a measured reason and not because it needs a sensor: it is the map a
 // session localises to, and -runWithConfiguration:options: (ARSession.m:77) reads the configuration
@@ -111,15 +111,19 @@
 // which is what a @dynamic here makes true: respondsToSelector: answers NO. Removing the line would
 // not make the absence honest - clang then synthesises the pair of accessors from the SDK header's own
 // property, and they would store a map and return it while the session runs on from nothing.
-@dynamic initialWorldMap;
-@dynamic detectionObjects;
-@dynamic wantsHDREnvironmentTextures;
-@dynamic automaticImageScaleEstimationEnabled;
+// The settings below are stored, as the release stores them: what a caller sets is what it reads back, and the
+// defaults are the ones a fresh configuration answers on the host (facts/ARKit/ConfigurationSettings.md). A session
+// does not act on any of them: the tracker builds no mesh, no face and no collaboration, and no object is matched.
+// That is what the registry rows say, and it is not a value the configuration makes up.
+@synthesize detectionObjects = _detectionObjects;
+@synthesize wantsHDREnvironmentTextures = _wantsHDREnvironmentTextures;
+@synthesize automaticImageScaleEstimationEnabled = _automaticImageScaleEstimationEnabled;
+@synthesize collaborationEnabled = _collaborationEnabled;
+@synthesize userFaceTrackingEnabled = _userFaceTrackingEnabled;
+@synthesize appClipCodeTrackingEnabled = _appClipCodeTrackingEnabled;
+@synthesize sceneReconstruction = _sceneReconstruction;
 @dynamic maximumNumberOfTrackedImages;
-@dynamic collaborationEnabled;
-@dynamic userFaceTrackingEnabled;
-@dynamic appClipCodeTrackingEnabled;
-@dynamic sceneReconstruction;
+@dynamic initialWorldMap;
 
 + (BOOL)isSupported
 {

@@ -76,8 +76,17 @@
 
 - (void)runWithConfiguration:(ARConfiguration *)configuration options:(ARSessionRunOptions)options
 {
-    if (![[configuration class] isSupported])
+    if (![[configuration class] isSupported]) {
+        // The session does not start, and the application is told why through the same channel as a tracker that
+        // fails to start. The error carries the framework's domain and code; it has no user info, since the port
+        // knows no more about the refusal than the code says.
+        NSError *unsupported = [NSError errorWithDomain:ARErrorDomain
+                                                   code:ARErrorCodeUnsupportedConfiguration
+                                               userInfo:nil];
+        if ([_delegate respondsToSelector:@selector(session:didFailWithError:)])
+            [_delegate session:self didFailWithError:unsupported];
         return;
+    }
     [_tracker stop];
     NSError *error = nil;
     if (![_tracker startWithError:&error]) {

@@ -83,18 +83,22 @@
     _maxTrackedImages = maximumNumberOfTrackedImages;
 }
 
+// The four settings are stored, as ARWorldTrackingConfiguration's are (ARConfiguration2.m): what a caller sets is what
+// it reads back. initialWorldMap is not stored, as there.
+@synthesize wantsHDREnvironmentTextures = _wantsHDREnvironmentTextures;
+@synthesize automaticImageScaleEstimationEnabled = _automaticImageScaleEstimationEnabled;
+@synthesize automaticSkeletonScaleEstimationEnabled = _automaticSkeletonScaleEstimationEnabled;
+@synthesize appClipCodeTrackingEnabled = _appClipCodeTrackingEnabled;
 @dynamic initialWorldMap;
-@dynamic wantsHDREnvironmentTextures;
-@dynamic automaticImageScaleEstimationEnabled;
-@dynamic automaticSkeletonScaleEstimationEnabled;
-@dynamic appClipCodeTrackingEnabled;
 
 
 + (BOOL)isSupported
 {
-    // A body is a pose estimated from the camera's own frames, which needs no sensor of its own, and
-    // the front camera. This device has a front camera, so the answer is what the hardware gives.
-    return [CharonARTracker hasFrontCamera];
+    // A body is a pose the release estimates from the frames with a neural network. This port builds no estimator, so
+    // a session of this configuration would run and never report a body, and the answer is NO. Apple documents body
+    // tracking as needing an A12 chip or later; this device is an A5. That requirement is the documented one and was
+    // not measured here, since the host is a Mac and answers NO for every configuration.
+    return NO;
 }
 
 @end

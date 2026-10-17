@@ -105,110 +105,110 @@
    "kind": "property",
    "introduced": "13.4",
    "minimum": "6.0",
-   "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARWorldTrackingConfiguration.sceneReconstruction; where the device lacks the part, answer as the system's availability query does",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARWorldTrackingConfiguration: instance list 0x1af215e88 of 86 twelve-byte entries and class list 0x1af215dc0 of 16 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsUserFaceTracking at 0x1af0958a4, +supportsAppClipCodeTracking at 0x1af11b384, +supportsSceneReconstruction: at 0x1af11b140, and on the instance list isCollaborationEnabled at 0x1af085d00, sceneReconstruction at 0x1af0845a0, wantsHDREnvironmentTextures at 0x1af11bf3c, appClipCodeTrackingEnabled at 0x1af11b3c4, automaticImageScaleEstimationEnabled at 0x1af11bf90, userFaceTrackingEnabled at 0x1af08d638, detectionImages at 0x1af11bf80, maximumNumberOfTrackedImages at 0x1af11bfb0, initialWorldMap at 0x1af085d10. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "status": "implemented",
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "carried: stored as the release stores it, and a fresh configuration answers none, as the host does. A mesh is reconstructed from scene depth, which this device does not have, so a session builds no mesh and supportsSceneReconstruction: answers NO",
+   "effect": "what a caller sets is what it reads back; the default is none",
+   "source": "ARKit/ARConfiguration2.m, a stored setting; host defaults and round trip measured on Mac Catalyst ARKit (facts/ARKit/ConfigurationSettings.md)"
   },
   {
    "api": "ARWorldTrackingConfiguration.wantsHDREnvironmentTextures",
    "kind": "property",
    "introduced": "12.0",
    "minimum": "6.0",
-   "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARWorldTrackingConfiguration.wantsHDREnvironmentTextures",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARWorldTrackingConfiguration: instance list 0x1af215e88 of 86 twelve-byte entries and class list 0x1af215dc0 of 16 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsUserFaceTracking at 0x1af0958a4, +supportsAppClipCodeTracking at 0x1af11b384, +supportsSceneReconstruction: at 0x1af11b140, and on the instance list isCollaborationEnabled at 0x1af085d00, sceneReconstruction at 0x1af0845a0, wantsHDREnvironmentTextures at 0x1af11bf3c, appClipCodeTrackingEnabled at 0x1af11b3c4, automaticImageScaleEstimationEnabled at 0x1af11bf90, userFaceTrackingEnabled at 0x1af08d638, detectionImages at 0x1af11bf80, maximumNumberOfTrackedImages at 0x1af11bfb0, initialWorldMap at 0x1af085d10. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "status": "implemented",
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "carried: stored as the release stores it, defaulting to NO as the host does. The HDR environment texture is rendered from the camera's view of the room, which the tracker does not render, so a session produces none",
+   "effect": "what a caller sets is what it reads back; the default is NO",
+   "source": "ARKit/ARConfiguration2.m, a stored setting; host defaults and round trip measured on Mac Catalyst ARKit (facts/ARKit/ConfigurationSettings.md)"
   },
   {
    "api": "ARWorldTrackingConfiguration.userFaceTrackingEnabled",
    "kind": "property",
    "introduced": "13.0",
    "minimum": "6.0",
-   "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARWorldTrackingConfiguration.userFaceTrackingEnabled; where the device lacks the part, answer as the system's availability query does",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARWorldTrackingConfiguration: instance list 0x1af215e88 of 86 twelve-byte entries and class list 0x1af215dc0 of 16 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsUserFaceTracking at 0x1af0958a4, +supportsAppClipCodeTracking at 0x1af11b384, +supportsSceneReconstruction: at 0x1af11b140, and on the instance list isCollaborationEnabled at 0x1af085d00, sceneReconstruction at 0x1af0845a0, wantsHDREnvironmentTextures at 0x1af11bf3c, appClipCodeTrackingEnabled at 0x1af11b3c4, automaticImageScaleEstimationEnabled at 0x1af11bf90, userFaceTrackingEnabled at 0x1af08d638, detectionImages at 0x1af11bf80, maximumNumberOfTrackedImages at 0x1af11bfb0, initialWorldMap at 0x1af085d10. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "status": "implemented",
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "carried: stored as the release stores it, defaulting to NO as the host does. Face tracking needs the TrueDepth camera, supportsUserFaceTracking is NO here, and a session tracks no face",
+   "effect": "what a caller sets is what it reads back; the default is NO",
+   "source": "ARKit/ARConfiguration2.m, a stored setting; host defaults and round trip measured on Mac Catalyst ARKit (facts/ARKit/ConfigurationSettings.md)"
   },
   {
    "api": "ARWorldTrackingConfiguration.collaborationEnabled",
    "kind": "property",
    "introduced": "13.0",
    "minimum": "6.0",
-   "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARWorldTrackingConfiguration.collaborationEnabled",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARWorldTrackingConfiguration: instance list 0x1af215e88 of 86 twelve-byte entries and class list 0x1af215dc0 of 16 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsUserFaceTracking at 0x1af0958a4, +supportsAppClipCodeTracking at 0x1af11b384, +supportsSceneReconstruction: at 0x1af11b140, and on the instance list isCollaborationEnabled at 0x1af085d00, sceneReconstruction at 0x1af0845a0, wantsHDREnvironmentTextures at 0x1af11bf3c, appClipCodeTrackingEnabled at 0x1af11b3c4, automaticImageScaleEstimationEnabled at 0x1af11bf90, userFaceTrackingEnabled at 0x1af08d638, detectionImages at 0x1af11bf80, maximumNumberOfTrackedImages at 0x1af11bfb0, initialWorldMap at 0x1af085d10. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "status": "implemented",
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "carried: stored as the release stores it, defaulting to NO as the host does. A collaborating session is not run by this port, so no collaboration data is produced",
+   "effect": "what a caller sets is what it reads back; the default is NO",
+   "source": "ARKit/ARConfiguration2.m, a stored setting; host defaults and round trip measured on Mac Catalyst ARKit (facts/ARKit/ConfigurationSettings.md)"
   },
   {
    "api": "ARWorldTrackingConfiguration.appClipCodeTrackingEnabled",
    "kind": "property",
    "introduced": "14.3",
    "minimum": "6.0",
-   "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARWorldTrackingConfiguration.appClipCodeTrackingEnabled",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARWorldTrackingConfiguration: instance list 0x1af215e88 of 86 twelve-byte entries and class list 0x1af215dc0 of 16 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsUserFaceTracking at 0x1af0958a4, +supportsAppClipCodeTracking at 0x1af11b384, +supportsSceneReconstruction: at 0x1af11b140, and on the instance list isCollaborationEnabled at 0x1af085d00, sceneReconstruction at 0x1af0845a0, wantsHDREnvironmentTextures at 0x1af11bf3c, appClipCodeTrackingEnabled at 0x1af11b3c4, automaticImageScaleEstimationEnabled at 0x1af11bf90, userFaceTrackingEnabled at 0x1af08d638, detectionImages at 0x1af11bf80, maximumNumberOfTrackedImages at 0x1af11bfb0, initialWorldMap at 0x1af085d10. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "status": "implemented",
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "carried: stored as the release stores it, defaulting to NO as the host does. supportsAppClipCodeTracking is NO here, and a session reads no App Clip code",
+   "effect": "what a caller sets is what it reads back; the default is NO",
+   "source": "ARKit/ARConfiguration2.m, a stored setting; host defaults and round trip measured on Mac Catalyst ARKit (facts/ARKit/ConfigurationSettings.md)"
   },
   {
    "api": "ARWorldTrackingConfiguration.automaticImageScaleEstimationEnabled",
    "kind": "property",
    "introduced": "13.0",
    "minimum": "6.0",
-   "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARWorldTrackingConfiguration.automaticImageScaleEstimationEnabled",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARWorldTrackingConfiguration: instance list 0x1af215e88 of 86 twelve-byte entries and class list 0x1af215dc0 of 16 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsUserFaceTracking at 0x1af0958a4, +supportsAppClipCodeTracking at 0x1af11b384, +supportsSceneReconstruction: at 0x1af11b140, and on the instance list isCollaborationEnabled at 0x1af085d00, sceneReconstruction at 0x1af0845a0, wantsHDREnvironmentTextures at 0x1af11bf3c, appClipCodeTrackingEnabled at 0x1af11b3c4, automaticImageScaleEstimationEnabled at 0x1af11bf90, userFaceTrackingEnabled at 0x1af08d638, detectionImages at 0x1af11bf80, maximumNumberOfTrackedImages at 0x1af11bfb0, initialWorldMap at 0x1af085d10. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "status": "implemented",
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "carried: stored as the release stores it, defaulting to NO as the host does. A session estimates the physical size of no reference image",
+   "effect": "what a caller sets is what it reads back; the default is NO",
+   "source": "ARKit/ARConfiguration2.m, a stored setting; host defaults and round trip measured on Mac Catalyst ARKit (facts/ARKit/ConfigurationSettings.md)"
   },
   {
    "api": "ARBodyTrackingConfiguration.wantsHDREnvironmentTextures",
    "kind": "property",
    "introduced": "12.0",
    "minimum": "6.0",
-   "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARBodyTrackingConfiguration.wantsHDREnvironmentTextures",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARBodyTrackingConfiguration: instance list 0x1af2198a8 of 39 twelve-byte entries and class list 0x1af219828 of 10 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsAppClipCodeTracking at 0x1af16786c, and on the instance list detectionImages at 0x1af1684fc, maximumNumberOfTrackedImages at 0x1af168558, initialWorldMap at 0x1af168478, wantsHDREnvironmentTextures at 0x1af1684bc, appClipCodeTrackingEnabled at 0x1af1678ac, automaticImageScaleEstimationEnabled at 0x1af168518, automaticSkeletonScaleEstimationEnabled at 0x1af168538. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "status": "implemented",
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "carried: stored as the release stores it, defaulting to NO as the host does. A session of this configuration is refused, since body tracking is not run (ARBodyTrackingConfiguration +isSupported is NO)",
+   "effect": "what a caller sets is what it reads back; the default is NO",
+   "source": "ARKit/ARConfiguration4.m, a stored setting; host defaults and round trip measured on Mac Catalyst ARKit (facts/ARKit/ConfigurationSettings.md)"
   },
   {
    "api": "ARBodyTrackingConfiguration.appClipCodeTrackingEnabled",
    "kind": "property",
    "introduced": "14.3",
    "minimum": "6.0",
-   "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARBodyTrackingConfiguration.appClipCodeTrackingEnabled",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARBodyTrackingConfiguration: instance list 0x1af2198a8 of 39 twelve-byte entries and class list 0x1af219828 of 10 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsAppClipCodeTracking at 0x1af16786c, and on the instance list detectionImages at 0x1af1684fc, maximumNumberOfTrackedImages at 0x1af168558, initialWorldMap at 0x1af168478, wantsHDREnvironmentTextures at 0x1af1684bc, appClipCodeTrackingEnabled at 0x1af1678ac, automaticImageScaleEstimationEnabled at 0x1af168518, automaticSkeletonScaleEstimationEnabled at 0x1af168538. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "status": "implemented",
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "carried: stored as the release stores it, defaulting to NO as the host does. A session of this configuration is refused, since body tracking is not run",
+   "effect": "what a caller sets is what it reads back; the default is NO",
+   "source": "ARKit/ARConfiguration4.m, a stored setting; host defaults and round trip measured on Mac Catalyst ARKit (facts/ARKit/ConfigurationSettings.md)"
   },
   {
    "api": "ARBodyTrackingConfiguration.automaticImageScaleEstimationEnabled",
    "kind": "property",
    "introduced": "13.0",
    "minimum": "6.0",
-   "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARBodyTrackingConfiguration.automaticImageScaleEstimationEnabled",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARBodyTrackingConfiguration: instance list 0x1af2198a8 of 39 twelve-byte entries and class list 0x1af219828 of 10 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsAppClipCodeTracking at 0x1af16786c, and on the instance list detectionImages at 0x1af1684fc, maximumNumberOfTrackedImages at 0x1af168558, initialWorldMap at 0x1af168478, wantsHDREnvironmentTextures at 0x1af1684bc, appClipCodeTrackingEnabled at 0x1af1678ac, automaticImageScaleEstimationEnabled at 0x1af168518, automaticSkeletonScaleEstimationEnabled at 0x1af168538. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "status": "implemented",
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "carried: stored as the release stores it, defaulting to NO as the host does. A session of this configuration is refused, since body tracking is not run",
+   "effect": "what a caller sets is what it reads back; the default is NO",
+   "source": "ARKit/ARConfiguration4.m, a stored setting; host defaults and round trip measured on Mac Catalyst ARKit (facts/ARKit/ConfigurationSettings.md)"
   },
   {
    "api": "ARBodyTrackingConfiguration.automaticSkeletonScaleEstimationEnabled",
    "kind": "property",
    "introduced": "13.0",
    "minimum": "6.0",
-   "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARBodyTrackingConfiguration.automaticSkeletonScaleEstimationEnabled",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARBodyTrackingConfiguration: instance list 0x1af2198a8 of 39 twelve-byte entries and class list 0x1af219828 of 10 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsAppClipCodeTracking at 0x1af16786c, and on the instance list detectionImages at 0x1af1684fc, maximumNumberOfTrackedImages at 0x1af168558, initialWorldMap at 0x1af168478, wantsHDREnvironmentTextures at 0x1af1684bc, appClipCodeTrackingEnabled at 0x1af1678ac, automaticImageScaleEstimationEnabled at 0x1af168518, automaticSkeletonScaleEstimationEnabled at 0x1af168538. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "status": "implemented",
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "carried: stored as the release stores it, defaulting to NO as the host does. A session of this configuration is refused, since body tracking is not run, so no skeleton is scaled",
+   "effect": "what a caller sets is what it reads back; the default is NO",
+   "source": "ARKit/ARConfiguration4.m, a stored setting; host defaults and round trip measured on Mac Catalyst ARKit (facts/ARKit/ConfigurationSettings.md)"
   },
   {
    "api": "ARBodyTrackingConfiguration.initialWorldMap",
@@ -216,10 +216,10 @@
    "introduced": "13.0",
    "minimum": "6.0",
    "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARBodyTrackingConfiguration.initialWorldMap",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARBodyTrackingConfiguration: instance list 0x1af2198a8 of 39 twelve-byte entries and class list 0x1af219828 of 10 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsAppClipCodeTracking at 0x1af16786c, and on the instance list detectionImages at 0x1af1684fc, maximumNumberOfTrackedImages at 0x1af168558, initialWorldMap at 0x1af168478, wantsHDREnvironmentTextures at 0x1af1684bc, appClipCodeTrackingEnabled at 0x1af1678ac, automaticImageScaleEstimationEnabled at 0x1af168518, automaticSkeletonScaleEstimationEnabled at 0x1af168538. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "owed: the map a body session localises to. The body configuration is refused on this device (+isSupported is NO), so the map is owed with the body estimator it would start from",
+   "effect": "respondsToSelector: answers NO for it, and a call compiled against the SDK raises an unrecognised selector",
+   "source": "ARKit/ARConfiguration4.m, @dynamic; the SDK's ARConfiguration.h; facts/ARKit/ConfigurationSettings.md"
   },
   {
    "api": "ARPositionalTrackingConfiguration.initialWorldMap",
@@ -227,10 +227,10 @@
    "introduced": "13.0",
    "minimum": "6.0",
    "status": "owed",
-   "facts": "facts/ARKit/Configurations.md",
-   "reason": "build the property ARPositionalTrackingConfiguration.initialWorldMap",
-   "effect": "until built: respondsToSelector: answers NO",
-   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARConfiguration: instance list 0x1af2140d8 of 61 twelve-byte entries and class list 0x1af214018 of 15 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsFrameSemantics: at 0x1af0f1d6c, +configurableCaptureDeviceForPrimaryCamera at 0x1af0f292c, +recommendedVideoFormatFor4KResolution at 0x1af0f2a14, +recommendedVideoFormatForHighResolutionFrameCapturing at 0x1af0f2a1c, and on the instance list videoHDRAllowed at 0x1af0f3134, setVideoHDRAllowed: at 0x1af0f313c, frameSemantics at 0x1af084078, setFrameSemantics: at 0x1af0f1cd0. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+   "facts": "facts/ARKit/ConfigurationSettings.md",
+   "reason": "owed: the map a positional session localises to. It is the same archive of the tracker's state as the world configuration's, which is owed with it",
+   "effect": "respondsToSelector: answers NO for it, and a call compiled against the SDK raises an unrecognised selector",
+   "source": "ARKit/ARConfiguration4.m, @dynamic; the SDK's ARConfiguration.h; facts/ARKit/ConfigurationSettings.md"
   },
   {
    "api": "ARBodyTrackingConfiguration.detectionImages",

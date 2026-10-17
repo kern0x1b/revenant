@@ -112,7 +112,7 @@ Read from `ARConfiguration.m`, and each answer is the hardware's own:
 | `ARWorldTrackingConfiguration` | YES | world tracking is the camera plus the gyroscope, integrated |
 | `AROrientationTrackingConfiguration` | YES | the gyroscope alone, which is what the class was named for |
 | `ARPositionalTrackingConfiguration` | YES | a tracked image and a place to put it: the camera and a location service |
-| `ARBodyTrackingConfiguration` | YES | a body is a **pose estimated from the camera's own frames**; it needs no sensor of its own, only the front camera, and this device has one |
+| `ARBodyTrackingConfiguration` | **NO** | a body is a **pose estimated by a neural network from the camera's frames**, and this port builds no estimator; the documented requirement is an A12 chip or later (`facts/ARKit/ConfigurationSettings.md`) |
 | `ARImageTrackingConfiguration` | YES | a tracked image is found in those same frames |
 | `ARFaceTrackingConfiguration` | **NO** | a face is *measured* by a depth sensor across it; there is no TrueDepth here and no LiDAR either |
 | `ARObjectScanningConfiguration` | **NO** | object scanning reads a mesh out of scene depth, and scene depth is a depth sensor's output |
