@@ -79,21 +79,25 @@ if [ -n "$absent" ]; then
     exit 1
 fi
 
-xmake l "$here/../../common/embed.lua" "$build/system.json" "$device/vision-expectations.h" foundation2_expectations
-sed -i.bak 's/foundation2_expectations/vision_expectations/' "$device/vision-expectations.h" && rm -f "$device/vision-expectations.h.bak"
-# The record is committed (device/vision-expectations.h), so it may not carry this machine's home
-# path -- and the file is already written by the line above, so this is checked before anything reads
-# it. It happened once: a case recorded failure.localizedDescription, which is a framework sentence
-# naming the model's file URL, and the run went on to print a pass. The cases now record the error's
-# domain and code instead; this is the check that says that is not enough on its own.
-home=$(grep -c '/Users/' "$device/vision-expectations.h" || true)
+# The record goes to the run folder. The committed device/vision-expectations.h is written only by RECORD=1, an explicit
+# mode, and a commit that changes that file names the reason: a plain run on this machine must not rewrite a tracked file.
+record="$build/vision-expectations.h"
+if [ "${RECORD:-}" = 1 ]; then
+    record="$device/vision-expectations.h"
+fi
+xmake l "$here/../../common/embed.lua" "$build/system.json" "$record" foundation2_expectations
+sed -i.bak 's/foundation2_expectations/vision_expectations/' "$record" && rm -f "$record.bak"
+# The record may not carry this machine's home path, and the file is already written by the line above, so this is
+# checked before anything reads it. It happened once: a case recorded failure.localizedDescription, which is a framework
+# sentence naming the model's file URL, and the run went on to print a pass. The cases now record the error's domain and
+# code instead; this is the check that says that is not enough on its own.
+home=$(grep -c '/Users/' "$record" || true)
 if [ "$home" != "0" ]; then
-    echo "$device/vision-expectations.h holds $home line(s) with this machine's home path in it, and that file is committed"
+    echo "$record holds $home line(s) with this machine's home path in it"
     echo "a case is recording a framework message that names a file URL; record the error's domain and code instead"
-    git -C "$here/../../.." checkout -- "${device#"$here/../../../"}" 2>/dev/null || true
     exit 1
 fi
-echo "no home path in vision-expectations.h"
+echo "no home path in $record"
 
 recorded=$(python3 -c "import json; print(len(json.load(open('$build/system.json'))))")
 # A container the cases name failing to compile is a case going wrong. vision_image is the one they
