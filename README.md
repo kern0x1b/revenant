@@ -27,12 +27,15 @@ legacy-iOS work, where it is the reactive layer under [Eidolon]'s SwiftUI.
 
 ### What is not included
 
-- **URLSession publishers** (`dataTaskPublisher`) — `URLSession` is iOS 7+, and
-  the publishers want a TLS stack this module does not carry. Omitted from the
-  legacy build.
-- A handful of operators absent from the base this fork started from
-  (`CombineLatest`, `Merge`, `collect(byTime:)`) are not yet implemented; they
-  are added as the consuming code needs them.
+- **URLSession publishers** (`dataTaskPublisher`) — not implemented yet. The
+  Combine spec (`charon/packages/a/apple-backports/spec/Combine/swift.tsv`) has no
+  rows for them, and `URLSession` is iOS 7+, so on iOS 6.1.3 they depend on the
+  URLSession that `charon@apple-backports` carries. How this module reaches that
+  class is still to be decided.
+- The `Optional` and `Result` publishers are declared under an `OCombine`
+  namespace (`Optional.OCombine.Publisher`, `Result.OCombine.Publisher`), and
+  `Optional.Publisher` and `Result.Publisher` are typealiases of it. The names a
+  caller writes are the ones Apple declares; the declared path differs.
 
 ## How it works
 
