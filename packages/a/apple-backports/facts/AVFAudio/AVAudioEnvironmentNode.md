@@ -75,34 +75,40 @@ answer, not a substitute.
   - **Divergence, recorded:** the host keeps the value it is given. Measured on macOS 27: the default reads 0, YES
     reads 1, NO reads 0. The port answers NO after YES, which is the answer the 6.1.3 device can stand behind.
 
+## The reverb filter band
+
+`reverbParameters.filterParameters` is implemented (`CharonEnvironmentFilterParameters` in `AVFAudio/AVAudioEnvironmentNode8.m`,
+with the defaults and the enable mapping in `AVFAudio/CharonEnvironmentFilter.h`). It is an `AVAudioUnitEQFilterParameters`, a band
+of a filter. The host's band is not an `AVAudioUnitEQ` band's defaults: the port's band subclass takes the environment as its owner, and
+the environment writes the band to the mixer's reverb filter, the SpatialMixer's parameters 14 to 18. Measured on the host, on the
+environment node's own parameter tree (`tests/backports/host/avfaudio/environment.m` checks each of these, and a mutation of one
+expected value fails):
+
+- the band's defaults: frequency 800, bandwidth 3, gain 0, type parametric (0), not bypassed; the mixer's at the default: 14 800,
+  15 3, 16 0, 17 0, 18 1 (enable is the bypass inverted);
+- writing the band lands in those ids: frequency to 14, bandwidth to 15, gain to 16, the filter type to 17 (identity for every
+  value 0 to 7), bypass YES to 18 = 0 and bypass NO to 18 = 1;
+- the band keeps the value it was given (frequency 20000, bandwidth 5, gain 24 read back), and the mixer clamps it: frequency to
+  10 to 10000 Hz, bandwidth to 0.05 to 4, gain to plus or minus 18 dB. The port writes the value raw and the mixer clamps it.
+
+**Not measured:** whether the filter also acts on the dry output. The graph does not need an NBandEQ unit inserted to carry it; the
+host does not insert one. The port's offline render through the filter is not compared to the host's render.
+
 ## Owed, not answered
 
 These rows are `owed` in the registry. Each has its measured reason in `registry/AVFAudio/`.
 
-- **`reverbParameters.filterParameters`**. The header names an `AVAudioUnitEQFilterParameters`, a band of a filter. The
-  host's mixer does carry a reverb filter, and the band maps onto it. Measured on the host, on the environment node's
-  own parameter tree (ids of the SpatialMixer):
-  - defaults: 14 frequency 800, 15 bandwidth 3, 16 gain 0, 17 type 0, 18 enable 1;
-  - writing the host's `filterParameters` lands in those ids: frequency to 14, bandwidth to 15, gain to 16, the filter
-    type to 17 (identity for every value 0 to 7), bypass YES to 18 = 0 and bypass NO to 18 = 1;
-  - the mixer clamps: frequency to 10 to 10000 Hz (the object keeps the 20000 it was given), bandwidth to 0.05 to 4 (the
-    object keeps 5), gain to plus or minus 18 dB (the object keeps 24 and minus 30 read back).
-  - Why owed: the property's class is `AVAudioUnitEQFilterParameters`, bound to an `AVAudioUnitEQ` owner in
-    `AVFoundation/AVAudioUnitEQ.m`, and the environment needs that class to take a second owner. The parameter names
-    are the reverb filter's (`kReverbParam_Filter*`), so the band is a filter on the reverb. **Not measured:** whether it
-    also filters the dry output. The graph does not need an NBandEQ unit inserted to carry it; the coordinator's
-    suggested insertion is not what the host does.
-- **`reverbParameters.loadFactoryReverbPreset:`**. Measured on the host: presets 0, 4, 8 and 12 leave every global
-  parameter of the environment's mixer unchanged (the reverb gain, the reverb filter and the tree's global set), and the
-  reverb object's `enable` and `level` read 0 after each. No preset is observable through the mixer, so there is no
-  table to map onto `k3DMixerParam_GlobalReverbGainInDecibels` or the filter. Owed with that reason.
-
-## Not yet measured here
-
-The environment node's own offline pull — `-charon_renderOfflineToBuffer:frames:`, the release's
-`AudioUnitRender` on its real generic output — is the hook the manual-rendering differential in
-`AVAudioEngine.m` uses. The sample-by-sample comparison against macOS is the next piece of work and is
-not in this delivery.
+- **`reverbParameters.loadFactoryReverbPreset:`**. Measured on the host, with the full state of each preset (`dump` of
+  `AVAudioUnitReverb.AUAudioUnit.fullState` for presets 0 to 12, and of the environment's `AUAudioUnit.fullState` for
+  `loadFactoryReverbPreset:` 0 to 12):
+  - the presets leave every global parameter of the environment's mixer unchanged (the reverb gain, the reverb filter and the
+    tree's global set), and the reverb object's `enable` and `level` read 0 after each;
+  - the environment's full state carries the preset's index at `GlobalProperties` key 10 (0 to 12, one for each preset) and changes
+    nothing else; the reverb's full state carries the preset's name (`Small Room` ... `Large Hall 2`, 13 names) and a 148-byte `data`
+    blob that is identical for every preset.
+  - So the presets' values are not observable from the state, the parameters or the tree, and there is no table of values to map onto
+    `k3DMixerParam_GlobalReverbGainInDecibels` or the filter. The port keeps no preset index either, since nothing it could do with
+    the index would be measured. Owed with that reason.
 
 ## Not yet measured here
 

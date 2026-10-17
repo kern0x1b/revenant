@@ -6,6 +6,7 @@
 #import <AudioToolbox/AudioFile.h>
 #import <AudioToolbox/AudioSession.h>
 #import "CharonEnvironmentOutput.h"
+#import "CharonEnvironmentFilter.h"
 
 // AVAudioEnvironmentNode on the release's own kAudioUnitSubType_SpatialMixer, and the two
 // parameter classes that go with it.
@@ -144,18 +145,96 @@ static AudioComponent CharonEnvironmentComponent(void)
 
 @end
 
+// The reverb's filter band. The header types it as an AVAudioUnitEQFilterParameters, and that class's setters store the value
+// and hand it to an AVAudioUnitEQ owner, which the environment is not. So this subclass takes the environment as its owner,
+// stores each value as the band does, and tells the environment to write the band to the mixer's reverb filter (SpatialMixer
+// parameters 14 to 18). The defaults and the enable mapping are the host's (CharonEnvironmentFilter.h).
+// The band's own initializer, which the AVFoundation backport defines; the EQ it names is not this class's owner, so nil.
+@class AVAudioUnitEQ;
+@interface AVAudioUnitEQFilterParameters (CharonEnvironment)
+- (instancetype)initForCharonEQ:(AVAudioUnitEQ *)eq bandIndex:(NSUInteger)bandIndex;
+@end
+
+@interface CharonEnvironmentFilterParameters : AVAudioUnitEQFilterParameters
+- (instancetype)initWithCharonOwner:(AVAudioEnvironmentNode *)owner;
+@end
+
+@implementation CharonEnvironmentFilterParameters {
+    __weak AVAudioEnvironmentNode *_charon_owner;
+}
+
+// The host's defaults: 800 Hz, bandwidth 3, gain 0, the parametric type, and not bypassed (enable 1 on the mixer).
+// The setters below run here before the environment has a mixer, and the environment ignores them until it does.
+- (instancetype)initWithCharonOwner:(AVAudioEnvironmentNode *)owner
+{
+    if ((self = [super initForCharonEQ:nil bandIndex:0])) {
+        _charon_owner = owner;
+        self.frequency = CharonEnvironmentFilterDefaultFrequency;
+        self.bandwidth = CharonEnvironmentFilterDefaultBandwidth;
+        self.gain = CharonEnvironmentFilterDefaultGain;
+        self.filterType = AVAudioUnitEQFilterTypeParametric;
+        self.bypass = NO;
+    }
+    return self;
+}
+
+// The band stores the value raw, as the host does, so the value read back is the one written; the mixer clamps it.
+- (void)setFilterType:(AVAudioUnitEQFilterType)filterType
+{
+    [super setFilterType:filterType];
+    [_charon_owner charon_applyEnvironmentParameters];
+}
+
+- (void)setFrequency:(float)frequency
+{
+    [super setFrequency:frequency];
+    [_charon_owner charon_applyEnvironmentParameters];
+}
+
+- (void)setBandwidth:(float)bandwidth
+{
+    [super setBandwidth:bandwidth];
+    [_charon_owner charon_applyEnvironmentParameters];
+}
+
+- (void)setGain:(float)gain
+{
+    [super setGain:gain];
+    [_charon_owner charon_applyEnvironmentParameters];
+}
+
+- (void)setBypass:(BOOL)bypass
+{
+    [super setBypass:bypass];
+    [_charon_owner charon_applyEnvironmentParameters];
+}
+
+@end
+
 @implementation AVAudioEnvironmentReverbParameters {
     __weak AVAudioEnvironmentNode *_charon_owner;
     float _charon_level;
     BOOL _charon_enable;
+    CharonEnvironmentFilterParameters *_charon_filter;
 }
 
-// Not implemented, and owed. filterParameters is an AVAudioUnitEQFilterParameters, a band bound to an AVAudioUnitEQ
-// owner in AVFoundation/AVAudioUnitEQ.m, so the environment cannot hand out its own band without that class taking a second
-// owner. The mixer does carry the reverb filter the band would drive: SpatialMixer parameters 14 to 18 (frequency,
-// bandwidth, gain, type, enable), measured on the host (facts/AVFAudio/AVAudioEnvironmentNode.md). loadFactoryReverbPreset:
-// is owed because the host's preset changes none of the mixer's parameters (measured, same file).
-// Both are in registry/AVFAudio/iosaudioenvironment8.json.
+- (instancetype)initWithCharonOwner:(AVAudioEnvironmentNode *)owner
+{
+    if ((self = [super init])) {
+        _charon_owner = owner;
+        _charon_filter = [[CharonEnvironmentFilterParameters alloc] initWithCharonOwner:owner];
+    }
+    return self;
+}
+
+- (AVAudioUnitEQFilterParameters *)filterParameters
+{
+    return _charon_filter;
+}
+
+// loadFactoryReverbPreset: is not implemented, and is owed. The host's preset changes none of the mixer's parameters, and its
+// full state (the environment's and the reverb's) carries the preset's index and name but not the values it sets, so there is
+// no table to map (facts/AVFAudio/AVAudioEnvironmentNode.md). Both rows are in registry/AVFAudio/iosaudioenvironment8.json.
 
 - (BOOL)enable
 {
@@ -261,6 +340,8 @@ static AudioComponent CharonEnvironmentComponent(void)
     _charon_initialized = AUGraphInitialize(_charon_graph) == noErr;
     if (_charon_initialized) {
         [self charon_applyOutputType];
+        // The mixer starts from the values the host gives the object, not from the mixer's own defaults.
+        [self charon_applyEnvironmentParameters];
     }
     return _charon_initialized;
 }
@@ -504,6 +585,18 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
                           (AudioUnitParameterValue)(_charon_reverb.enable ? 1.0f : 0.0f), 0);
     AudioUnitSetParameter(_charon_mixerUnit, k3DMixerParam_GlobalReverbGainInDecibels, kAudioUnitScope_Global, 0,
                           (AudioUnitParameterValue)_charon_reverb.level, 0);
+    // The reverb filter band, which the mixer clamps (see CharonEnvironmentFilter.h).
+    AVAudioUnitEQFilterParameters *filter = _charon_reverb.filterParameters;
+    AudioUnitSetParameter(_charon_mixerUnit, kReverbParam_FilterFrequency, kAudioUnitScope_Global, 0,
+                          (AudioUnitParameterValue)filter.frequency, 0);
+    AudioUnitSetParameter(_charon_mixerUnit, kReverbParam_FilterBandwidth, kAudioUnitScope_Global, 0,
+                          (AudioUnitParameterValue)filter.bandwidth, 0);
+    AudioUnitSetParameter(_charon_mixerUnit, kReverbParam_FilterGain, kAudioUnitScope_Global, 0,
+                          (AudioUnitParameterValue)filter.gain, 0);
+    AudioUnitSetParameter(_charon_mixerUnit, kReverbParam_FilterType, kAudioUnitScope_Global, 0,
+                          (AudioUnitParameterValue)filter.filterType, 0);
+    AudioUnitSetParameter(_charon_mixerUnit, kReverbParam_FilterEnable, kAudioUnitScope_Global, 0,
+                          CharonEnvironmentFilterEnableValue(filter.bypass), 0);
 }
 
 #pragma mark Rendering
