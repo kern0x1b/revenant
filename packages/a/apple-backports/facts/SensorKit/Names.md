@@ -83,7 +83,7 @@ dlsym-and-deref path, so a reader that had the path wrong would be caught by the
 believed: it prints `matches the host's own symbol`. The comparator's own control is an empty
 `HOST` file, which must be red — a comparison of nothing is not a comparison.
 
-**What is deliberately not used here.** `tools/cache-index/first-rung.py` answers the first held rung
+**What is deliberately not used here.** `tools/cache-index/first-rung.lua` answers the first held rung
 that carries a name, and its ladder has a hole above 12.0, so a `NONE` from it says nothing about a
 SensorKit name's release and is not used as such here. What introduced each name comes from the SDK's
 own `API_AVAILABLE(ios(...))` on the declaration, and every row's `source` names the header and line.

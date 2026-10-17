@@ -10,7 +10,7 @@
       "reason": "a panorama is an ordinary photo to this release: ALAssetPropertyType answers one of three values and ALAssetTypePanorama is in no held release's symbol table, so the release's library keeps no record of which of its photos was taken as a panorama",
       "effect": "the filter that names no media type, which is +livePhotosFilter, and a picker configured with it presents nothing and calls its delegate with no results once it has appeared",
       "facts": "facts/PhotosUI/Filters.md",
-      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.py over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
+      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.lua over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
     },
     {
       "api": "PHPickerFilter.screenshotsFilter",
@@ -21,7 +21,7 @@
       "reason": "a screenshot is an ordinary photo to this release, and the library has no property that says where a photo came from",
       "effect": "the filter that names no media type, which is +livePhotosFilter, and a picker configured with it presents nothing and calls its delegate with no results once it has appeared",
       "facts": "facts/PhotosUI/Filters.md",
-      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.py over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
+      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.lua over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
     },
     {
       "api": "PHPickerFilter.screenRecordingsFilter",
@@ -32,7 +32,7 @@
       "reason": "a screen recording is an ordinary video to this release, and the library has no property that says where a video came from",
       "effect": "the filter that names no media type, which is +livePhotosFilter, and a picker configured with it presents nothing and calls its delegate with no results once it has appeared",
       "facts": "facts/PhotosUI/Filters.md",
-      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.py over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
+      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.lua over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
     },
     {
       "api": "PHPickerFilter.slomoVideosFilter",
@@ -43,7 +43,7 @@
       "reason": "a slow motion clip is an ordinary video to this release: ALAsset names a duration and nothing about a frame rate, and the library's own filters are allPhotos, allVideos and allAssets",
       "effect": "the filter that names no media type, which is +livePhotosFilter, and a picker configured with it presents nothing and calls its delegate with no results once it has appeared",
       "facts": "facts/PhotosUI/Filters.md",
-      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.py over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
+      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.lua over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
     },
     {
       "api": "PHPickerFilter.timelapseVideosFilter",
@@ -54,7 +54,7 @@
       "reason": "a time lapse is an ordinary video to this release: ALAsset names a duration and nothing about the interval between frames, and the library's own filters are allPhotos, allVideos and allAssets",
       "effect": "the filter that names no media type, which is +livePhotosFilter, and a picker configured with it presents nothing and calls its delegate with no results once it has appeared",
       "facts": "facts/PhotosUI/Filters.md",
-      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.py over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
+      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.lua over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
     },
     {
       "api": "+[PHPickerFilter playbackStyleFilter:]",
@@ -65,7 +65,7 @@
       "reason": "-[PHAsset playbackStyle] is the port's own answer for an asset - an image, a video, or Unsupported when the library cannot say - so a filter of style Image is the image filter and a filter of style Video is the video filter; the other four cases of the enum name what this release keeps no record of, an animated image, a live photo and a looping video being of iOS 9.1 and later",
       "effect": "PHAssetPlaybackStyleImage gives +imagesFilter and PHAssetPlaybackStyleVideo gives +videosFilter, so the picker shows images or movies; Unsupported, ImageAnimated, LivePhoto and VideoLooping give the filter that names no media type",
       "facts": "facts/PhotosUI/Filters.md",
-      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.py over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
+      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.lua over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
     },
     {
       "api": "+[PHPickerFilter allFilterMatchingSubfilters:]",
@@ -76,7 +76,7 @@
       "reason": "a filter is the set of the two media types the release's picker takes, so AND-ing a set of filters is intersecting their sets; an empty array constrains nothing, which is the reading of the header's own word and the opposite of anyFilterMatchingSubfilters: with the same empty array",
       "effect": "the media types every subfilter names, and for an empty array both of them; each set is one of the four filters the 14.0 object already makes, so no state of its own is needed",
       "facts": "facts/PhotosUI/Filters.md",
-      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.py over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
+      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.lua over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
     },
     {
       "api": "+[PHPickerFilter notFilterOfSubfilter:]",
@@ -87,7 +87,7 @@
       "reason": "a filter is the set of the two media types the release's picker takes, so negating one is what is left of those two once it has taken its own; the complement is taken over the release's picker and not over the library, which has assets of any other kind in it",
       "effect": "the media types the subfilter does not name, and the filter that names nothing when the subfilter named both",
       "facts": "facts/PhotosUI/Filters.md",
-      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.py over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
+      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.lua over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
     },
     {
       "api": "PHPickerConfiguration.selection",

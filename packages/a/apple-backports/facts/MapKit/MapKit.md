@@ -508,7 +508,7 @@ the release's and not the reader's
 and neither release has the class's entry points either — `grep -cxF` on each release's own selector
 table (`~/.charon/dyld/6.1.3/selectors_armv7.txt`, `~/.charon/dyld/4.3/selectors_armv7.txt`) answers
 **0 and 0** for `initWithCenterCoordinate:radius:`, for `initWithCoordinateRegion:` and for
-`pointOfInterestCategory`. `python3 tools/cache-index/first-rung.py MKLocalPointsOfInterestRequest`
+`pointOfInterestCategory`. `xmake l tools/cache-index/first-rung.lua MKLocalPointsOfInterestRequest`
 answers `16.0`, which is the ladder's hole (no 13.0, 14.0 or 15.0 is held) and not a measured first
 release; `tools/release-split.lua` says so in its own note.
 

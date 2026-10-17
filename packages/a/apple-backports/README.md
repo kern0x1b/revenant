@@ -294,7 +294,7 @@ Thirteen rows of JavaScriptCore's C API are **absent** here, and the reason is a
 release: `JSObjectMakeTypedArray` and its ten siblings, `JSObjectGetTypedArray*`,
 `JSObjectGetArrayBuffer*` and `JSValueGetTypedArrayType` all report on, or make, an ES6 typed array, and
 iOS 6's engine has none. Measured, not assumed: the release's C API exports no typed-array entry point
-at all until 10.0.1 (`tools/cache-index/first-rung.py` over the 50 held rungs, for all thirteen), and the
+at all until 10.0.1 (`tools/cache-index/first-rung.lua` over the 50 held rungs, for all thirteen), and the
 6.1.3 armv7 cache's own symbol table carries 300 `JSC::` symbols - `JSC::JSArray` and `JSC::JSString`
 among them, which is the control that says the search can see a JSC class - and none for
 `JSC::JSArrayBuffer` or `JSC::JSTypedArray`.

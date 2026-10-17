@@ -6,7 +6,7 @@ so they are carried in `Graphics/ImageIOAnimation16.m` over the release's own `C
 
 ## Which release this object is, and why not 13.0
 
-`tools/cache-index/first-rung.py` over the 50 held rungs (2026-10-03) puts
+`tools/cache-index/first-rung.lua` over the 50 held rungs (2026-10-03) puts
 `_CGAnimateImageAtURLWithBlock`, `_CGAnimateImageDataWithBlock` and the three `kCGImageAnimation...` names at
 **16.0**, and on no rung below it. The SDK annotates the pair `IMAGEIO_AVAILABLE_STARTING(10.15, 13.0)`, and
 the ladder the answer comes from has no rung between 13.0 and 16.0 - which is the same situation

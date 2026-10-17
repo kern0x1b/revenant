@@ -39,7 +39,7 @@ The 4.3 `no` in the first two rows is why the registry row keeps `minimum` `6.0`
 `minimums()` (`modules/apple/backports.lua:2024`) reads `entry.minimum` and never `entry.status`, so that
 field is the placement record for every band whether or not the status claims a capability.
 
-`python3 tools/cache-index/first-rung.py masterClock sourceClock` agrees on the shape and is worth
+`xmake l tools/cache-index/first-rung.lua masterClock sourceClock` agrees on the shape and is worth
 reading for the hole it exposes: `masterClock` answers **6.0** and `sourceClock` answers **8.0** — but
 nothing is held between 12.0 and 16.0, so a 16.0 answer bounds an arrival between 13.0 and 16.0 rather
 than dating it. The `8.0` here is the same ladder artefact seen from the other end: the name exists at

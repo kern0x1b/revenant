@@ -54,7 +54,7 @@ arm64e dyld shared cache is a heavy job on this machine. The reader is the tree'
 ## Presence on the held ladder, and why 16.0 is the answer and not 17.4
 
 ```
-$ python3 tools/cache-index/first-rung.py CPLaneGuidance CPRouteInformation
+$ xmake l tools/cache-index/first-rung.lua CPLaneGuidance CPRouteInformation
 CPLaneGuidance	16.0
 CPRouteInformation	18.0
 ```

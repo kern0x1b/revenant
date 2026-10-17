@@ -1,6 +1,6 @@
 // The five value classes of iOS 11's PassKit, in ONE object because all five arrived in 11.0: the
 // release-split gate refuses an object carrying two releases' API, and these five first export at
-// 11.0 together (measured, `python3 tools/cache-index/first-rung.py` over the held ladder: 11.0 for
+// 11.0 together (measured, `xmake l tools/cache-index/first-rung.lua` over the held ladder: 11.0 for
 // all five, and they are in no earlier rung).
 //
 // The five are the completion blocks' own value types, which is what decides they are CARRIED rather
@@ -27,7 +27,7 @@
 // PKPaymentAuthorizationStatusSuccess and the two null_resettable error lists answer the EMPTY list
 // rather than nil. The lists of SUMMARY ITEMS and SHIPPING METHODS can only ever hold what a caller
 // can build here: there is no PKPaymentSummaryItem in this release at all (registry row, 8.0,
-// absent) and no PKShippingMethod either (tools/cache-index/first-rung.py puts
+// absent) and no PKShippingMethod either (tools/cache-index/first-rung.lua puts
 // _OBJC_CLASS_$_PKShippingMethod at 8.0, so no release this port deploys on has it), so in practice
 // they are the empty array on this device. That is the release's own limit and this object does not
 // paper over it: it copies what it is given, and it is given an empty array.

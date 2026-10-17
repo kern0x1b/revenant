@@ -1,5 +1,5 @@
 // MPSMatrixCopyToImage, from MPSMatrixToImage.h of the iPhoneOS 26.2 surface. One object for one
-// release: `python3 tools/cache-index/first-rung.py` answers 12.0 for MPSMatrixCopyToImage and for
+// release: `xmake l tools/cache-index/first-rung.lua` answers 12.0 for MPSMatrixCopyToImage and for
 // every other name in this file, so this file carries 12.0 API only.
 //
 // WHAT IT IS. The copy between a matrix and an image, one direction of the two MPSMatrixToImage.h

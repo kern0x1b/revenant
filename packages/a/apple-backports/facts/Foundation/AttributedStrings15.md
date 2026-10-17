@@ -438,7 +438,7 @@ implementation could be held to — which is what `inert` says and what `absent`
 
 ## The release's own ladder
 
-`python3 tools/cache-index/first-rung.py` from the repository root answers which held release carries each
+`xmake l tools/cache-index/first-rung.lua` from the repository root answers which held release carries each
 name, and for this object's members it answers **16.0** for all of them — the four attribute names
 (`_NSAlternateDescriptionAttributeName`, `_NSImageURLAttributeName`,
 `_NSInlinePresentationIntentAttributeName`, `_NSLanguageIdentifierAttributeName`) and the ten selectors.

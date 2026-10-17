@@ -1,5 +1,5 @@
 // MPSNNResizeBilinear and MPSNNCropAndResizeBilinear, from MPSNNResize.h of the iPhoneOS 16.4 SDK.
-// One object for one release: `python3 tools/cache-index/first-rung.py MPSNNResizeBilinear
+// One object for one release: `xmake l tools/cache-index/first-rung.lua MPSNNResizeBilinear
 // MPSNNCropAndResizeBilinear` answers 12.0 for both, and every other name this file defines is a
 // member both headers declare at ios(12.0), so this file carries 12.0 API only.
 //

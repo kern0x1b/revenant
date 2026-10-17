@@ -86,7 +86,7 @@ is reasoned, not assumed, and is recorded as reasoned here and in the row's `eff
 
 ## What the ladder says about the names
 
-`tools/cache-index/first-rung.py`, the first held release that carries each name, over the 50 rungs of
+`tools/cache-index/first-rung.lua`, the first held release that carries each name, over the 50 rungs of
 `dyld.held_ladder({"armv7","armv7s"})` -- asked with the name as the cache spells it, which for a
 selector is the selector without the method's brackets and for a C symbol is the symbol with its
 Mach-O underscore (`_PHLocalIdentifiersErrorKey`, not `PHLocalIdentifiersErrorKey`, which reads NONE):

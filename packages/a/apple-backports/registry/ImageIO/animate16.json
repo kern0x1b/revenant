@@ -9,7 +9,7 @@
       "status": "owed",
       "reason": "build the class CharonImageAnimation",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "no SDK header declares this name; the date is this port's own, the release whose object carries it, and the two functions it carries are first exported by the 16.0 caches (tools/cache-index/first-rung.py over the 50 held rungs)",
+      "source": "no SDK header declares this name; the date is this port's own, the release whose object carries it, and the two functions it carries are first exported by the 16.0 caches (tools/cache-index/first-rung.lua over the 50 held rungs)",
       "facts": "facts/ImageIO/Animation.md"
     }
   ]

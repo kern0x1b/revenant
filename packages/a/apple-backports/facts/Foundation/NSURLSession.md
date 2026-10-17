@@ -108,13 +108,13 @@ by that record and not by a header it read.
 
 **`absent`, and not `ignored`.** `ignored` is this registry's word for an API the *release* carries and
 the port chooses not to carry, so that the call reaches the system's own implementation. Neither band
-this package carries has any NSURLSession to reach: `tools/cache-index/first-rung.py` puts the first
+this package carries has any NSURLSession to reach: `tools/cache-index/first-rung.lua` puts the first
 held rung carrying `NSURLSession` or `NSURLSessionTaskDelegate` at **7.0**, above every rung a
 `minimum` of 6.0 reaches, and the two rungs' own name indexes carry neither name nor any of these three
 selectors - 0 of the 317,453 names at 4.3 and 0 of the 568,965 at 6.1.3, with `UIView`, `NSObject` and
 `setObject:forKey:` present in both as the control. That is
 `~/.charon/cache-index/<release>.names.gz`, the index `tools/cache-index/build.py` writes, read here by
-`tools/cache-index/first-rung.py`'s own `_names_of()` over the bytes it holds. `Foundation17ReleaseAbsences.md` closed the same
+`tools/cache-index/first-rung.lua`'s own `_names_of()` over the bytes it holds. `Foundation17ReleaseAbsences.md` closed the same
 gap for 4.3 and 6.0 by class census, and found no class named `URLSession` in either.
 
 An earlier commit in the sibling NSUserActivity family had its two rows as `ignored` and the 2026-09-28

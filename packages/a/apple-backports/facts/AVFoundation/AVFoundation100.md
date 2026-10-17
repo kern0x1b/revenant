@@ -43,7 +43,7 @@ what begins playback on this release, so the method is the release's own `-setRa
 `-[AVPlayerItemVideoOutput initWithOutputSettings:]` - AVPlayerItemOutput.h:185: the argument is "the
 client requirements for output CVPixelBuffers, expressed using the constants in AVVideoSettings.h".
 Those constants are the pixel buffer attributes, and the ones this release can name were checked one by
-one with `first-rung.py`:
+one with `first-rung.lua`:
 
 ```
 _kCVPixelBufferPixelFormatTypeKey    3.0
@@ -74,7 +74,7 @@ track's own format description. The value is stored and read back and nothing on
 $ printf '%s\n' _AVPlayerTimeControlStatusPlaying _AVPlayerItemStatusReadyToPlay \
     _AVCaptureColorSpaceSRGB _AVCaptureColorSpaceP3_D65 _AVMediaCharacteristicIsDefault \
     _AVTrackAssociationTypeTimecode _UTTypeMPEG4Movie _NSURLSession \
-    | python3 tools/cache-index/first-rung.py
+    | xmake l tools/cache-index/first-rung.lua
 _AVPlayerTimeControlStatusPlaying   NONE
 _AVPlayerItemStatusReadyToPlay       NONE
 _AVCaptureColorSpaceSRGB             NONE
@@ -119,4 +119,4 @@ No band build and no 6.1.3 gate was run; the only build this worktree may run is
 is green. The objects were compiled on their own with the shared `llvm` package's clang at
 `-target armv7-apple-ios6.0 -isysroot` the 16.4 SDK with the flags `modules/apple/backports.lua`'s
 `compile_arguments` uses, and every symbol they reference was checked against 6.1.3 with
-`first-rung.py`. Whether a band links them is not verified.
+`first-rung.lua`. Whether a band links them is not verified.

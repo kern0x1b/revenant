@@ -6,7 +6,7 @@
 // release the port deploys on has to be one a release's own export answers for, and no release is held
 // between 12.0 and 16.0:
 //
-//   $ printf 'MPSNNPad\n' | python3 tools/cache-index/first-rung.py
+//   $ printf 'MPSNNPad\n' | xmake l tools/cache-index/first-rung.lua
 //   MPSNNPad   16.0
 //
 // so this class is answered by a 16.0 object and could not sit beside the 12.0 states of

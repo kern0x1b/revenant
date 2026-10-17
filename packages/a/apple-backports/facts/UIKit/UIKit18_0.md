@@ -46,9 +46,9 @@ port owns rather than one the release carries (see M2).
 
 The cheap reading looks like the right one and is not:
 `grep -cxF separatorInsetReference ~/.charon/dyld/6.1.3/selectors_armv7.txt` answers 0, and so does
-the same file for plain `separatorInset`, which `first-rung.py` places at **7.0**, while the same
+the same file for plain `separatorInset`, which `first-rung.lua` places at **7.0**, while the same
 file answers 1 for `reloadData`. `selectors_armv7.txt` is a partial index: a zero in it says nothing
-about the release. `first-rung.py` is the reader with a self-test, and the class-scoped dump above
+about the release. `first-rung.lua` is the reader with a self-test, and the class-scoped dump above
 is the reader that answers the question these rows ask. Measured 2026-10-03.
 
 ## M2. The one member the port carries: `+[UITraitCollection traitCollectionWithListEnvironment:]`

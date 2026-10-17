@@ -44,7 +44,7 @@ all three are measured here, class-scoped, with the control in the same run:
 - **12.0** — the other held end, on arm64. It is a band end for the import check and
   `check_categories`, and it is where six of these rows turn out to be carried.
 
-`first-rung.py` over the 97 distinct names reads **16.0** for 88 of them and an earlier rung for 9.
+`first-rung.lua` over the 97 distinct names reads **16.0** for 88 of them and an earlier rung for 9.
 That index answers *presence*, not ownership, so it cannot settle a row on its own; it is recorded
 in "The early rungs are other classes' names" below and every one is explained.
 
@@ -134,7 +134,7 @@ than smoothed over. **Six rows are carried by the 12.0 cache**, all of them Text
 | `NSTextAttachment.lineLayoutPadding` | property | `-lineLayoutPadding`, `-setLineLayoutPadding:` | `UIFoundation` |
 | `NSTextAttachment.usesTextAttachmentView` | property | `-usesTextAttachmentView` (getter only) | `UIFoundation` |
 
-`first-rung.py --rungs` says the same thing independently, and names the releases: these three
+`first-rung.lua --rungs` says the same thing independently, and names the releases: these three
 classes read **`11.0,12.0,16.0,18.0`**, which is the only non-16.0 answer among the 23 class and
 protocol rows. `NSTextLayoutManager` and `NSTextViewportLayoutController` read `16.0,18.0` even
 though they are the other half of TextKit 2 — so the split inside one framework is real and is the
@@ -177,7 +177,7 @@ it was reading the third end.
 
 ## The early rungs are other classes' names, measured
 
-`first-rung.py` over the 97 distinct names: 88 read 16.0, and 9 read earlier. Every one is
+`first-rung.lua` over the 97 distinct names: 88 read 16.0, and 9 read earlier. Every one is
 explained, and none of them rescues its row:
 
 | name | rung | what the cache actually says |
@@ -185,7 +185,7 @@ explained, and none of them rescues its row:
 | `NSTextAttachmentViewProvider`, `NSTextLayoutFragment`, `NSTextLineFragment` | 11.0 | TextKit **2**, and 12.0 **does** carry these three — see the section above. 6.1.3 carries TextKit **1** (`NSTextStorage`, `NSLayoutManager`, `NSTextContainer`, `NSTextAttachment` all present) and none of the three. |
 | `UITrackingLayoutGuide`, `UIKeyboardLayoutGuide`, `UIButtonConfiguration`, `NSTextLayoutManager`, `UIToolTipConfiguration`, `UIPointerAccessory`, `UIBandSelectionInteraction`, `UIWindowSceneActivation*`, `UIFocusEffect`, `UIFocusHaloEffect`, `UIToolTipInteraction` | 16.0 | read `16.0,18.0` — the first held release carrying the name at all, and nothing between 6.1.3 and it. |
 
-Per-release, for all 23 class and protocol rows (`first-rung.py --rungs`, one name per run — the
+Per-release, for all 23 class and protocol rows (`first-rung.lua --rungs`, one name per run — the
 multi-name form stops after the first answer):
 
 ```

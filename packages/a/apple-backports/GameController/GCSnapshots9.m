@@ -20,7 +20,7 @@ BOOL GCMicroGamepadSnapShotDataV100FromNSData(GCMicroGamepadSnapShotDataV100 *sn
 
 // The micro game's snapshot class is measured on the ladder at 10.0.1 - the same rung as the
 // V100 pair above, which is why this is the object it belongs in:
-// `python3 tools/cache-index/first-rung.py GCMicroGamepadSnapshot` answers 10.0.1. The class is a
+// `xmake l tools/cache-index/first-rung.lua GCMicroGamepadSnapshot` answers 10.0.1. The class is a
 // profile of the micro game's elements holding the values it was saved from, and its structure has
 // four fields - the direction pad's two axes and two buttons - which is what
 // GCMicroGamepadSnapshot.h:39-52 documents.

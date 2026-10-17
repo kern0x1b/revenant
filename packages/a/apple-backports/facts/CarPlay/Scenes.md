@@ -39,7 +39,7 @@ pages), and these three are the gate itself.
 | `CPTemplateApplicationDashboardScene` | 13.4 | 16.0 | the dashboard widget, a second screen in the car |
 | `CPTemplateApplicationInstrumentClusterScene` | 15.4 | 16.0 | the instrument cluster, the car's gauges |
 
-"First held rung carrying it" is `python3 tools/cache-index/first-rung.py CPTemplateApplicationScene
+"First held rung carrying it" is `xmake l tools/cache-index/first-rung.lua CPTemplateApplicationScene
 CPTemplateApplicationDashboardScene CPTemplateApplicationInstrumentClusterScene`, which answers 16.0
 for all three. That is **presence, not the release that introduced the name**: the held ladder has no
 13.x or 14.x or 15.x rung — it goes 12.0 then 16.0 (`ls ~/.charon/cache-index/*.names.gz`) — so a

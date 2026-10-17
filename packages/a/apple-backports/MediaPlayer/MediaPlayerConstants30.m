@@ -1,7 +1,7 @@
 // MPMediaPlaylistPropertySeedItems, the 3.0 band's MediaPlayer string constant, one of one.
 //
 // THE BAND IS 3.0 AND THE PROPERTY IS 8.0, and both are kept because the disagreement is real and the tool
-// settles it. `tools/cache-index/first-rung.py _MPMediaPlaylistPropertySeedItems` answers 3.0 - the oldest
+// settles it. `tools/cache-index/first-rung.lua _MPMediaPlaylistPropertySeedItems` answers 3.0 - the oldest
 // HELD release that carries the name - while the property that reads it, MPMediaPlaylist.seedItems, is
 // MP_API(ios(8.0)). A first draft put this constant in MediaPlayerConstants80.m beside that property, and
 // `tools/release-split.lua` refused the object:

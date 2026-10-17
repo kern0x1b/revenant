@@ -2,7 +2,7 @@
 // CGImageSource, which is what decodes and indexes the frames.
 //
 // WHICH RELEASE THIS OBJECT IS: 16.0, and it is a new object of a family GraphicsBackports already has
-// twenty-eight objects of. tools/cache-index/first-rung.py over the 50 held rungs puts
+// twenty-eight objects of. tools/cache-index/first-rung.lua over the 50 held rungs puts
 // _CGAnimateImageAtURLWithBlock, _CGAnimateImageDataWithBlock and the three kCGImageAnimation... names at
 // 16.0 and on no rung below it, which is what makes this a 16.0-band object and not a 13.0 one: the SDK
 // annotates the pair 13.0, and the ladder the answer comes from has no rung between 13.0 and 16.0. It is not

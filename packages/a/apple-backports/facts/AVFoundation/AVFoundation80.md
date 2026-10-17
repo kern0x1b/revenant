@@ -18,7 +18,7 @@ none; the row list came out of the file this band owns.
 | --- | --- | --- |
 | the deleted class-scoped row reader | does **OWNER** carry the member, own table or through a superclass | `xmake l tools/corpus/objc-inventory.lua <cache>` then the tool |
 | `objc.lua`'s `known_selectors` file | is the **name** in the release's whole selector set at all | `~/.charon/dyld/6.1.3/selectors_armv7.txt`, 113 981 names |
-| `tools/cache-index/first-rung.py` | which **held release** first carries the name | `first-rung.py NAME` |
+| `tools/cache-index/first-rung.lua` | which **held release** first carries the name | `first-rung.lua NAME` |
 
 All three ran over these 64 rows. The class-scoped reader is the one the registry's own
 `carried_by_release` asks, so it decides; the other two are the check that it is not alone in its answer.
@@ -72,7 +72,7 @@ So a name-level check would have called four of these rows carried, and the gate
 `AVPlayerItemMetadataOutput` **is** a class at 8.0, with 14 own instance selectors. The protocol that
 declares this method is not: at 8.0 and 8.0 armv7s no class and no protocol declares that selector, and
 the protocol itself first appears as a declared protocol at **12.0** (where `MPCModelGenericAVItem`
-declares the same selector). The name is registered earlier — `first-rung.py` answers 8.0 for the
+declares the same selector). The name is registered earlier — `first-rung.lua` answers 8.0 for the
 selector and **11.0** for `AVPlayerItemMetadataOutputPushDelegate` — and the header says
 `API_AVAILABLE(macos(10.10), ios(8.0), tvos(9.0), watchos(1.0))` at `AVPlayerItemOutput.h:552`.
 

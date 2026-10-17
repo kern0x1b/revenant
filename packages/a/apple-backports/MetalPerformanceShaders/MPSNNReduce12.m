@@ -11,7 +11,7 @@
 // two answers differ: measured with modules/apple/dyld.lua's first_releases() over the held ladder, the
 // call modules/apple/backports.lua's check_releases() makes, the twelve classes' class symbols are
 // exported by the 12.0, 16.0 and 18.0 caches and by no earlier held one, so first_releases() answers
-// 12.0. tools/cache-index/first-rung.py answers 12.0 for them as well, and the two tools part company on
+// 12.0. tools/cache-index/first-rung.lua answers 12.0 for them as well, and the two tools part company on
 // the BASE rather than on these: the 12.0 cache carries MPSNNReduceUnary's name and does not export it,
 // so the base reads as 16.0 and these as 12.0, and an object cannot be both.
 //

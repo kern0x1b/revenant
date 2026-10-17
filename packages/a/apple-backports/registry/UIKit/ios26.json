@@ -42,7 +42,7 @@
    "reason": "build -[UIApplication defaultStatusForCategory:error:]",
    "effect": "until built: respondsToSelector: answers NO",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the ladder answer from tools/cache-index/first-rung.py with its self-test green, and the four release inventories from tools/corpus/objc-inventory.lua - commands and output in the facts page"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the ladder answer from tools/cache-index/first-rung.lua with its self-test green, and the four release inventories from tools/corpus/objc-inventory.lua - commands and output in the facts page"
   },
   {
    "api": "-[UIResponderStandardEditActions showWritingTools:]",
@@ -53,7 +53,7 @@
    "reason": "build -[UIResponderStandardEditActions showWritingTools:]",
    "effect": "until built: respondsToSelector: answers NO",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own); the class-versus-protocol answer measured with tools/corpus/objc-inventory.lua over the four caches and the ladder answer with tools/cache-index/first-rung.py, commands and output in the facts page"
+   "source": "SDK 26.2 surface, UIKit (via=own); the class-versus-protocol answer measured with tools/corpus/objc-inventory.lua over the four caches and the ladder answer with tools/cache-index/first-rung.lua, commands and output in the facts page"
   },
   {
    "api": "UITextView.subclassForWritingToolsCoordinator",
@@ -86,7 +86,7 @@
    "reason": "declared in CharonUIKit18.h and implemented empty, which is the same answer CharonUIKit26.h's twenty-one give and for the same reason: a class is a DYLD SYMBOL, and for a name whose only requirement is that dyld resolve it an empty class IS the complete honest answer - invented members would answer for behaviour nobody measured. NO RELEASE THIS PORT TARGETS CARRIES THE NAME, measured on all four of them (6.1.3, 12.0, 16.0 and 18.0: no class and no protocol of that name in any of the four Objective-C inventories, against controls that find UITextView, UIViewController and UIWindowScene in the same runs), and first-rung answers NONE for it, which is what a name that arrived after the ladder's last rung - 18.0 - looks like. The superclass is NSObject because no declaration in this tree names another: the 26.2 sysroot is not in the store",
    "effect": "the class is EXPORTED, so an application that names it links and dyld resolves it before main runs. It has no members: a 6.1.3 release has no Writing Tools service, no revision-tracking model to rewrite a range in and no UI to present a suggestion in, so nothing on this release sends it a message that the port could answer",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the name's absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.py, both commands and their output in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIWritingToolsCoordinator and _OBJC_METACLASS_$_UIWritingToolsCoordinator"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the name's absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.lua, both commands and their output in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIWritingToolsCoordinator and _OBJC_METACLASS_$_UIWritingToolsCoordinator"
   },
   {
    "api": "UIWritingToolsCoordinatorAnimationParameters",
@@ -151,7 +151,7 @@
    "reason": "build -[UITextInput insertInputSuggestion:]",
    "effect": "until built: respondsToSelector: answers NO",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four caches and the ladder answer with tools/cache-index/first-rung.py, commands, output and controls in the facts page"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four caches and the ladder answer with tools/cache-index/first-rung.lua, commands, output and controls in the facts page"
   },
   {
    "api": "-[UITextInputDelegate conversationContext:didChange:]",
@@ -184,7 +184,7 @@
    "reason": "declared in CharonUIKit18.h and implemented empty, which is the same answer CharonUIKit26.h's twenty-one give and for the same reason: a class is a DYLD SYMBOL, and for a name whose only requirement is that dyld resolve it an empty class IS the complete honest answer - invented members would answer for behaviour nobody measured. NO RELEASE THIS PORT TARGETS CARRIES THE NAME, measured on all four of them: no class and no protocol of that name in the Objective-C inventories of 6.1.3, 12.0, 16.0 and 18.0, against controls that find UITextView, UIViewController, UIWindowScene, UISplitViewController and the other owners of the same filtered run, and first-rung answers NONE for the name - which is what a name that arrived after the ladder's last rung, 18.0, looks like. IT DOES NOT INHERIT FROM ANY OF THE OTHER SEVEN, which is the tempting reading of the names and is not measured: no declaration in this tree names a superclass for any of them, and a wrong superclass is a wrong answer at runtime rather than a missing one, so all eight inherit NSObject",
    "effect": "the class is EXPORTED, so an application that names it links and dyld resolves it before main runs. It has no members, and that is the whole of it: A conversation context is the per-conversation state a smart reply is resolved against, and resolving one needs a mail or messages service this release has not.",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.py, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIConversationContext and _OBJC_METACLASS_$_UIConversationContext"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.lua, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIConversationContext and _OBJC_METACLASS_$_UIConversationContext"
   },
   {
    "api": "UIConversationEntry",
@@ -195,7 +195,7 @@
    "reason": "declared in CharonUIKit18.h and implemented empty, which is the same answer CharonUIKit26.h's twenty-one give and for the same reason: a class is a DYLD SYMBOL, and for a name whose only requirement is that dyld resolve it an empty class IS the complete honest answer - invented members would answer for behaviour nobody measured. NO RELEASE THIS PORT TARGETS CARRIES THE NAME, measured on all four of them: no class and no protocol of that name in the Objective-C inventories of 6.1.3, 12.0, 16.0 and 18.0, against controls that find UITextView, UIViewController, UIWindowScene, UISplitViewController and the other owners of the same filtered run, and first-rung answers NONE for the name - which is what a name that arrived after the ladder's last rung, 18.0, looks like. IT DOES NOT INHERIT FROM ANY OF THE OTHER SEVEN, which is the tempting reading of the names and is not measured: no declaration in this tree names a superclass for any of them, and a wrong superclass is a wrong answer at runtime rather than a missing one, so all eight inherit NSObject",
    "effect": "the class is EXPORTED, so an application that names it links and dyld resolves it before main runs. It has no members, and that is the whole of it: A conversation entry is one message in that conversation, and there is nothing on a 6.1.3 release that reads or writes one.",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.py, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIConversationEntry and _OBJC_METACLASS_$_UIConversationEntry"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.lua, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIConversationEntry and _OBJC_METACLASS_$_UIConversationEntry"
   },
   {
    "api": "UIInputSuggestion",
@@ -206,7 +206,7 @@
    "reason": "declared in CharonUIKit18.h and implemented empty, which is the same answer CharonUIKit26.h's twenty-one give and for the same reason: a class is a DYLD SYMBOL, and for a name whose only requirement is that dyld resolve it an empty class IS the complete honest answer - invented members would answer for behaviour nobody measured. NO RELEASE THIS PORT TARGETS CARRIES THE NAME, measured on all four of them: no class and no protocol of that name in the Objective-C inventories of 6.1.3, 12.0, 16.0 and 18.0, against controls that find UITextView, UIViewController, UIWindowScene, UISplitViewController and the other owners of the same filtered run, and first-rung answers NONE for the name - which is what a name that arrived after the ladder's last rung, 18.0, looks like. IT DOES NOT INHERIT FROM ANY OF THE OTHER SEVEN, which is the tempting reading of the names and is not measured: no declaration in this tree names a superclass for any of them, and a wrong superclass is a wrong answer at runtime rather than a missing one, so all eight inherit NSObject",
    "effect": "the class is EXPORTED, so an application that names it links and dyld resolves it before main runs. It has no members, and that is the whole of it: An input suggestion is what a text input offers while the user types, and offering it needs a suggestion service and a UI to present it in, neither of which this release has.",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.py, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIInputSuggestion and _OBJC_METACLASS_$_UIInputSuggestion"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.lua, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIInputSuggestion and _OBJC_METACLASS_$_UIInputSuggestion"
   },
   {
    "api": "UIMailConversationContext",
@@ -217,7 +217,7 @@
    "reason": "declared in CharonUIKit18.h and implemented empty, which is the same answer CharonUIKit26.h's twenty-one give and for the same reason: a class is a DYLD SYMBOL, and for a name whose only requirement is that dyld resolve it an empty class IS the complete honest answer - invented members would answer for behaviour nobody measured. NO RELEASE THIS PORT TARGETS CARRIES THE NAME, measured on all four of them: no class and no protocol of that name in the Objective-C inventories of 6.1.3, 12.0, 16.0 and 18.0, against controls that find UITextView, UIViewController, UIWindowScene, UISplitViewController and the other owners of the same filtered run, and first-rung answers NONE for the name - which is what a name that arrived after the ladder's last rung, 18.0, looks like. IT DOES NOT INHERIT FROM ANY OF THE OTHER SEVEN, which is the tempting reading of the names and is not measured: no declaration in this tree names a superclass for any of them, and a wrong superclass is a wrong answer at runtime rather than a missing one, so all eight inherit NSObject",
    "effect": "the class is EXPORTED, so an application that names it links and dyld resolves it before main runs. It has no members, and that is the whole of it: The Mail specialisation of the abstract pair, and it is no more answerable than the pair it would inherit from.",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.py, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIMailConversationContext and _OBJC_METACLASS_$_UIMailConversationContext"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.lua, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIMailConversationContext and _OBJC_METACLASS_$_UIMailConversationContext"
   },
   {
    "api": "UIMailConversationEntry",
@@ -228,7 +228,7 @@
    "reason": "declared in CharonUIKit18.h and implemented empty, which is the same answer CharonUIKit26.h's twenty-one give and for the same reason: a class is a DYLD SYMBOL, and for a name whose only requirement is that dyld resolve it an empty class IS the complete honest answer - invented members would answer for behaviour nobody measured. NO RELEASE THIS PORT TARGETS CARRIES THE NAME, measured on all four of them: no class and no protocol of that name in the Objective-C inventories of 6.1.3, 12.0, 16.0 and 18.0, against controls that find UITextView, UIViewController, UIWindowScene, UISplitViewController and the other owners of the same filtered run, and first-rung answers NONE for the name - which is what a name that arrived after the ladder's last rung, 18.0, looks like. IT DOES NOT INHERIT FROM ANY OF THE OTHER SEVEN, which is the tempting reading of the names and is not measured: no declaration in this tree names a superclass for any of them, and a wrong superclass is a wrong answer at runtime rather than a missing one, so all eight inherit NSObject",
    "effect": "the class is EXPORTED, so an application that names it links and dyld resolves it before main runs. It has no members, and that is the whole of it: The Mail specialisation of the abstract pair, and it is no more answerable than the pair it would inherit from.",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.py, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIMailConversationEntry and _OBJC_METACLASS_$_UIMailConversationEntry"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.lua, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIMailConversationEntry and _OBJC_METACLASS_$_UIMailConversationEntry"
   },
   {
    "api": "UIMessageConversationContext",
@@ -239,7 +239,7 @@
    "reason": "declared in CharonUIKit18.h and implemented empty, which is the same answer CharonUIKit26.h's twenty-one give and for the same reason: a class is a DYLD SYMBOL, and for a name whose only requirement is that dyld resolve it an empty class IS the complete honest answer - invented members would answer for behaviour nobody measured. NO RELEASE THIS PORT TARGETS CARRIES THE NAME, measured on all four of them: no class and no protocol of that name in the Objective-C inventories of 6.1.3, 12.0, 16.0 and 18.0, against controls that find UITextView, UIViewController, UIWindowScene, UISplitViewController and the other owners of the same filtered run, and first-rung answers NONE for the name - which is what a name that arrived after the ladder's last rung, 18.0, looks like. IT DOES NOT INHERIT FROM ANY OF THE OTHER SEVEN, which is the tempting reading of the names and is not measured: no declaration in this tree names a superclass for any of them, and a wrong superclass is a wrong answer at runtime rather than a missing one, so all eight inherit NSObject",
    "effect": "the class is EXPORTED, so an application that names it links and dyld resolves it before main runs. It has no members, and that is the whole of it: The Messages specialisation of the abstract pair, and it is no more answerable than the pair it would inherit from.",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.py, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIMessageConversationContext and _OBJC_METACLASS_$_UIMessageConversationContext"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.lua, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIMessageConversationContext and _OBJC_METACLASS_$_UIMessageConversationContext"
   },
   {
    "api": "UIMessageConversationEntry",
@@ -250,7 +250,7 @@
    "reason": "declared in CharonUIKit18.h and implemented empty, which is the same answer CharonUIKit26.h's twenty-one give and for the same reason: a class is a DYLD SYMBOL, and for a name whose only requirement is that dyld resolve it an empty class IS the complete honest answer - invented members would answer for behaviour nobody measured. NO RELEASE THIS PORT TARGETS CARRIES THE NAME, measured on all four of them: no class and no protocol of that name in the Objective-C inventories of 6.1.3, 12.0, 16.0 and 18.0, against controls that find UITextView, UIViewController, UIWindowScene, UISplitViewController and the other owners of the same filtered run, and first-rung answers NONE for the name - which is what a name that arrived after the ladder's last rung, 18.0, looks like. IT DOES NOT INHERIT FROM ANY OF THE OTHER SEVEN, which is the tempting reading of the names and is not measured: no declaration in this tree names a superclass for any of them, and a wrong superclass is a wrong answer at runtime rather than a missing one, so all eight inherit NSObject",
    "effect": "the class is EXPORTED, so an application that names it links and dyld resolves it before main runs. It has no members, and that is the whole of it: The Messages specialisation of the abstract pair, and it is no more answerable than the pair it would inherit from.",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.py, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIMessageConversationEntry and _OBJC_METACLASS_$_UIMessageConversationEntry"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.lua, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UIMessageConversationEntry and _OBJC_METACLASS_$_UIMessageConversationEntry"
   },
   {
    "api": "UISmartReplySuggestion",
@@ -261,7 +261,7 @@
    "reason": "declared in CharonUIKit18.h and implemented empty, which is the same answer CharonUIKit26.h's twenty-one give and for the same reason: a class is a DYLD SYMBOL, and for a name whose only requirement is that dyld resolve it an empty class IS the complete honest answer - invented members would answer for behaviour nobody measured. NO RELEASE THIS PORT TARGETS CARRIES THE NAME, measured on all four of them: no class and no protocol of that name in the Objective-C inventories of 6.1.3, 12.0, 16.0 and 18.0, against controls that find UITextView, UIViewController, UIWindowScene, UISplitViewController and the other owners of the same filtered run, and first-rung answers NONE for the name - which is what a name that arrived after the ladder's last rung, 18.0, looks like. IT DOES NOT INHERIT FROM ANY OF THE OTHER SEVEN, which is the tempting reading of the names and is not measured: no declaration in this tree names a superclass for any of them, and a wrong superclass is a wrong answer at runtime rather than a missing one, so all eight inherit NSObject",
    "effect": "the class is EXPORTED, so an application that names it links and dyld resolves it before main runs. It has no members, and that is the whole of it: A smart reply is a reply the system composes for the conversation it is in, and composing one is a service call this release cannot make.",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.py, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UISmartReplySuggestion and _OBJC_METACLASS_$_UISmartReplySuggestion"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the absence from every release measured with tools/corpus/objc-inventory.lua over the four caches and tools/cache-index/first-rung.lua, both commands with their output and controls in the facts page; the object read with nm -gU, which lists _OBJC_CLASS_$_UISmartReplySuggestion and _OBJC_METACLASS_$_UISmartReplySuggestion"
   },
   {
    "api": "UITextInputTraits.conversationContext",
@@ -272,7 +272,7 @@
    "reason": "build the property UITextInputTraits.conversationContext",
    "effect": "until built: respondsToSelector: answers NO",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the class-versus-protocol answer measured with tools/corpus/objc-inventory.lua over the four band-end caches and the ladder answer with tools/cache-index/first-rung.py - commands, output and controls in the facts page"
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the class-versus-protocol answer measured with tools/corpus/objc-inventory.lua over the four band-end caches and the ladder answer with tools/cache-index/first-rung.lua - commands, output and controls in the facts page"
   },
   {
    "api": "+[UIBarButtonItem fixedSpaceItem]",
@@ -401,7 +401,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder insertElements:afterActionForIdentifier:]"
   },
@@ -412,7 +412,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder insertElements:afterCommandForAction:propertyList:]"
   },
@@ -423,7 +423,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder insertElements:afterMenuForIdentifier:]"
   },
@@ -434,7 +434,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder insertElements:atEndOfMenuForIdentifier:]"
   },
@@ -445,7 +445,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder insertElements:atStartOfMenuForIdentifier:]"
   },
@@ -456,7 +456,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder insertElements:beforeActionForIdentifier:]"
   },
@@ -467,7 +467,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder insertElements:beforeCommandForAction:propertyList:]"
   },
@@ -478,7 +478,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder insertElements:beforeMenuForIdentifier:]"
   },
@@ -489,7 +489,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder removeActionForIdentifier:]"
   },
@@ -500,7 +500,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder removeCommandForAction:propertyList:]"
   },
@@ -511,7 +511,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder replaceActionForIdentifier:withElements:]"
   },
@@ -522,7 +522,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder replaceCommandForAction:propertyList:withElements:]"
   },
@@ -533,7 +533,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIMenuBuilder replaceMenuForIdentifier:withElements:]"
   },
@@ -555,7 +555,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIResponderStandardEditActions alignCenter:]"
   },
@@ -566,7 +566,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIResponderStandardEditActions alignJustified:]"
   },
@@ -577,7 +577,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIResponderStandardEditActions alignLeft:]"
   },
@@ -588,7 +588,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIResponderStandardEditActions alignRight:]"
   },
@@ -599,7 +599,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIResponderStandardEditActions newFromPasteboard:]"
   },
@@ -610,7 +610,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIResponderStandardEditActions performClose:]"
   },
@@ -621,7 +621,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIResponderStandardEditActions toggleInspector:]"
   },
@@ -632,7 +632,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UISearchBarDelegate searchBar:shouldChangeTextInRanges:replacementText:]"
   },
@@ -653,7 +653,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UISplitViewControllerDelegate splitViewController:didHideColumn:]"
   },
@@ -664,7 +664,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UISplitViewControllerDelegate splitViewController:didShowColumn:]"
   },
@@ -685,7 +685,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UITextFieldDelegate textField:editMenuForCharactersInRanges:suggestedActions:]"
   },
@@ -696,7 +696,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UITextFieldDelegate textField:shouldChangeCharactersInRanges:replacementString:]"
   },
@@ -707,7 +707,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UITextViewDelegate textView:editMenuForTextInRanges:suggestedActions:]"
   },
@@ -718,7 +718,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UITextViewDelegate textView:shouldChangeTextInRanges:replacementText:]"
   },
@@ -799,7 +799,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIWindowSceneDelegate preferredWindowingControlStyleForScene:]"
   },
@@ -810,7 +810,7 @@
    "minimum": "6.0",
    "status": "owed",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
    "reason": "build -[UIWindowSceneDelegate windowScene:didUpdateEffectiveGeometry:]"
   },
@@ -1522,7 +1522,7 @@
    "status": "owed",
    "reason": "build the property UITextInput.unobscuredContentRect",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name, and coordination/api-queue.md's note that this name predates the surface; the owner and the selector's real owners measured with tools/corpus/objc-inventory.lua over the four band-end caches and tools/cache-index/first-rung.py --rungs, commands, output and controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name, and coordination/api-queue.md's note that this name predates the surface; the owner and the selector's real owners measured with tools/corpus/objc-inventory.lua over the four band-end caches and tools/cache-index/first-rung.lua --rungs, commands, output and controls in the facts page",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md"
   },
   {
@@ -1832,7 +1832,7 @@
    "reason": "build the property UITextInputTraits.allowsNumberPadPopover",
    "effect": "until built: respondsToSelector: answers NO",
    "facts": "facts/UIKit/ConverseAndWriteTools18.md",
-   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.py - every command, its output and its controls in the facts page",
+   "source": "SDK 26.2 surface, UIKit (via=own) for the name and the introduced version; the owner measured with tools/corpus/objc-inventory.lua over the four band-end caches (6.1.3, 12.0, 16.0, 18.0) and the selector's absence of any held release with tools/cache-index/first-rung.lua - every command, its output and its controls in the facts page",
    "ledger": "missing"
   },
   {

@@ -66,7 +66,7 @@ for r in 6.1.3 4.3; do
   do printf '%s %-62s %s\n' "$r" "$s" "$(strings -a ~/.charon/dyld/$r/dyld_shared_cache_armv7 | grep -cxF "$s")"; done
 done
 printf '%s\n' UIPointerInteraction UIPointerInteractionDelegate UIPointerInteractionAnimating \
-  addAnimations: addCompletion: zzNonexistentNameForControl | python3 tools/cache-index/first-rung.py
+  addAnimations: addCompletion: zzNonexistentNameForControl | xmake l tools/cache-index/first-rung.lua
 ```
 
 ### The output

@@ -12,10 +12,10 @@ cache or out of a document the tree already carries.
 
 ## What was checked, and the control in each run
 
-**First held rung of each name** - `tools/cache-index/first-rung.py`, the merged name index over
+**First held rung of each name** - `tools/cache-index/first-rung.lua`, the merged name index over
 the 50 held rungs:
 
-    $ python3 tools/cache-index/first-rung.py < <the 35 names, one per line>
+    $ xmake l tools/cache-index/first-rung.lua < <the 35 names, one per line>
     _NSFileSize                                     3.0      <- the control
     NSCharonW07ControlNameThatNoReleaseCarries      NONE    <- the negative control
     _OBJC_CLASS_$_AVAggregateAssetDownloadTask       11.0

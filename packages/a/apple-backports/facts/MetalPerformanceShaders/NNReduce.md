@@ -20,8 +20,8 @@ with that call:
 | `_OBJC_CLASS_$_MPSNNReduceUnary` and its metaclass | **16.0** | 16.0, 18.0 |
 | `_OBJC_CLASS_$_MPSNNReduceColumnMax`, `RowMin`, `FeatureChannelsSum` and the other nine | **12.0** | 12.0, 16.0, 18.0 |
 
-`tools/cache-index/first-rung.py` answers **12.0 for all fourteen of them**, and that is the whole
-difference between the two tools rather than a disagreement about the caches: `first-rung.py` reads
+`tools/cache-index/first-rung.lua` answers **12.0 for all fourteen of them**, and that is the whole
+difference between the two tools rather than a disagreement about the caches: `first-rung.lua` reads
 whether a rung **carries** a name (its string section, its Objective-C metadata) and
 `first_releases()` reads whether a rung **exports** it. The 12.0 cache carries
 `MPSNNReduceUnary` and does not export it, so the base reads as 16.0 and the twelve concrete

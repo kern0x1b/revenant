@@ -63,7 +63,7 @@ extern AVAudioTimePitchAlgorithm const AVAudioTimePitchAlgorithmTimeDomain;
 extern NSString *const AVSampleBufferAudioRendererWasFlushedAutomaticallyNotification;
 extern NSString *const AVSampleBufferAudioRendererFlushTimeKey;
 
-// AVTime.h in the 16.4 SDK, and the release's own since 4.0 (tools/cache-index/first-rung.py
+// AVTime.h in the 16.4 SDK, and the release's own since 4.0 (tools/cache-index/first-rung.lua
 // valueWithCMTime: and CMTimeValue both answer 4.0): the boundary times of
 // -addBoundaryTimeObserverForTimes: are NSValues of a CMTime, and the port's objects read them back.
 @interface NSValue (CharonCMTimeBox)

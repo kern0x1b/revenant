@@ -14,7 +14,7 @@
 //   MPSNNFilterNode12.m   12.0   MPSNNFilterNode
 //   MPSNNGraphNodes16.m   16.0   MPSNNStateNode MPSNNBinaryArithmeticNode MPSCNNPoolingNode
 //
-// All fourteen agree on class and metaclass, so the earliest is the class's own. `first-rung.py` answers
+// All fourteen agree on class and metaclass, so the earliest is the class's own. `first-rung.lua` answers
 // 11.0 for all fourteen and is right about the CLASSES and wrong about what a link needs: it reads the
 // names file, which build.py:8 writes with `strings -a <cache> | grep -xF NAME`, so it finds a class that
 // is in the cache and absent from its export trie. That is the difference this split rests on, and

@@ -6,7 +6,7 @@
 // MPSCNNBatchNormalization.h:102 and MPSRNNLayer.h:1055 annotate ios(12.0), and the ladder says so too:
 //
 //   $ printf 'MPSCNNNormalizationMeanAndVarianceState\nMPSRNNMatrixTrainingState\n' \
-//       | python3 tools/cache-index/first-rung.py
+//       | xmake l tools/cache-index/first-rung.lua
 //   MPSCNNNormalizationMeanAndVarianceState   12.0
 //   MPSRNNMatrixTrainingState                  12.0
 //

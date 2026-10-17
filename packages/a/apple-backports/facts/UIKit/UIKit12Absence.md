@@ -68,7 +68,7 @@ UIFocusItem                       0     0    0    0    1    1
 
 Every 1 is a release **newer** than this band's ends, and each of them is the release whose SDK
 declares the name: the three 12.0 rows read 1 first at 12.0, `UIFocusItem` at 11.0 (its row is 10.0.1
-by `first-rung.py`, and 10.0.1 is not held), `UIFocusEnvironment` at 9.0. The zeros are therefore the
+by `first-rung.lua`, and 10.0.1 is not held), `UIFocusEnvironment` at 9.0. The zeros are therefore the
 releases' and the reader's, which is what a control is for.
 
 ### Class-scoped selectors over the two armv7 band ends
@@ -104,7 +104,7 @@ comparable to the check. Read from the two dumps:
 other side: the name is in the index and in the caches, but `UIFocusItem`'s `frame` belongs to a
 protocol no release of this band declares, so the row's answer is still no.
 
-### `first-rung.py`, the ladder's own index
+### `first-rung.lua`, the ladder's own index
 
 ```
 UIFocusMovementHint        12.0     UIFocusItemContainer        12.0

@@ -251,7 +251,7 @@ same reader, the same prefix, 11.0 answering with the class, the tester class an
 6.1.3 and 4.3 carry neither the class nor the protocol, and the four selectors go with them:
 
 ```
-python3 tools/cache-index/first-rung.py NSURLSessionStreamDelegate \
+xmake l tools/cache-index/first-rung.lua NSURLSessionStreamDelegate \
     'URLSession:streamTask:didBecomeInputStream:outputStream:' 'URLSession:readClosedForStreamTask:' \
     'URLSession:writeClosedForStreamTask:' 'URLSession:betterRouteDiscoveredForStreamTask:'
 NSURLSessionStreamDelegate	11.0
@@ -279,7 +279,7 @@ three: the release *can* be asked about a route, and the row before said it coul
 Measured:
 
 ```
-python3 tools/cache-index/first-rung.py _SCNetworkReachabilityCreateWithName _SCNetworkReachabilitySetCallback
+xmake l tools/cache-index/first-rung.lua _SCNetworkReachabilityCreateWithName _SCNetworkReachabilitySetCallback
 _SCNetworkReachabilityCreateWithName	3.0
 _SCNetworkReachabilitySetCallback	3.0
 ```

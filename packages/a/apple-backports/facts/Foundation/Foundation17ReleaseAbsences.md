@@ -79,7 +79,7 @@ produce resume data from and no delegate to send `didReceiveInformationalRespons
 
 ## The owner trap, measured twice — a selector string is not an NSLocale or an upload task
 
-`tools/cache-index/first-rung.py` places two of these names on rungs, and in both cases the
+`tools/cache-index/first-rung.lua` places two of these names on rungs, and in both cases the
 owner is not the class the row is about:
 
 | name | first held rung | the class that actually owns it there |

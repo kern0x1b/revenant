@@ -32,7 +32,7 @@ carry, so no band that takes the object lacks one:
 | `_UIGraphicsPushContext`, `_UIGraphicsPopContext`, `_kCGPDFContextMediaBox` | 3.0 |
 | `_CGContextSetBaseCTM` | 3.0, and declared in no header - not the 26.2 one either |
 
-Read with `python3 tools/cache-index/first-rung.py <symbol>`, one name per run. The last one is the
+Read with `xmake l tools/cache-index/first-rung.lua <symbol>`, one name per run. The last one is the
 family's only private call: it sets the matrix a context returns to when its CTM is reset, which is
 what keeps the y flip across the pages of one document, and the three private functions beside it in
 `CharonGraphicsRenderer.h` are declared the same way for the same reason.

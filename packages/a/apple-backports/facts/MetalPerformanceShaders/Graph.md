@@ -41,7 +41,7 @@ its true superclass. What four of them are *not*, at 11.0, is in any image's **e
 registry is consulted **only as a last resort**, and only for a row whose status is `implemented`. So the
 rows saying `introduced 11.0` never got a say, and `misplaced()` refused the single object.
 
-**`first-rung.py` answers a different question and is right about the classes.** It reads
+**`first-rung.lua` answers a different question and is right about the classes.** It reads
 `~/.charon/cache-index/<release>.names.gz`, which `tools/cache-index/build.py:8` writes with
 `strings -a <cache> | grep -xF NAME` — every string in the cache, in any image, in any section. So it finds
 a class that is *in* the cache and *not exported from* it, and answers 11.0 for all fourteen. That is a
@@ -125,11 +125,11 @@ it. That record stands; it is about the image kernels and not about the graph.
 
 ## The fourteen classes, settled from the headers
 
-`first-rung.py` answers **11.0** for all fourteen and **12.0** for `MPSNNGradientFilterNode`,
+`first-rung.lua` answers **11.0** for all fourteen and **12.0** for `MPSNNGradientFilterNode`,
 `MPSNNGradientStateNode`, `MPSNNLabelsNode` and `MPSNNReduceRowSum`:
 
 ```
-python3 tools/cache-index/first-rung.py MPSNNGraph MPSNNImageNode MPSNNStateNode MPSNNFilterNode \
+xmake l tools/cache-index/first-rung.lua MPSNNGraph MPSNNImageNode MPSNNStateNode MPSNNFilterNode \
     MPSNNPadding MPSNNDefaultPadding MPSNNBinaryArithmeticNode MPSNNAdditionNode \
     MPSNNSubtractionNode MPSNNMultiplicationNode MPSNNDivisionNode MPSNNConcatenationNode \
     MPSCNNPoolingNode MPSCNNPoolingAverageNode MPSCNNPoolingMaxNode
@@ -188,7 +188,7 @@ measurements:
   class's interface is annotated with. `MPSNNGraphNodes.h:404-428` and `:2158` carry no macro of their
   own, and `grep -cxF` over `~/.charon/dyld/11.0/selectors_arm64.txt` — every selector the whole 11.0
   cache carries — answers **0** for all five. They cannot have arrived in 11.0, and what they return is
-  `MPSNNGradientFilterNode`, which `first-rung.py` places at 12.0.
+  `MPSNNGradientFilterNode`, which `first-rung.lua` places at 12.0.
 - **`+[MPSNNDefaultPadding paddingForTensorflowAveragePooling]` reads `11.0`,** not the `11.3`
   `MPSNeuralNetworkTypes.h:497` annotates it with, because **the selector is in the 11.0 cache** (the same
   grep answers **1**) — and because `check_registry`'s `held` check refuses an absent-or-owed row whose

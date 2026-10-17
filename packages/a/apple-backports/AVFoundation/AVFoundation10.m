@@ -15,7 +15,7 @@
 // It is a CATEGORY method, so nm -gU over this object defines no API symbol at all and
 // tools/release-split.lua checks ZERO symbols here and reports the file clean vacuously - the blind spot
 // its own header documents. The class-scoped check for a category is a selector-string walk of the cache
-// ladder, which is what first-rung.py answers, and the selector is 10.0.1 there while 6.1.3's AVPlayer
+// ladder, which is what first-rung.lua answers, and the selector is 10.0.1 there while 6.1.3's AVPlayer
 // does not carry it.
 
 @implementation AVPlayer (CharonAVFoundation10)

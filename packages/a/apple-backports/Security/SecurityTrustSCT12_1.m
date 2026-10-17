@@ -10,7 +10,7 @@
 // symbol is absent from the armv7 caches of both releases the port supports.
 //
 // Note the ladder's own caveat, which is why the row's `introduced` is the header's 12.1.1 and not a
-// rung: first-rung.py answers 9.0 for this symbol, because the held ladder has a hole above 12.0
+// rung: first-rung.lua answers 9.0 for this symbol, because the held ladder has a hole above 12.0
 // (there is no 12.1.1, 13.0 or 14.0 armv7 cache in ~/.charon/dyld) and the index is a PRESENCE answer
 // over the rungs that exist. The header's availability is the declaration and the registry carries it.
 //

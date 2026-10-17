@@ -11,7 +11,7 @@ WHAT IT MEASURES ITSELF, so a reader does not have to take the output on trust:
      "GroupImageIndexMonoscopicImageLocation", the two TIFF position names are "XPosition" and "YPosition",
      and the monoscopic locations and the stereo aggressor keys are bare words - so no naming convention
      produces this table.
-  2. for every name, the first HELD RUNG that exports the SYMBOL, with tools/cache-index/first-rung.py.
+  2. for every name, the first HELD RUNG that exports the SYMBOL, with tools/cache-index/first-rung.lua.
      This family exports real `const CFStringRef` variables, so an object's API arrived in one release and
      this is what says which; a name no rung carries is placed by the ledger's own availability, because
      the ladder ends at 10.3.4 and nothing else says anything about it.
@@ -34,7 +34,7 @@ GRAPHICS = os.path.join(WT, "packages/a/apple-backports/Graphics")
 REGISTRY = os.path.join(WT, "packages/a/apple-backports/registry/ImageIO")
 PROBE = os.path.join(WT, "tests/backports/host/imageio-names/probe.c")
 HARNESS = os.path.join(WT, "tests/backports/host/imageio-names")
-FIRST_RUNG = os.path.join(WT, "tools/cache-index/first-rung.py")
+FIRST_RUNG = os.path.join(WT, "tools/cache-index/first-rung.lua")
 LEDGER = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("CHARON_LEDGER")
 if not LEDGER:
     # The corpus ledger, found by walking up to the workspace that holds coordination/ - this repository is

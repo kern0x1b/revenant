@@ -25,7 +25,7 @@ own `introduced` is **26.4**, which no SDK here reaches - it comes from
 a header read either. The held release ladder stops at 18.0, older than the pair, so the release's own
 metadata cannot settle it:
 
-    $ python3 tools/cache-index/first-rung.py --self-test | grep "rung in the table"
+    $ xmake l tools/cache-index/first-rung.lua --self-test | grep "rung in the table"
     ok   every rung in the table is held (53 rungs)
     $ ls ~/.charon/dyld | tail -1
     18.0

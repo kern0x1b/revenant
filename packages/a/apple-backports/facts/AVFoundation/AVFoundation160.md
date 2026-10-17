@@ -78,7 +78,7 @@ The failure is reported in a domain of the port's own because the release has no
 $ printf '%s\n' _AVErrorUnknown _AVErrorOperationNotSupportedForAsset _kCMPersistentTrackID_Invalid \
     _kCMVideoCodecType_H264 _AVMediaCharacteristicIsDefault _NSURLSession _CMSampleBufferGetSampleCursor \
     _CMSampleBufferIsSampleCursorValid _AVAssetTrackGroupOutputHandlingPreserveAlternateTracks \
-    _AVPlayerTimeControlStatusPlaying _AVPlayerItemStatusReadyToPlay | python3 tools/cache-index/first-rung.py
+    _AVPlayerTimeControlStatusPlaying _AVPlayerItemStatusReadyToPlay | xmake l tools/cache-index/first-rung.lua
 _AVErrorUnknown	NONE
 _AVErrorOperationNotSupportedForAsset	NONE
 _kCMPersistentTrackID_Invalid	NONE
@@ -133,4 +133,4 @@ No band build and no 6.1.3 gate was run: the only build this worktree is allowed
 `xmake l $HOME/Git/projects/ios/coordination/run_light_tests.lua`. The objects were compiled on their
 own with the shared `llvm` package's clang at `-target armv7-apple-ios6.0 -isysroot` the 16.4 SDK with
 the flags `modules/apple/backports.lua`'s `compile_arguments` uses, and every symbol they reference was
-checked against 6.1.3's own cache with `first-rung.py`. Whether a band links them is not verified.
+checked against 6.1.3's own cache with `first-rung.lua`. Whether a band links them is not verified.

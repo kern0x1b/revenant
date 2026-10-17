@@ -242,7 +242,7 @@ earlier in this page.
 The control for that negative is in the same dump: 7187 classes came out of it, and
 `UIApplication` and `UIConcreteLocalNotification` are two of them, so the reader finds
 the class it is looking in. The three delivered-notification selectors themselves are
-absent from every release before they existed - `first-rung.py
+absent from every release before they existed - `first-rung.lua
 getDeliveredNotificationsWithCompletionHandler: removeAllDeliveredNotifications
 removeDeliveredNotificationsWithIdentifiers:` answers `10.0.1` for each - and
 `$HOME/.charon/dyld/6.1.3/selectors_armv7.txt` holds 113981 selectors and none of them

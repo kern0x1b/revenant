@@ -417,7 +417,7 @@
       "reason": "build -[HKWorkoutSessionDelegate workoutSession:didGenerateEvent:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit.md",
-      "source": "coordination/corpus/sdk-26.2-surface.tsv for the version, which reads 10.0 with via=own; HKWorkoutSession.h of iOS 26.2 and of iOS 16.4 at the member's own annotation and at the protocol's; HKHealthStore.h of the same two; and the ladder's first held rung carrying the selector string, 10.0.1 (tools/cache-index/first-rung.py)"
+      "source": "coordination/corpus/sdk-26.2-surface.tsv for the version, which reads 10.0 with via=own; HKWorkoutSession.h of iOS 26.2 and of iOS 16.4 at the member's own annotation and at the protocol's; HKHealthStore.h of the same two; and the ladder's first held rung carrying the selector string, 10.0.1 (tools/cache-index/first-rung.lua)"
     },
     {
       "api": "HKCDADocumentSample.document",

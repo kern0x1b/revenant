@@ -625,11 +625,11 @@ here.
 
 Where the value comes from, and which release has Apple's own body for the class:
 
-    $ python3 tools/cache-index/first-rung.py VNDetectHumanBodyPoseRequest VNRecognizeAnimalsRequest
+    $ xmake l tools/cache-index/first-rung.lua VNDetectHumanBodyPoseRequest VNRecognizeAnimalsRequest
     VNDetectHumanBodyPoseRequest   16.0
     VNRecognizeAnimalsRequest      16.0
 
-`first-rung.py` is a PRESENCE oracle, not a version oracle: it says the name is real and which held release
+`first-rung.lua` is a PRESENCE oracle, not a version oracle: it says the name is real and which held release
 has Apple's own implementation of it. 16.0 is the nearest held release that carries Vision at all - the
 held set is dense to 12.0 and then jumps to 16.0 and 18.0, so a name the SDK dates to 13.0 or 14.0 reads as
 "16.0" here. The SDK headers and `coordination/corpus/sdk-26.2-surface.tsv` are the VERSION oracle, and

@@ -50,7 +50,7 @@ CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua UITextPasteItem   6.1.3 4
 CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua NSItemProvider    6.1.3 4.3 8.0
 printf '%s\n' UISearchTextField UISearchToken UISearchTextFieldPasteItem UITextPasteItem NSItemProvider \
              searchTextField:itemProviderForCopyingToken: setSearchTokenResult: zzNonexistentNameForControl \
-  | python3 tools/cache-index/first-rung.py
+  | xmake l tools/cache-index/first-rung.lua
 for r in 6.1.3 4.3; do
   for s in searchTextField:itemProviderForCopyingToken: setSearchTokenResult: zzNonexistentSelectorForControl:
   do printf '%s %-48s %s\n' "$r" "$s" "$(strings -a ~/.charon/dyld/$r/dyld_shared_cache_armv7 | grep -cxF "$s")"; done

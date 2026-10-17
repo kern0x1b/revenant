@@ -1836,7 +1836,7 @@
       "reason": "build +[HKQuery predicateForStatesOfMindWithAssociation:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: python3 tools/cache-index/first-rung.py --rungs predicateForStatesOfMindWithAssociation: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithAssociation: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "+[HKQuery predicateForStatesOfMindWithKind:]",
@@ -1847,7 +1847,7 @@
       "reason": "build +[HKQuery predicateForStatesOfMindWithKind:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: python3 tools/cache-index/first-rung.py --rungs predicateForStatesOfMindWithKind: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithKind: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "+[HKQuery predicateForStatesOfMindWithLabel:]",
@@ -1858,7 +1858,7 @@
       "reason": "build +[HKQuery predicateForStatesOfMindWithLabel:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: python3 tools/cache-index/first-rung.py --rungs predicateForStatesOfMindWithLabel: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithLabel: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "+[HKQuery predicateForStatesOfMindWithValence:operatorType:]",
@@ -1869,7 +1869,7 @@
       "reason": "build +[HKQuery predicateForStatesOfMindWithValence:operatorType:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: python3 tools/cache-index/first-rung.py --rungs predicateForStatesOfMindWithValence:operatorType: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithValence:operatorType: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "+[HKQuery predicateForWorkoutsWithOperatorType:duration:]",
@@ -2628,7 +2628,7 @@
       "reason": "build -[HKHealthStore endWorkoutSession:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: python3 tools/cache-index/first-rung.py --rungs endWorkoutSession: reads 9.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 9.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs endWorkoutSession: reads 9.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 9.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "-[HKHealthStore executeQuery:]",
@@ -2650,7 +2650,7 @@
       "reason": "build -[HKHealthStore pauseWorkoutSession:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: python3 tools/cache-index/first-rung.py --rungs pauseWorkoutSession: reads 10.0.1 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 10.0.1 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs pauseWorkoutSession: reads 10.0.1 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 10.0.1 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "-[HKHealthStore requestAuthorizationToShareTypes:readTypes:completion:]",
@@ -2672,7 +2672,7 @@
       "reason": "build -[HKHealthStore resumeWorkoutSession:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: python3 tools/cache-index/first-rung.py --rungs resumeWorkoutSession: reads 10.0.1 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 10.0.1 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs resumeWorkoutSession: reads 10.0.1 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 10.0.1 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "-[HKHealthStore saveObject:withCompletion:]",
@@ -2705,7 +2705,7 @@
       "reason": "build -[HKHealthStore startWorkoutSession:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: python3 tools/cache-index/first-rung.py --rungs startWorkoutSession: reads 9.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 9.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs startWorkoutSession: reads 9.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 9.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "-[HKHealthStore stopQuery:]",

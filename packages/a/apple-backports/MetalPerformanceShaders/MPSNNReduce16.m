@@ -11,7 +11,7 @@
 // the call modules/apple/backports.lua's check_releases() makes, so the same measurement refuses the
 // mixed object - _OBJC_CLASS_$_MPSNNReduceUnary is exported by the 16.0 and 18.0 caches and by no
 // earlier held one, while the twelve concrete classes' classes are exported from 12.0. tools/cache-index/
-// first-rung.py answers 12.0 for the base as well, and that is the difference between the two tools: a
+// first-rung.lua answers 12.0 for the base as well, and that is the difference between the two tools: a
 // rung CARRIES a name in its string section and its Objective-C metadata, and first-rung reads that,
 // while a client of a backport has to BIND the symbol, and only an export is bindable. The 12.0 cache
 // carries the base and does not export it. So the base is release-16.0 surface for the band and the

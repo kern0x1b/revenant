@@ -20,7 +20,7 @@
       "status": "owed",
       "reason": "build the class AVRoutePickerView",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the armv7 cache ladder through tools/cache-index/first-rung.py for every name above, and the failed compile of the deleted first attempt recorded in this row's reason",
+      "source": "the armv7 cache ladder through tools/cache-index/first-rung.lua for every name above, and the failed compile of the deleted first attempt recorded in this row's reason",
       "facts": "facts/AVKit/Absent.md"
     },
     {

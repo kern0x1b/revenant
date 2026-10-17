@@ -6,7 +6,7 @@
 // The iOS 7.0 trust and policy accessors: what 6.1.3 answers for each of them, and what the port
 // answers for the same call.
 //
-// EVERY RELEASE CALL BELOW IS MEASURED, not assumed. Read with tools/cache-index/first-rung.py
+// EVERY RELEASE CALL BELOW IS MEASURED, not assumed. Read with tools/cache-index/first-rung.lua
 // --rungs against the armv7 caches of the two releases this port supports; the presence table is in
 // facts/Security/AbsentRows613.md:
 //

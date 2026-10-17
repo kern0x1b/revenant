@@ -1,7 +1,7 @@
 // CGImageMetadata and CGImageMetadataTag: the tag container of iOS 7, over the release's own
 // CoreFoundation, for a release whose ImageIO has no metadata tree of its own.
 //
-// MEASURED, tools/cache-index/first-rung.py over the 50 held rungs (2026-09-30, .agent-work/runs/io-rungs.txt):
+// MEASURED, tools/cache-index/first-rung.lua over the 50 held rungs (2026-09-30, .agent-work/runs/io-rungs.txt):
 // every CGImageMetadata* symbol this file defines first appears on the 7.0 rung and on no rung below it,
 // so one object holds the whole 7.0 surface and needs no split. The names iOS 6 does export
 // (kCGImageMetadataNamespaceExif and its seven siblings, CGImageSourceCopyMetadataAtIndex) are the

@@ -9,7 +9,7 @@
       "status": "implemented",
       "reason": "iOS 6 has no barcode descriptor of any kind and no filter that reads one, so the class is made here as what the header says it is: an abstract representation of a symbol's attributes, holding the bytes the CALLER has already encoded. CIBarcodeDescriptor.h:75 says what those bytes are - the codeword sequence immediately following 'Bitstream to codeword coversion' - and there is no Reed-Solomon, no mask choice and no codeword to lay down in this family",
       "effect": "the abstract base the header declares with no member of its own (CIBarcodeDescriptor.h:26). Every subclass inherits its NSCopying and NSSecureCoding answers and nothing else is declared here, so no API member is carried by it and a caller cannot make one",
-      "source": "the host's own CoreImage, compared case by case by tests/backports/host/cibarcode/run.sh with every name this port defines renamed in the harness build only (90 records, 0 differences, 3 mutations) and every range swept whole; tools/cache-index/first-rung.py over the 50 held rungs, which put all five classes at 11.0 and on no rung below it",
+      "source": "the host's own CoreImage, compared case by case by tests/backports/host/cibarcode/run.sh with every name this port defines renamed in the harness build only (90 records, 0 differences, 3 mutations) and every range swept whole; tools/cache-index/first-rung.lua over the 50 held rungs, which put all five classes at 11.0 and on no rung below it",
       "facts": "facts/CoreImage/BarcodeDescriptor.md"
     },
     {
@@ -20,7 +20,7 @@
       "status": "implemented",
       "reason": "iOS 6 has no barcode descriptor of any kind and no filter that reads one, so the class is made here as what the header says it is: an abstract representation of a symbol's attributes, holding the bytes the CALLER has already encoded. CIBarcodeDescriptor.h:75 says what those bytes are - the codeword sequence immediately following 'Bitstream to codeword coversion' - and there is no Reed-Solomon, no mask choice and no codeword to lay down in this family",
       "effect": "a QR code symbol: the caller's codeword bytes, the symbol version, the mask pattern and the error correction level, all four echoed back exactly as passed",
-      "source": "the host's own CoreImage, compared case by case by tests/backports/host/cibarcode/run.sh with every name this port defines renamed in the harness build only (90 records, 0 differences, 3 mutations) and every range swept whole; tools/cache-index/first-rung.py over the 50 held rungs, which put all five classes at 11.0 and on no rung below it",
+      "source": "the host's own CoreImage, compared case by case by tests/backports/host/cibarcode/run.sh with every name this port defines renamed in the harness build only (90 records, 0 differences, 3 mutations) and every range swept whole; tools/cache-index/first-rung.lua over the 50 held rungs, which put all five classes at 11.0 and on no rung below it",
       "facts": "facts/CoreImage/BarcodeDescriptor.md"
     },
     {
@@ -31,7 +31,7 @@
       "status": "implemented",
       "reason": "iOS 6 has no barcode descriptor of any kind and no filter that reads one, so the class is made here as what the header says it is: an abstract representation of a symbol's attributes, holding the bytes the CALLER has already encoded. CIBarcodeDescriptor.h:75 says what those bytes are - the codeword sequence immediately following 'Bitstream to codeword coversion' - and there is no Reed-Solomon, no mask choice and no codeword to lay down in this family",
       "effect": "an Aztec code symbol: the caller's codeword bytes, whether it is compact, how many layers and how many data codewords, checked against the header's own ranges of 1-32 and 1-2048",
-      "source": "the host's own CoreImage, compared case by case by tests/backports/host/cibarcode/run.sh with every name this port defines renamed in the harness build only (90 records, 0 differences, 3 mutations) and every range swept whole; tools/cache-index/first-rung.py over the 50 held rungs, which put all five classes at 11.0 and on no rung below it",
+      "source": "the host's own CoreImage, compared case by case by tests/backports/host/cibarcode/run.sh with every name this port defines renamed in the harness build only (90 records, 0 differences, 3 mutations) and every range swept whole; tools/cache-index/first-rung.lua over the 50 held rungs, which put all five classes at 11.0 and on no rung below it",
       "facts": "facts/CoreImage/BarcodeDescriptor.md"
     },
     {
@@ -42,7 +42,7 @@
       "status": "implemented",
       "reason": "iOS 6 has no barcode descriptor of any kind and no filter that reads one, so the class is made here as what the header says it is: an abstract representation of a symbol's attributes, holding the bytes the CALLER has already encoded. CIBarcodeDescriptor.h:75 says what those bytes are - the codeword sequence immediately following 'Bitstream to codeword coversion' - and there is no Reed-Solomon, no mask choice and no codeword to lay down in this family",
       "effect": "a PDF417 symbol: the caller's codeword bytes, whether it is compact, how many rows and how many columns, checked against the header's own ranges of 3-90 and 1-30",
-      "source": "the host's own CoreImage, compared case by case by tests/backports/host/cibarcode/run.sh with every name this port defines renamed in the harness build only (90 records, 0 differences, 3 mutations) and every range swept whole; tools/cache-index/first-rung.py over the 50 held rungs, which put all five classes at 11.0 and on no rung below it",
+      "source": "the host's own CoreImage, compared case by case by tests/backports/host/cibarcode/run.sh with every name this port defines renamed in the harness build only (90 records, 0 differences, 3 mutations) and every range swept whole; tools/cache-index/first-rung.lua over the 50 held rungs, which put all five classes at 11.0 and on no rung below it",
       "facts": "facts/CoreImage/BarcodeDescriptor.md"
     },
     {
@@ -53,7 +53,7 @@
       "status": "implemented",
       "reason": "iOS 6 has no barcode descriptor of any kind and no filter that reads one, so the class is made here as what the header says it is: an abstract representation of a symbol's attributes, holding the bytes the CALLER has already encoded. CIBarcodeDescriptor.h:75 says what those bytes are - the codeword sequence immediately following 'Bitstream to codeword coversion' - and there is no Reed-Solomon, no mask choice and no codeword to lay down in this family",
       "effect": "a Data Matrix symbol: the caller's codeword bytes, the rows, the columns and the ECC version, with no range check because the header states none and the host has none either - 1x1 answers",
-      "source": "the host's own CoreImage, compared case by case by tests/backports/host/cibarcode/run.sh with every name this port defines renamed in the harness build only (90 records, 0 differences, 3 mutations) and every range swept whole; tools/cache-index/first-rung.py over the 50 held rungs, which put all five classes at 11.0 and on no rung below it",
+      "source": "the host's own CoreImage, compared case by case by tests/backports/host/cibarcode/run.sh with every name this port defines renamed in the harness build only (90 records, 0 differences, 3 mutations) and every range swept whole; tools/cache-index/first-rung.lua over the 50 held rungs, which put all five classes at 11.0 and on no rung below it",
       "facts": "facts/CoreImage/BarcodeDescriptor.md"
     },
     {

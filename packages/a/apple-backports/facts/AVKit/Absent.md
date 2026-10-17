@@ -31,7 +31,7 @@ mtime and size, and how many names it holds. A second run costs 50 header reads 
 **Rung 1 - is the name real, and in which held release:**
 
 ```
-$ python3 tools/cache-index/first-rung.py AVInterstitialTimeRange AVRoutePickerView
+$ xmake l tools/cache-index/first-rung.lua AVInterstitialTimeRange AVRoutePickerView
 AVInterstitialTimeRange	16.0
 AVRoutePickerView	11.0
 ```
@@ -112,7 +112,7 @@ Three details a reader needs, because each one is a way to get a wrong answer:
 
 - **`cache-value.lua` takes the C name.** It strips the Mach-O underscore from each export before it
   compares, and adds none, so passing `_AVKitErrorDomain` answers "no image of this cache exports it".
-  The header's "C symbols need the leading underscore" is advice for `first-rung.py`, whose index holds
+  The header's "C symbols need the leading underscore" is advice for `first-rung.lua`, whose index holds
   both spellings; this reader wants the other one.
 - **The 8.0 image is the control for the date.** `AVError.h:19` annotates the constant `ios(9.0)`, and
   8.0's AVKit carries the cstring with no `_AVKitErrorDomain` symbol at all:

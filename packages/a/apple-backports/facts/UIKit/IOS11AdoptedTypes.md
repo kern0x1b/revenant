@@ -44,7 +44,7 @@ Two families needed a rung the ladder's 12.0 does not have: `UIAccessibilityCont
 `UIPickerViewAccessibilityDelegate` read `control: 0` at 6.1.3, 4.3 and 12.0, so the run certified
 nothing, and the census was re-run at 16.0, which reads 2 and 1 respectively with a control of 2 and 1.
 Both are declared by the SDK as 11.0 (`coordination/corpus/sdk-26.2-surface.tsv`), and
-`tools/cache-index/first-rung.py` answers 16.0 for both, which is the 12.0->16.0 hole in the held set
+`tools/cache-index/first-rung.lua` answers 16.0 for both, which is the 12.0->16.0 hole in the held set
 and not a later introduction.
 
 ## The two classes

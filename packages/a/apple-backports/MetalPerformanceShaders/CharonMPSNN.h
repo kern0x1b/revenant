@@ -17,7 +17,7 @@
 //   MPSNNGraphNodes16.m   MPSNNStateNode, MPSNNBinaryArithmeticNode and MPSCNNPoolingNode, at 16.0
 //
 // The split is by what a client can BIND, which is what backports.lua's measured_names()/releases_in()
-// measure and what tools/cache-index/first-rung.py does not: a class can be present in a release's ObjC
+// measure and what tools/cache-index/first-rung.lua does not: a class can be present in a release's ObjC
 // inventory and its class symbol still in no export trie of that release, and a client cannot link against
 // what is not exported. Measured with dyld.load + dyld.exported_at over the held ladder, armv7 preferred,
 // and the placement is the EARLIEST of the class symbol and the metaclass symbol, which is what

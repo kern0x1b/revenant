@@ -56,7 +56,7 @@ a per-image `__objc_classlist` read.
   `-nowPlayingSessionDidChangeActive:` and `-nowPlayingSessionDidChangeCanBecomeActive:`, are on **0** of the
   113981 names.
 - **`NSUserActivity.externalMediaContentIdentifier`** is a category on a class the release does not have. The
-  **class** arrived in 8.0 — `first-rung.py` answers 8.0 — and it is in neither cache: the 6.1.3 inventory
+  **class** arrived in 8.0 — `first-rung.lua` answers 8.0 — and it is in neither cache: the 6.1.3 inventory
   holds 848 UIKit and 418 Foundation classes and `NSUserActivity` is in neither, at either end. A category on
   a missing class compiles, links, and then never installs.
 

@@ -9,7 +9,7 @@
  *
  *   VNDetectHumanRectanglesRequest.h annotates the class API_AVAILABLE(ios(13.0)), and the 16.4 SDK
  *   surface this registry was read from says 13.0 too. But 11.0's own Vision already exports the class
- *   -- tools/cache-index/first-rung.py answers 11.0 for it, and the census of 11.0 in
+ *   -- tools/cache-index/first-rung.lua answers 11.0 for it, and the census of 11.0 in
  *   facts/Vision/Absence.md section 1 finds it among 155 VN* classes, beside VNHumanObservation and
  *   VNHumanDetector. A release can carry a class before the release that declares it public.
  *

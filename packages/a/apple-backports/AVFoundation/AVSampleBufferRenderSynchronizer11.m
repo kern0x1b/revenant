@@ -14,7 +14,7 @@
 // shaped the code, and the one it could not make, are in facts/AVFoundation/SampleBufferRender11.md.
 //
 // ONE RELEASE PER OBJECT. Every symbol this file defines first appears in the 11.0 image: the class
-// symbol (tools/cache-index/first-rung.py _OBJC_CLASS_$_AVSampleBufferRenderSynchronizer answers 11.0)
+// symbol (tools/cache-index/first-rung.lua _OBJC_CLASS_$_AVSampleBufferRenderSynchronizer answers 11.0)
 // and nothing else. -currentTime is 12.0 and lives in AVSampleBufferRenderSynchronizer12.m;
 // -setRate:time:atHostTime: is 14.5 and lives in AVSampleBufferRenderSynchronizer14.m.
 //

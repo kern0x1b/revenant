@@ -60,7 +60,7 @@ The reader answers with the symbol's install, its address and the string its poi
 ## The releases carry none of them
 
 Measured, not assumed. The name index of the port's own ladder
-(`tools/cache-index/first-rung.py`, over 50 held releases) answers, for each of the twenty, the
+(`tools/cache-index/first-rung.lua`, over 50 held releases) answers, for each of the twenty, the
 oldest held release that carries it: `9.0` for the OpenGLES key, `10.0.1` for
 `kCVMetalTextureUsage`, and `16.0` for the other eighteen, because no release between 9.3.6 (the
 last armv7 rung) and 16.0 is held and a 13.0, 14.0 or 15.0 name therefore first appears on the

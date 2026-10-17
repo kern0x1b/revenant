@@ -12,7 +12,7 @@
  * JSValueToStringCopy, JSStringRelease and the four property functions. Through the two helpers of
  * JSInternal.m: JSValueIsObject, JSValueToBoolean, JSStringIsEqualToUTF8CString, JSObjectCallAsFunction
  * and the rest of what charon_js_is_array and charon_js_is_date ask. All exported since 3.0
- * (first-rung.py over the 50 held rungs, the oldest held rung carrying each), each present in the 6.1.3
+ * (first-rung.lua over the 50 held rungs, the oldest held rung carrying each), each present in the 6.1.3
  * armv7 cache and in the 4.3 one this package also builds.
  */
 

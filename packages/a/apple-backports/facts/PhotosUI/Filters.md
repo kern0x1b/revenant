@@ -12,7 +12,7 @@ is in `PHPickerFilter15.m` and `PHPickerFilter16.m`, which are categories on the
 Source: `PHPicker.h` of the iOS 16.4 SDK, which is the SDK this package compiles against and
 which declares all eleven with their availability; `sdk-26.2-surface.tsv` for the same eleven
 by name, kind and introduced release; `ALAsset.h` of the same SDK for what the release's
-library can say about an asset; and `tools/cache-index/first-rung.py` over the 50 held rungs
+library can say about an asset; and `tools/cache-index/first-rung.lua` over the 50 held rungs
 for which of the asset-type constants exist in a release at all.
 
 ## What a filter is here
@@ -40,7 +40,7 @@ The release's library answers `ALAssetPropertyType` with one of three values, an
 header says so: `ALAssetTypePhoto`, `ALAssetTypeVideo` or `ALAssetTypeUnknown`
 (`ALAsset.h:21` and `:33-35` of the 16.4 SDK). Nothing finer exists. Measured over the 50
 held rungs, `_ALAssetTypePanorama` and `_ALAssetTypePhotoStream` are in none of them
-(`first-rung.py` answers `NONE` for both, while `_ALAssetTypePhoto` and `_ALAssetTypeVideo`
+(`first-rung.lua` answers `NONE` for both, while `_ALAssetTypePhoto` and `_ALAssetTypeVideo`
 read `4.0`). So of the eight kind filters:
 
 - `playbackStyleFilter:` is the one that names something. `-[PHAsset playbackStyle]` is the

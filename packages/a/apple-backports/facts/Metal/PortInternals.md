@@ -189,7 +189,7 @@ them: `CharonMetalBlitEncoder` from five (`8`, `9`, `10`, `12`, `13`), `CharonMe
 
 ## The two rungs that certify "no release carries these names"
 
-`python3 tools/cache-index/first-rung.py`, the 16 names and 3 controls in one run:
+`xmake l tools/cache-index/first-rung.lua`, the 16 names and 3 controls in one run:
 
     CharonMetalBlitEncoder NONE      CharonMetalDevice  NONE      CharonMetalLibrary NONE
     ... every one of the sixteen ...  NONE                 MTLDevice          8.0

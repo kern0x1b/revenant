@@ -11,7 +11,7 @@ subject is absent.
 Source: `PHLivePhotoView.h` and `PHContentEditingController.h` of the iOS 16.4 SDK and of the
 iOS 26.2 SDK, for what each row declares and what its members take;
 `sdk-26.2-surface.tsv` for the same three by name, kind and introduced release; and
-`tools/cache-index/first-rung.py` over the 50 held rungs, which reads `PHLivePhotoView` first
+`tools/cache-index/first-rung.lua` over the 50 held rungs, which reads `PHLivePhotoView` first
 at 9.1, `PHLivePhotoViewDelegate` at 9.2 and `PHContentEditingController` at 8.0 - so no
 release this port carries below them holds any of the three. The delegate's name appearing a
 release after its class's is what a name's first appearance measures; the header's own

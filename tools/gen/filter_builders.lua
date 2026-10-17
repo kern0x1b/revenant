@@ -63,7 +63,7 @@ local OBJECT = [[#import <CoreImage/CoreImage.h>
 // (facts/CoreImage/ImageApplyingFilter.md).
 //
 // The port carries CIFilter's constructors and not CIFilter: the class is the release's own from
-// iOS 5.0 (tools/cache-index/first-rung.py _OBJC_CLASS_$_CIFilter -> 5.0), so these are a category
+// iOS 5.0 (tools/cache-index/first-rung.lua _OBJC_CLASS_$_CIFilter -> 5.0), so these are a category
 // on it, and charon_collect installs a category method only where the class does not answer the
 // selector, which is exactly the band this object is for.
 

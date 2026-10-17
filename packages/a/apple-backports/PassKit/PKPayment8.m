@@ -4,7 +4,7 @@
 // WHY THESE TWO AND NOT THE OTHER THREE OF 8.0. apple.objc.inventory against the armv7 dyld shared
 // cache of 6.1.3 finds 64 classes beginning PK and none of them begins PKPayment (control in the same
 // run: 590 class rows beginning NS and one beginning PKA, PKAddPassesViewController), and
-// tools/cache-index/first-rung.py answers 8.0 for PKPayment, PKPaymentPass, PKPaymentRequest,
+// tools/cache-index/first-rung.lua answers 8.0 for PKPayment, PKPaymentPass, PKPaymentRequest,
 // PKPaymentSummaryItem and PKPaymentToken. So all five arrived after the release. What separates
 // them is what a member can answer, and this file is the line:
 //

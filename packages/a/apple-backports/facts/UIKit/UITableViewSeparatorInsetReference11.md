@@ -20,7 +20,7 @@ answer what the system answers. It would not, and that is measured, below.
 ## The release carries neither name on the bands this port builds
 
 ```
-$ python3 tools/cache-index/first-rung.py separatorInset separatorInsetReference \
+$ xmake l tools/cache-index/first-rung.lua separatorInset separatorInsetReference \
       setSeparatorInsetReference: cellLayoutMarginsFollowReadableWidth zzzBackportProbeXYZ
 separatorInset	7.0
 separatorInsetReference	11.0
@@ -40,7 +40,7 @@ dumps.
 `grep -cxF separatorInsetReference ~/.charon/dyld/6.1.3/selectors_armv7.txt` - answers 0 for 6.1.3 and
 for 4.3, and so does the control it needs: the same file answers 0 for plain `separatorInset`, which
 first-rung places at **7.0**, and 1 for `reloadData`. So `selectors_armv7.txt` is a partial list, a zero
-in it says nothing about the release, and the only reader that has a self-test is `first-rung.py`.
+in it says nothing about the release, and the only reader that has a self-test is `first-rung.lua`.
 Measured 2026-10-03.
 
 ## The two names are not one switch on the system, and that is what settles it

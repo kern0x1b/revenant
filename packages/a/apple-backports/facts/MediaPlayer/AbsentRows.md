@@ -22,7 +22,7 @@ controls are the deleted mach32 test, 0 failures.
   a list of names, not a count per class (`dealloc` is on one line, not 433). A count of 0 there is
   necessary and not sufficient; a count of 1 says some class somewhere declares it. Where a row below turns
   on absence, the per-class read above is the evidence.
-- `tools/cache-index/first-rung.py`, self-test 8 checks 0 failures, answers the oldest **held** release that
+- `tools/cache-index/first-rung.lua`, self-test 8 checks 0 failures, answers the oldest **held** release that
   carries a name - presence, not the release that introduced it, and the held set has a hole above 12.0.
 
 ## The two MPVolumeView rows are spelled for their getters, not their property names
@@ -85,7 +85,7 @@ this device has no items at all, by two independent reads.
 
 ## `NSUserActivity.externalMediaContentIdentifier`
 
-The **class** arrived in iOS 8: `first-rung.py` answers `8.0` for `NSUserActivity` - the oldest held
+The **class** arrived in iOS 8: `first-rung.lua` answers `8.0` for `NSUserActivity` - the oldest held
 release that carries the name - and it is not among 6.1.3's 236 classes. `externalMediaContentIdentifier`
 is on **0** of the 113981 names.
 

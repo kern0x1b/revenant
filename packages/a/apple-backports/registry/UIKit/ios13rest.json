@@ -807,7 +807,7 @@
    "status": "owed",
    "reason": "build -[UIFontDescriptor fontDescriptorWithDesign:]",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "UIFontDescriptor is not in the 6.1.3 cache at all: the class-scoped read finds no such class among 11378 (first-rung.py answers 7.0, and the ladder holds no 6.0 read for it), so the release has no descriptor and no design to name; the port does implement the class (UIFontDescriptor.m) and it has no design attribute either"
+   "source": "UIFontDescriptor is not in the 6.1.3 cache at all: the class-scoped read finds no such class among 11378 (first-rung.lua answers 7.0, and the ladder holds no 6.0 read for it), so the release has no descriptor and no design to name; the port does implement the class (UIFontDescriptor.m) and it has no design attribute either"
   },
   {
    "api": "UILargeContentViewerInteraction",
@@ -1213,7 +1213,7 @@
    "reason": "build -[UITextFormattingCoordinatorDelegate updateTextAttributesWithConversionHandler:]",
    "effect": "until built: respondsToSelector: answers NO",
    "facts": "facts/UIKit/UIInertInteractions.md",
-   "source": "the font panel belongs to Mac Catalyst: the port own UITextFormattingCoordinator.m answers +isFontPanelVisible NO and its delegate is never asked, so no panel is ever shown and nothing calls updateTextAttributesWithConversionHandler:; UITextFormattingCoordinatorDelegate is in no held release at all (first-rung.py answers NONE, against a nonsense name also NONE)"
+   "source": "the font panel belongs to Mac Catalyst: the port own UITextFormattingCoordinator.m answers +isFontPanelVisible NO and its delegate is never asked, so no panel is ever shown and nothing calls updateTextAttributesWithConversionHandler:; UITextFormattingCoordinatorDelegate is in no held release at all (first-rung.lua answers NONE, against a nonsense name also NONE)"
   },
   {
    "api": "-[UIResponderStandardEditActions updateTextAttributesWithConversionHandler:]",
@@ -1224,7 +1224,7 @@
    "reason": "build -[UIResponderStandardEditActions updateTextAttributesWithConversionHandler:]",
    "effect": "until built: respondsToSelector: answers NO",
    "facts": "facts/UIKit/UIInertInteractions.md",
-   "source": "the font panel belongs to Mac Catalyst: the port own UITextFormattingCoordinator.m answers +isFontPanelVisible NO and its delegate is never asked, so no panel is ever shown and nothing calls updateTextAttributesWithConversionHandler:; UITextFormattingCoordinatorDelegate is in no held release at all (first-rung.py answers NONE, against a nonsense name also NONE)"
+   "source": "the font panel belongs to Mac Catalyst: the port own UITextFormattingCoordinator.m answers +isFontPanelVisible NO and its delegate is never asked, so no panel is ever shown and nothing calls updateTextAttributesWithConversionHandler:; UITextFormattingCoordinatorDelegate is in no held release at all (first-rung.lua answers NONE, against a nonsense name also NONE)"
   },
   {
    "api": "UITextPlaceholder",
@@ -4143,7 +4143,7 @@
    "status": "owed",
    "reason": "build the class NSToolbar",
    "effect": "until built: NSClassFromString answers nil",
-   "source": "NSToolbar is in no held release anywhere on the ladder: first-rung.py answers NONE for the name, and a nonsense name answers NONE in the same run, so the answer is the ladder own and not the reader failing to look; neither 6.1.3 nor 4.3 declares it either (objc.inventory over both)"
+   "source": "NSToolbar is in no held release anywhere on the ladder: first-rung.lua answers NONE for the name, and a nonsense name answers NONE in the same run, so the answer is the ladder own and not the reader failing to look; neither 6.1.3 nor 4.3 declares it either (objc.inventory over both)"
   },
   {
    "api": "NSToolbarPrimarySidebarTrackingSeparatorItemIdentifier",

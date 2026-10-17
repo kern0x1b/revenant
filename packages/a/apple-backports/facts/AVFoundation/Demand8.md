@@ -1,7 +1,7 @@
 # AVFoundation release 8 demand rows
 
 Corpus: `DEMAND-AVFoundation-8.tsv`, 4 rows, CRASH-ON-USE, each called by 1 app in the corpus.
-`python3 tools/cache-index/first-rung.py setExposureTargetBias:completionHandler: setSessionWithNoConnection: maxExposureTargetBias minExposureTargetBias`
+`xmake l tools/cache-index/first-rung.lua setExposureTargetBias:completionHandler: setSessionWithNoConnection: maxExposureTargetBias minExposureTargetBias`
 answers 8.0 for all four.
 
 `objc.inventory` (`modules/apple/objc.lua`) over `~/.charon/dyld/6.1.3/dyld_shared_cache_armv7`,

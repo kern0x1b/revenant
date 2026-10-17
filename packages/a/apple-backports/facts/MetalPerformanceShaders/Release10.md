@@ -22,7 +22,7 @@ byte-identical to the branch's; nothing in either was rewritten for this landing
 
 ## WHAT WAS CHECKED HERE, AND THE COMMAND BESIDE IT
 
-**Where each name is real, and in which held rung.** `python3 tools/cache-index/first-rung.py MPSCNNFullyConnected MPSImageConversion`,
+**Where each name is real, and in which held rung.** `xmake l tools/cache-index/first-rung.lua MPSCNNFullyConnected MPSImageConversion`,
 run from this checkout, answering from the index rather than from the dyld caches:
 
 ```

@@ -2,7 +2,7 @@
 
 Thirty-two string constants, in twelve objects, one release each, because `release-split` refuses an
 object whose symbols sit on two rungs of the ladder. The rungs are measured with
-`tools/cache-index/first-rung.py` over the 32 symbol names: one at 3.0, three at 7.0, one at 8.2, twelve
+`tools/cache-index/first-rung.lua` over the 32 symbol names: one at 3.0, three at 7.0, one at 8.2, twelve
 at 9.0, one at 9.1, three at 9.3, five at 10.0.1, one each at 10.2, 10.3, 11.0 and 12.0, and two at 16.0.
 **`MPMediaPlaylistPropertyCloudGlobalID` first appears at 8.2**, where the corpus filed it under 9.0, and
 the tool decides the ladder rather than the corpus.

@@ -23,7 +23,7 @@ SecAccessControlRef SecAccessControlCreateWithFlags(CFAllocatorRef allocator, CF
 // WHAT 6.1.3 ANSWERS: it has no SecAccessControl AT ALL. The type arrived with its only two entry
 // points in the same release - SecAccessControlCreateWithFlags (SecAccessControl.h:119-122,
 // API_AVAILABLE(macos(10.10), ios(8.0))) and this one - and neither is in the armv7 cache of 6.1.3 or
-// of 4.3 (first rung 8.0 for both, read with tools/cache-index/first-rung.py --rungs). The attributes
+// of 4.3 (first rung 8.0 for both, read with tools/cache-index/first-rung.lua --rungs). The attributes
 // that would carry it are absent from the same caches: the literal "accc" (kSecAttrAccessControl)
 // first appears at 8.0, and "akpu" (kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly) with it.
 //

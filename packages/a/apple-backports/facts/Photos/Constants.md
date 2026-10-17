@@ -52,7 +52,7 @@ PHLivePhotoShouldRenderAtPlaybackTime	/System/Library/Frameworks/Photos.framewor
 
 ## The first held rung of each name
 
-`tools/cache-index/first-rung.py`, which answers presence and not the release a name was introduced
+`tools/cache-index/first-rung.lua`, which answers presence and not the release a name was introduced
 in, and which wants the name as the cache spells it -- for a C symbol the Mach-O underscore, since
 `PHLivePhotoShouldRenderAtPlaybackTime` read `NONE` and `_PHLivePhotoShouldRenderAtPlaybackTime` read
 `11.0`:
@@ -136,6 +136,6 @@ key nothing builds a dictionary with is a name with the right value and no user.
 
 Source: the header of iOS 16.4 for the declarations and the codes; `tools/corpus/cache-value.lua` over
 the arm64e cache of 16.0 for every value and every address above, which is the device's own Photos and
-not the host's library; `tools/cache-index/first-rung.py` over the 50 held rungs for the presence
+not the host's library; `tools/cache-index/first-rung.lua` over the 50 held rungs for the presence
 column. What Apple's Photos *does* with these keys, and what a system library answers for an
 identifier it has never seen, is a separate question and is not answered here.

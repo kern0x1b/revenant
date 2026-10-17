@@ -147,12 +147,12 @@ out of dot patterns. A table an *application* builds is real and is kept, coded 
 
 ## Does the release carry any of these names? Measured, and no
 
-`tools/cache-index/first-rung.py` answers for the oldest held release carrying a name, which is exactly
+`tools/cache-index/first-rung.lua` answers for the oldest held release carrying a name, which is exactly
 the question "is a whole-class `@implementation` the right direction here, or a category":
 
 ```
 $ printf '%s\n' AXMathExpression AXMathExpressionNumber AXMathExpressionFenced AXMathExpressionRow \
-      AXCustomContent AXCustomContentProvider NSObject | python3 tools/cache-index/first-rung.py
+      AXCustomContent AXCustomContentProvider NSObject | xmake l tools/cache-index/first-rung.lua
 AXMathExpression	NONE
 AXMathExpressionNumber	NONE
 AXMathExpressionFenced	NONE

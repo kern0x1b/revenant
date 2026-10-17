@@ -5,7 +5,7 @@
 // `dyld.first_releases()` over the held ladder answers 18.0 for all 33. The ladder's rungs are 12.0, 16.0 and
 // then 18.0, so the 16.0 image - the rung before - predates every one of these constants and the 18.0 image
 // exports them all; the same answer comes from `tools/symbol-first-release.lua` and from
-// `tools/cache-index/first-rung.py` over the same ladder. Their rows keep the release each header names, so
+// `tools/cache-index/first-rung.lua` over the same ladder. Their rows keep the release each header names, so
 // ios164.json says 16.4 for the four that arrived in 16.4 and ios170.json says 17.0 for the twelve of 17.0.
 //
 // Seven of the 33 hold a value that is not their own name - HKFHIRResourceTypeDiagnosticReport is

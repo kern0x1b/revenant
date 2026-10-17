@@ -4,7 +4,7 @@
 // here, not a row to be implemented, and the decision is the same for five of them: the object is one the
 // release built and this library did not lay out.
 //
-// MEASURED, tools/cache-index/first-rung.py over the 50 held rungs (2026-09-30,
+// MEASURED, tools/cache-index/first-rung.lua over the 50 held rungs (2026-09-30,
 // .agent-work/runs/io-rungs.txt), the symbols this file's decisions rest on:
 //   _CGImageDestinationCopyImageSource             first held rung 7.0
 //   _CGImageDestinationAddAuxiliaryDataInfo       first held rung 11.0

@@ -68,7 +68,7 @@ $ awk -F'\t' '$1=="class" && $2 ~ /^PKA/ {n++} END{print n+0}' inv-6.1.3.tsv
 
 So the release carries 66 classes beginning `PK` and **zero** beginning `PKPayment`, in a run that
 finds 590 beginning `NS` and the one `PKA` there is: the zero is the release's and not the reader's.
-`tools/cache-index/first-rung.py` agrees and gives the version each arrived: `PKPayment`,
+`tools/cache-index/first-rung.lua` agrees and gives the version each arrived: `PKPayment`,
 `PKPaymentPass`, `PKPaymentRequest`, `PKPaymentSummaryItem` and `PKPaymentToken` all read **8.0**, and
 `PKPaymentButton` reads **8.3**. Presence, not version -- the held ladder has a hole at 13.0/14.0/15.0,
 so a name first seen at 8.0 here is 8.0 and not 12.0.
@@ -484,8 +484,8 @@ where the name is there. Transcript: `.agent-work/runs/d10-passkit-r11/census-pa
 Which release the name is real in, over the whole held ladder:
 
 ```
-$ python3 tools/cache-index/first-rung.py --rungs _OBJC_CLASS_\$_PKPaymentAuthorizationResult
-first-rung.py: read 50 per-release index(es) in 30.44s
+$ xmake l tools/cache-index/first-rung.lua --rungs _OBJC_CLASS_\$_PKPaymentAuthorizationResult
+first-rung.lua: read 50 per-release index(es) in 30.44s
 _OBJC_CLASS_$_PKPaymentAuthorizationResult	11.0,12.0,16.0,18.0
 ```
 
@@ -539,7 +539,7 @@ does not.
 What a caller **cannot** fill on this device is the other two lists, and the object does not paper over
 it: there is no `PKPaymentSummaryItem` in 6.1.3 at all (registry row, 8.0, absent) and no
 `PKShippingMethod` either. Both are measured rather than assumed --
-`python3 tools/cache-index/first-rung.py` with `_OBJC_CLASS_$_PKPaymentSummaryItem` and
+`xmake l tools/cache-index/first-rung.lua` with `_OBJC_CLASS_$_PKPaymentSummaryItem` and
 `_OBJC_CLASS_$_PKShippingMethod` answers **8.0** for each, which is above 6.1.3 and below the 11.0 the
 census found them on. So in practice `paymentSummaryItems` and `shippingMethods` answer the **empty
 array** here, which is what the release's own missing classes leave and not a value this port invents. Both properties copy, so a delegate that mutates the array it passed
@@ -699,7 +699,7 @@ should be read as what the SDK declares, not as what 6.1.3 has.
 measured and right. The second is wrong:
 
 ```
-$ python3 tools/cache-index/first-rung.py PKRemotePass
+$ xmake l tools/cache-index/first-rung.lua PKRemotePass
 PKRemotePass	6.1
 $ awk -F'\t' '$1=="class" && $2=="PKRemotePass" {print $2, $3}' .agent-work/runs/pk9/inv-6.1.3.tsv
 PKRemotePass PKPass
@@ -720,7 +720,7 @@ $ grep -n "remotePass\|deviceName" .../iPhoneOS26.2.sdk/System/Library/Framework
 ```
 
 The value is a **BOOL** saying whether this pass lives on another device, and the selector is
-**`isRemotePass`**, not `remotePass`. `first-rung.py` agrees about both: `isRemotePass` reads 9.0 and
+**`isRemotePass`**, not `remotePass`. `first-rung.lua` agrees about both: `isRemotePass` reads 9.0 and
 `remotePass` reads 9.0 too (it is `PKRemotePass`'s own), while `deviceName` reads **3.0** — which is
 another class's selector and not `PKPass`'s, the exact trap the ladder's own note describes, and the
 reason the class-scoped run above and not `first-rung` answers this band.
@@ -751,7 +751,7 @@ every name.
 
 ### One object per release, and what places it
 
-Every class in the object first appears at 9.0 (`first-rung.py` on all three), and `band()` drops an
+Every class in the object first appears at 9.0 (`first-rung.lua` on all three), and `band()` drops an
 object from every band whose release already exports all of its symbols. So this file is built
 exactly where the release lacks these three classes and nowhere else — which is what keeps the
 `PKPass` category from replacing the release's own `-deviceName` in a band that has it. The four

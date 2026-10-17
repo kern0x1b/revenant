@@ -365,7 +365,7 @@ the master relationship is the row the two halves deliberately differ on.
     xmake l tools/image-exports.lua 6.1.3 armv7 CoreMedia.framework/CoreMedia Timebase
     xmake l tools/image-exports.lua 6.1.3 armv7 CoreMedia.framework/CoreMedia CMClock
     xmake l tools/image-exports.lua 6.1.3 armv7 CoreMedia.framework/CoreMedia CMSampleBufferGetAudio
-    python3 tools/cache-index/first-rung.py _OBJC_CLASS_\$_AVSampleBufferAudioRenderer \
+    xmake l tools/cache-index/first-rung.lua _OBJC_CLASS_\$_AVSampleBufferAudioRenderer \
         _OBJC_CLASS_\$_AVSampleBufferRenderSynchronizer _OBJC_PROTOCOL_\$_AVQueuedSampleBufferRendering
     sh tests/backports/host/avf-samplerender11/run.sh
 

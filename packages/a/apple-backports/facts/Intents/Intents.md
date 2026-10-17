@@ -328,7 +328,7 @@ $ CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua INMessage 6.1.3 4.3 10.
 control: 4 name(s) beginning INMessage found in this run, so a zero on another rung is the release's and not the reader's
 ```
 
-**Which held release first carries each name.** `tools/cache-index/first-rung.py`, over the whole
+**Which held release first carries each name.** `tools/cache-index/first-rung.lua`, over the whole
 ladder, with a nonsense name in the same run as the negative control. Read it as PRESENCE and
 nothing else: `numberOfAttachments` reads 3.0 and `linkMetadata` reads 10.0.1, and neither is
 `INMessage`'s - they are other classes' selectors of the same name, which is the same trap
@@ -339,7 +339,7 @@ $ printf '%s\n' 'initWithIdentifier:conversationIdentifier:content:dateSent:send
     'initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:groupName:serviceName:linkMetadata:' \
     'initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:groupName:serviceName:messageType:numberOfAttachments:' \
     attachmentFiles numberOfAttachments linkMetadata charonNoSuchSelector17Control \
-  | python3 tools/cache-index/first-rung.py
+  | xmake l tools/cache-index/first-rung.lua
 initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:groupName:messageType:serviceName:attachmentFiles:	18.0
 initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:groupName:serviceName:linkMetadata:	18.0
 initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:groupName:serviceName:messageType:numberOfAttachments:	18.0

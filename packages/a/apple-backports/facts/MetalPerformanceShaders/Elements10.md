@@ -315,7 +315,7 @@ is a measurement of Apple's code.
 
 **A third object was needed, and the measurement that forced it is the export trie, not the name.**
 `MPSImagePyramid` itself is annotated `ios(10.0)` (`MPSImageConvolution.h:519`) and
-`first-rung.py` answers `10.0.1` for `_OBJC_CLASS_$_MPSImagePyramid` — both true, and `first-rung`
+`first-rung.lua` answers `10.0.1` for `_OBJC_CLASS_$_MPSImagePyramid` — both true, and `first-rung`
 answers whether a rung *carries* a name, which this one does from `10.0.1` because
 `MPSImageGaussianPyramid`'s `super_class` points at it. What an object is *placed* by is what a client
 can bind, and `tools/release-split.lua` measures that: over the same held ladder it answers **16.0**.
@@ -341,7 +341,7 @@ fill to write into.
 
 ```
 $ printf '%s\n' _OBJC_CLASS_$_MPSImageLaplacianPyramid _OBJC_CLASS_$_MPSImageLaplacianPyramidAdd \
-      _OBJC_CLASS_$_MPSImageLaplacianPyramidSubtract | python3 tools/cache-index/first-rung.py
+      _OBJC_CLASS_$_MPSImageLaplacianPyramidSubtract | xmake l tools/cache-index/first-rung.lua
 _OBJC_CLASS_$_MPSImageLaplacianPyramid	12.0
 _OBJC_CLASS_$_MPSImageLaplacianPyramidAdd	12.0
 _OBJC_CLASS_$_MPSImageLaplacianPyramidSubtract	12.0
@@ -377,4 +377,4 @@ not. Its three declared properties answer; `-neuronType` and `-data` are 11.0 an
 - Harness: `tests/backports/host/mpscnn10/run.sh`, cases in `cases.m`
 - Objects: `packages/a/apple-backports/MetalPerformanceShaders/MPSCNNElements10.m`,
   `MPSImageElements10.m`; the shared walk seam in `MPSImageConvolution13.m`
-- Ladder: `python3 tools/cache-index/first-rung.py` over the held armv7/arm64 caches
+- Ladder: `xmake l tools/cache-index/first-rung.lua` over the held armv7/arm64 caches

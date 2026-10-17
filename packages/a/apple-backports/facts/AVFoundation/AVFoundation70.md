@@ -99,7 +99,7 @@ on, and it is what the rows now name.
 | `AVVideoCompositionLayerInstruction` | 21 | 27 | `-getOpacityRampForTime:startOpacity:endOpacity:timeRange:` and its transform twin are there; the crop ramp and `-setCropRectangle:atTime:` are 7.0's, and 6.1.3 has no crop member to store one in |
 | `AVMediaSelectionOption` | 24 | 30 | `-locale`, `-optionID`, `-_title`, `-propertyList`, `-dictionary`, `-metadataForFormat:`; 7.0 adds `displayName`, `displayNameWithLocale:`, `extendedLanguageTag` |
 
-`CMClockGetHostTimeClock` is carried from 6.0 (`tools/cache-index/first-rung.py`, with `_NSFileSize`
+`CMClockGetHostTimeClock` is carried from 6.0 (`tools/cache-index/first-rung.lua`, with `_NSFileSize`
 answering 3.0 as the index's own control), so the clock type is on the floor; what 6.1.3 lacks is any way
 to reach one from the capture stack.
 
@@ -122,7 +122,7 @@ the key, and the key is a plain string in each image's own `__cstring`:
 
 The zero is the control: the same 6.1.3 run that finds 0 strings naming `videoBinned` finds 16
 naming `olume` and 2 naming `Binned`, so the reader was looking and the name is not there.
-`first-rung.py` agrees on the two selectors, `isBinned` at 6.0 and `isVideoBinned` at 7.0, and
+`first-rung.lua` agrees on the two selectors, `isBinned` at 6.0 and `isVideoBinned` at 7.0, and
 `"LiveSourceOptions.Binned"` is the session-level key both sides carry and is not this property.
 
 So `-[AVCaptureDeviceFormat isVideoBinned]` is `-[self isBinned]`, and that is what
@@ -164,7 +164,7 @@ where the release is short.
 Neither `release-split` nor `nm` can see any of this. `release-split` reported
 `clean, every object file's symbols first-appear in one release (104 files, 824 symbols, 50 releases
 checked)`, and the object exports no symbol to be mixed; the selector itself was checked against the
-caches with a control, where `first-rung.py` answers `isVideoBinned` 7.0 and `isBinned` 6.0 and its
+caches with a control, where `first-rung.lua` answers `isVideoBinned` 7.0 and `isBinned` 6.0 and its
 own control `_NSFileSize` answers 3.0, and a raw selector-string search of the two armv7 caches
 answers 1 for `isVideoBinned` at 7.0 and **0** at 6.1.3.
 
@@ -279,7 +279,7 @@ from each class's own line, and they are what a caller has instead.
   `-_setVolume:`, `-_setWantsVolumeChangesWhenPausedOrInactive:` and not one of `-volume`, `-setVolume:`,
   `-muted` or `-setMuted:`. The same 140 include `-masterClock`/`-setMasterClock:` - which is
   `AVPlayer`'s clock and not `AVCaptureSession`'s, the difference the `AVCaptureSession.masterClock` row
-  has to make and `first-rung.py` alone cannot.
+  has to make and `first-rung.lua` alone cannot.
 - **`AVAssetTrack` answers `-preferredVolume` and has no `-minFrameDuration`.** 52 own instance methods at
   6.1.3: `-nominalFrameRate`, `-naturalTimeScale`, `-estimatedDataRate`, `-preferredVolume`,
   `-extendedLanguageTag`, `-loadValuesAsynchronouslyForKeys:completionHandler:`,

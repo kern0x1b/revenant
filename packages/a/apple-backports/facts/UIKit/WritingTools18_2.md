@@ -21,7 +21,7 @@ keeps one row per name.
 
 ## The measurement
 
-`tools/cache-index/first-rung.py` answers, for one name, the first held rung that carries it — read from
+`tools/cache-index/first-rung.lua` answers, for one name, the first held rung that carries it — read from
 the index, which is what makes it cheap enough to ask about every row. Asked about the eight:
 
 | name | first held rung |
@@ -55,6 +55,6 @@ no implementation to write against and the caller sees `respondsToSelector:` ans
 ## What would move them
 
 A rung above 18.0 in the ladder. When a cache for 18.2 or later is unpacked under `~/.charon/dyld/`,
-`first-rung.py` answers a real rung for these names and the question becomes a different one: whether the
+`first-rung.lua` answers a real rung for these names and the question becomes a different one: whether the
 coordinator is worth carrying over what the tree has. Until then there is nothing to read Apple's own
 behaviour out of, and nothing to match it against.

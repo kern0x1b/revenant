@@ -4,7 +4,7 @@
 // ALAssetPropertyType with one of three values - ALAssetTypePhoto, ALAssetTypeVideo or
 // ALAssetTypeUnknown, which is what ALAsset.h of the 16.4 SDK says of its own property - and nothing
 // in the release names a fourth (_ALAssetTypePanorama and _ALAssetTypePhotoStream are in no held
-// release's symbol table; tools/cache-index/first-rung.py answers NONE for both). A depth effect
+// release's symbol table; tools/cache-index/first-rung.lua answers NONE for both). A depth effect
 // photo is an image with a depth map beside it, a burst is several exposures the library groups, and
 // a cinematic video is a video shot in a particular way: none of the three is a property this
 // release keeps, so the filter naming one matches nothing and the picker presents nothing, which is

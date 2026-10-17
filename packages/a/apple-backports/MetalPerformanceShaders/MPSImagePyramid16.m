@@ -7,7 +7,7 @@
 // the SDK declares. But the release does not EXPORT it until 16.0, and an object's placement is
 // decided by what a client can bind, not by whether the name is in the cache:
 //
-//   * tools/cache-index/first-rung.py answers 10.0.1 for _OBJC_CLASS_$_MPSImagePyramid, and that is
+//   * tools/cache-index/first-rung.lua answers 10.0.1 for _OBJC_CLASS_$_MPSImagePyramid, and that is
 //     TRUE and not the question: first-rung measures whether a rung CARRIES a name, and this one
 //     carries it from 10.0.1 because MPSImageGaussianPyramid's super_class points at it.
 //   * tools/release-split.lua measures what a rung EXPORTS, and answers 16.0 - which is what

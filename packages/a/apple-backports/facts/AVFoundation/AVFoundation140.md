@@ -35,7 +35,7 @@ among its 35 own instance methods, and that is the release's only segment-durati
 is what divides them. So the port applies a positive numeric value there and leaves `kCMTimeInvalid`
 and `kCMTimeIndefinite` alone, the second because the method that would consume it, `-flushSegment`, is
 14.0's and this release has no segments to flush. `kCMTimeInvalid` reads **4.0** in
-`first-rung.py`, so the symbol the default needs is one the release has.
+`first-rung.lua`, so the symbol the default needs is one the release has.
 
 **There is no object for the 14.5 half of this slice.** Every one of its eleven rows is blocked on
 substrate no band end carries: seven on centre-stage hardware and its vocabulary, two on the

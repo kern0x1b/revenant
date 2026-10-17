@@ -195,7 +195,7 @@ the correction at the end of this file says what that `-init` does):
   two, at the method's own declaration in `HKHealthStore.h` of 16.4 and of 26.2 alike): they are the
   watchOS surface of the class, and the watch application and app extensions both arrived after this
   release. Their selector strings are in the images of 9.0 and of 10.0.1 — which is the string being
-  present, not the method being this release's API, and `first-rung.py` answers presence and never a
+  present, not the method being this release's API, and `first-rung.lua` answers presence and never a
   version.
 - **the four states-of-mind predicates of `HKQuery`** — `predicateForStatesOfMindWithValence:operatorType:`,
   `predicateForStatesOfMindWithKind:`, `predicateForStatesOfMindWithLabel:` and
@@ -206,7 +206,7 @@ the correction at the end of this file says what that `-init` does):
   carried here for a while and are removed. **Their rows now say 18.0**, which is what they are:
   `HKStateOfMind.h` of iOS 26.2 carries `API_AVAILABLE(ios(18.0), watchos(11.0), macCatalyst(18.0),
   macos(15.0), visionos(2.0))` on each of those three typedefs and on the class `HKStateOfMind` itself,
-  and `first-rung.py` puts the first held rung carrying any of the four selectors at 18.0. A row whose
+  and `first-rung.lua` puts the first held rung carrying any of the four selectors at 18.0. A row whose
   `introduced` field says 8.0 while its own reason says the method is not 8.0's is a row that cannot be
   read — the field and the sentence have to agree, and the field is the one a reader trusts. Each of the
   four rows says so in its `source` too: `sdk-26.2-surface.tsv`, the registry's own source, reads these
@@ -299,7 +299,7 @@ Every row in the table below was settled by reading the header itself:
 | --- | --- |
 | the eight `-init` of `HKObject`, `HKObjectType`, `HKQuantity`, `HKSource`, `HKStatistics`, `HKStatisticsCollection`, `HKCategorySample`, `HKWorkoutEvent` | `- (instancetype)init NS_UNAVAILABLE;` in each of their headers, so a caller cannot call it, and the release's own `-init` raises when reached (measured, see the correction at the end of this file) |
 | `-startWorkoutSession:`, `-endWorkoutSession:`, `-pauseWorkoutSession:`, `-resumeWorkoutSession:` | each carries `API_UNAVAILABLE(ios, …)`; they are the watchOS surface of the class |
-| `+predicateForStatesOfMindWithAssociation:` and its three siblings | declared in the 26.2 header inside `@interface HKQuery (HKStateOfMind)`, with **no** `API_AVAILABLE` on the method or the category, so the row took the class's version - the corpus's `via=class-floor`. The type of each argument, `HKStateOfMindAssociation` and its two siblings, is `API_AVAILABLE(ios(18.0), …)` in `HKStateOfMind.h`, and `first-rung.py` puts the first held rung carrying the selector at 18.0. So they are 18.0's, their rows say 18.0, and they are `absent` here because this port carries no group of that release |
+| `+predicateForStatesOfMindWithAssociation:` and its three siblings | declared in the 26.2 header inside `@interface HKQuery (HKStateOfMind)`, with **no** `API_AVAILABLE` on the method or the category, so the row took the class's version - the corpus's `via=class-floor`. The type of each argument, `HKStateOfMindAssociation` and its two siblings, is `API_AVAILABLE(ios(18.0), …)` in `HKStateOfMind.h`, and `first-rung.lua` puts the first held rung carrying the selector at 18.0. So they are 18.0's, their rows say 18.0, and they are `absent` here because this port carries no group of that release |
 | `+workoutWithActivityType:startDate:endDate:duration:totalEnergyBurned:totalDistance:metadata:` | declared, as `@method` and as the definition; the six-argument form beside it is one argument short and **no header declares it**, so it is gone |
 | `-[HKStatisticsCollectionQuery initWithQuantityType:quantitySamplePredicate:options:anchorDate:intervalComponents:]` | declared with exactly those five arguments; the seven-argument form with `initialResultsHandler:` is in **no** header and in none of the three images, so it is gone and the handler comes through the `initialResultsHandler` property, which is declared |
 | `-[HKStatisticsCollection statistics]`, `-sources` | declared in the 16.4 header inside `@interface HKStatisticsCollection`, and the 8.0 image's list of that class does not hold them: the header is the authority on the method, so both are carried, and the image's disagreement is this row's business |
@@ -572,7 +572,7 @@ object is named for the first held rung that carries it. The registry rows keep 
 named for the release the check measures.
 
 The 16.0 answer was taken twice, independently, before the 13.4 image was held, and the two agreed: `xmake l tools/symbol-first-release.lua` over the ladder with the build
-SDK's own `.tbd` owner filter, and `python3 tools/cache-index/first-rung.py` over the index of the same
+SDK's own `.tbd` owner filter, and `xmake l tools/cache-index/first-rung.lua` over the index of the same
 rungs. The 13.4 placement of the 20 has been measured by `tools/release-split.lua` only.
 
 **The two constants of 26.0 that the ladder places at 16.0.** `HKMedicationDoseEventTypeIdentifierMedicationDoseEvent`
@@ -639,7 +639,7 @@ that owns it:
   `API_UNAVAILABLE(ios)` in both SDKs. The class itself is made on iOS 17 by
   `-initWithHealthStore:configuration:error:`, which is the one initialiser of `HKWorkoutSession` the
   header does not close off to iOS.
-- the selector **string** is in the image of 10.0.1 (`first-rung.py`), which is the string being
+- the selector **string** is in the image of 10.0.1 (`first-rung.lua`), which is the string being
   present and not the method being iOS API — the same distinction the four workout-session methods of
   `HKHealthStore` above turn on.
 
@@ -674,9 +674,9 @@ behind each one and put the command and the file and line it answers in the row,
 not on any release this port can run, and now the row says so with the tool the rulebook names for
 exactly this question, and with a control:
 
-    $ python3 tools/cache-index/first-rung.py 'predicateForStatesOfMindWithKind:'
+    $ xmake l tools/cache-index/first-rung.lua 'predicateForStatesOfMindWithKind:'
     predicateForStatesOfMindWithKind:	18.0
-    $ python3 tools/cache-index/first-rung.py 'predicateForSamplesWithStartDate:endDate:options:'
+    $ xmake l tools/cache-index/first-rung.lua 'predicateForSamplesWithStartDate:endDate:options:'
     predicateForSamplesWithStartDate:endDate:options:	8.0
 
 The second line is the control: the same reader, in the same run, finds a HealthKit selector the armv7

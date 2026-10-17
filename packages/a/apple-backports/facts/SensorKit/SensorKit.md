@@ -26,7 +26,7 @@ them is not evidence, and this page used to carry several.
 | what the host answers for the five value members, and what the port's objects carry | `tests/backports/host/sensorkit-value/run.sh` | the three HOST lines, `5 of 5 accessors`, 5 plants |
 | what the host's own eighteen classes do about the `-init`/`+new` pair they close, and what the port's objects carry | `tests/backports/host/unavailable-init/run.sh` | `18 of 18 classes as the table says`, `18 of 18 classes the host's answer`, 4 plants and the control |
 | what one cache of one release carries, and what one image of it exports | `modules/apple/objc.lua`, `binary_inventory` at `:395` | the class and symbol inventory of a cache or an image |
-| one symbol's release of first appearance, over the held ladder | `tools/cache-index/first-rung.py` | one TSV line per name, or `NONE` |
+| one symbol's release of first appearance, over the held ladder | `tools/cache-index/first-rung.lua` | one TSV line per name, or `NONE` |
 | what release the SDK declares a name arrived in | `coordination/corpus/sdk-26.2-surface.tsv`, the `api` and `introduced` columns | 530 SensorKit rows; every one of this family's 35 matches |
 
 **Every `introduced` in this family is checked against the registry's own source**, which is the
@@ -41,7 +41,7 @@ registry diff adds exactly **one** `minimum` - `6.0`, on the new `SRSensorReader
 and changes none, so no existing row of this family moved band. **The 4.3 rung has not been gated**: a
 placement defect there is invisible at 6.1.3 by construction, and the coordinator runs the gates.
 
-`tools/cache-index/first-rung.py` answers **presence, not version**, and that limit is load-bearing
+`tools/cache-index/first-rung.lua` answers **presence, not version**, and that limit is load-bearing
 here: the ladder it walks (`dyld.held_ladder` in `modules/apple/dyld.lua`) has a hole above 12.0, so a
 `NONE` from it for a SensorKit name is not evidence about the release that introduced it and is not
 used on this page as such. What introduced a SensorKit name comes from the SDK's own

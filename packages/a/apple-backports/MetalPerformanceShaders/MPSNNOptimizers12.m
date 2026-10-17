@@ -1,7 +1,7 @@
 // The optimizer family of MPSNNOptimizers.h - MPSNNOptimizerDescriptor, MPSNNOptimizer,
 // MPSNNOptimizerStochasticGradientDescent, MPSNNOptimizerRMSProp and MPSNNOptimizerAdam.
 //
-// One object for one release. `python3 tools/cache-index/first-rung.py MPSNNOptimizer
+// One object for one release. `xmake l tools/cache-index/first-rung.lua MPSNNOptimizer
 // MPSNNOptimizerDescriptor MPSNNOptimizerAdam MPSNNOptimizerRMSProp
 // MPSNNOptimizerStochasticGradientDescent` answers 12.0 for all five, and every class in
 // MPSNNOptimizers.h carries MPS_CLASS_AVAILABLE_STARTING(..., ios(12.0), ...) - or ios(12) for the

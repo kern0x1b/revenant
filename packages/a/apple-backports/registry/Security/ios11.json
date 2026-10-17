@@ -46,7 +46,7 @@
    "kind": "function",
    "minimum": "6.0",
    "reason": "build the function SecTrustSetSignedCertificateTimestamps()",
-   "source": "the armv7 shared caches of 6.1.3 and 4.3 through tools/cache-index (first-rung.py --rungs), which carry _SecTrustEvaluate, _SecTrustGetCertificateCount, _SecTrustGetCertificateAtIndex, _SecPolicyCreateBasicX509 and _SecPolicyCreateSSL and none of the fourteen names",
+   "source": "the armv7 shared caches of 6.1.3 and 4.3 through tools/cache-index (first-rung.lua --rungs), which carry _SecTrustEvaluate, _SecTrustGetCertificateCount, _SecTrustGetCertificateAtIndex, _SecPolicyCreateBasicX509 and _SecPolicyCreateSSL and none of the fourteen names",
    "status": "owed"
   },
   {
@@ -56,7 +56,7 @@
    "kind": "constant",
    "minimum": "6.0",
    "reason": "build the constant kSecAttrPersistentReference",
-   "source": "the armv7 shared caches of 6.1.3 and 4.3 through tools/cache-index (first-rung.py --rungs), which carry _SecTrustEvaluate, _SecTrustGetCertificateCount, _SecTrustGetCertificateAtIndex, _SecPolicyCreateBasicX509 and _SecPolicyCreateSSL and none of the fourteen names; the value read by dlsym off the host framework, this Mac's own Security.framework, asked through the case in tests/backports/host/security/trust-accessors.m",
+   "source": "the armv7 shared caches of 6.1.3 and 4.3 through tools/cache-index (first-rung.lua --rungs), which carry _SecTrustEvaluate, _SecTrustGetCertificateCount, _SecTrustGetCertificateAtIndex, _SecPolicyCreateBasicX509 and _SecPolicyCreateSSL and none of the fourteen names; the value read by dlsym off the host framework, this Mac's own Security.framework, asked through the case in tests/backports/host/security/trust-accessors.m",
    "status": "owed"
   },
   {
@@ -66,7 +66,7 @@
    "kind": "constant",
    "minimum": "6.0",
    "reason": "build the constant kSecAttrPersistantReference",
-   "source": "the armv7 shared caches of 6.1.3 and 4.3 through tools/cache-index (first-rung.py --rungs), which carry _SecTrustEvaluate, _SecTrustGetCertificateCount, _SecTrustGetCertificateAtIndex, _SecPolicyCreateBasicX509 and _SecPolicyCreateSSL and none of the fourteen names; the value read by dlsym off the host framework, this Mac's own Security.framework, asked through the case in tests/backports/host/security/trust-accessors.m",
+   "source": "the armv7 shared caches of 6.1.3 and 4.3 through tools/cache-index (first-rung.lua --rungs), which carry _SecTrustEvaluate, _SecTrustGetCertificateCount, _SecTrustGetCertificateAtIndex, _SecPolicyCreateBasicX509 and _SecPolicyCreateSSL and none of the fourteen names; the value read by dlsym off the host framework, this Mac's own Security.framework, asked through the case in tests/backports/host/security/trust-accessors.m",
    "status": "owed"
   },
   {

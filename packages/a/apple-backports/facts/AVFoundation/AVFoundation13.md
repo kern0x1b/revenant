@@ -248,7 +248,7 @@ Each reason in the registry names the count and the members. Grouped by what is 
 
 ```
 $ # the removed class-scoped row read, arguments: --inventory 6.1.3 12.0 16.0 -- rows13.tsv
-$ python3 tools/cache-index/first-rung.py --self-test
+$ xmake l tools/cache-index/first-rung.lua --self-test
 $ strings -a ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 | grep -cxF SELECTOR
 ```
 

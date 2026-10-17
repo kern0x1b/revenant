@@ -73,7 +73,7 @@ same enum value would be a lie here.
 
 Neither deployment band end carries the class, which is why this is a port object and not a
 re-export. `CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua UI 6.1.3 4.3 11.0 12.0`, and
-`tools/cache-index/first-rung.py`:
+`tools/cache-index/first-rung.lua`:
 
 ```
 NAME                             4.3 6.1.3 7.0 9.0 11.0 12.0
@@ -82,7 +82,7 @@ control (per release): 661 / 796 / 997 / 1484 / 2039 / 2130 names beginning UI
 ```
 
 Every control is a real count, so the zero is the release's and not the reader's.
-`first-rung.py --rungs UIPencilInteraction` answers `16.0,18.0`: the 12.1 release that introduced it
+`first-rung.lua --rungs UIPencilInteraction` answers `16.0,18.0`: the 12.1 release that introduced it
 is not held (the ladder jumps 12.0 → 16.0), and the class symbol first appears on the rungs this
 machine holds from 16.0 on. That is the same hole the 16.0 absence page records, read from the other
 side: the SDK's `12.1` is not contradicted by the caches, it is simply not among them.

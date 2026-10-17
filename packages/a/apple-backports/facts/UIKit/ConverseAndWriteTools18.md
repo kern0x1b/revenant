@@ -91,8 +91,8 @@
 //
 // 3. THE LADDER, for every name in this band.  One run, 54 names, with the tool's own self-test first:
 //
-//      python3 tools/cache-index/first-rung.py --self-test
-//      python3 tools/cache-index/first-rung.py <names>
+//      xmake l tools/cache-index/first-rung.lua --self-test
+//      xmake l tools/cache-index/first-rung.lua <names>
 //
 //    The self-test is the reader's certificate: `self-test: checks=8 failures=0`, with a positive control
 //    answering 3.0 for _NSFileSize and a negative control answering NONE for a nonsense name.  Every one

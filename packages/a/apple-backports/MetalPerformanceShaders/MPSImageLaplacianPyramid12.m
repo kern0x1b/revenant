@@ -4,7 +4,7 @@
 // One object for one release, and the release's own cache ladder is the judge rather than the header's
 // annotation. All three annotate ios(10.0) - MPSImageConvolution.h:663 (:664 MPSImageLaplacianPyramid),
 // :683 (:684 MPSImageLaplacianPyramidSubtract) and :706 (:707 MPSImageLaplacianPyramidAdd) - and
-//     python3 tools/cache-index/first-rung.py _OBJC_CLASS_\$_MPSImageLaplacianPyramid
+//     xmake l tools/cache-index/first-rung.lua _OBJC_CLASS_\$_MPSImageLaplacianPyramid
 //         _OBJC_CLASS_\$_MPSImageLaplacianPyramidAdd _OBJC_CLASS_\$_MPSImageLaplacianPyramidSubtract
 // answers 12.0 for all three, where the same command answers 10.0.1 for MPSImagePyramid and
 // MPSImageGaussianPyramid, which are MPSImagePyramid10.m's classes. So 12.0 is what this object

@@ -62,7 +62,7 @@ nearly gone too: 6 names contain `Face`, one of them a detector, and `CIDetector
 `ARSKView` and `ARSKViewDelegate` are the two rows that are **not** a sensor answer, and they are
 measured as a dependency instead: `SKView`, `SKScene`, `SKNode`, `SKSpriteNode`, `SKCameraNode` and
 the `SKViewDelegate` protocol are absent, 0 entries each, from both caches, and
-`tools/cache-index/first-rung.py` reads 7.0 for both `SKView` and `_OBJC_CLASS_$_SKView` (the
+`tools/cache-index/first-rung.lua` reads 7.0 for both `SKView` and `_OBJC_CLASS_$_SKView` (the
 nonsense control reads `NONE`). SpriteKit has no folder, no row and no implementation in this tree,
 so the view is missing on every release the port carries, not only on 6.1.3.
 

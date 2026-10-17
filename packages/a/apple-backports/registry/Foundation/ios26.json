@@ -258,7 +258,7 @@
       "facts": "facts/Foundation/NSPredicateValidating.md",
       "reason": "build -[NSPredicate allowEvaluationWithValidator:error:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "the 16.4 build SDK this package compiles against and the 26.2 SDK tools/intents/generate.sh calls SDK_262, both read whole - 0 files of either name NSPredicateValidating and 0 name allowEvaluationWithValidator, NSPredicate itself in 95 files of the 16.4 and 88 of the 26.2 as the control; the row's introduced 26.4 from coordination/corpus/registry-last.tsv against a newest readable SDK of 26.2; the 53 held rungs tools/cache-index/first-rung.py reads, 18.0 the newest of them"
+      "source": "the 16.4 build SDK this package compiles against and the 26.2 SDK tools/intents/generate.sh calls SDK_262, both read whole - 0 files of either name NSPredicateValidating and 0 name allowEvaluationWithValidator, NSPredicate itself in 95 files of the 16.4 and 88 of the 26.2 as the control; the row's introduced 26.4 from coordination/corpus/registry-last.tsv against a newest readable SDK of 26.2; the 53 held rungs tools/cache-index/first-rung.lua reads, 18.0 the newest of them"
     },
     {
       "api": "NSPredicateValidating",
@@ -269,7 +269,7 @@
       "facts": "facts/Foundation/NSPredicateValidating.md",
       "reason": "build the protocol NSPredicateValidating",
       "effect": "until built: NSProtocolFromString answers nil",
-      "source": "the 16.4 build SDK this package compiles against and the 26.2 SDK tools/intents/generate.sh calls SDK_262, both read whole - 0 files of either name NSPredicateValidating and 0 name allowEvaluationWithValidator, NSPredicate itself in 95 files of the 16.4 and 88 of the 26.2 as the control; the row's introduced 26.4 from coordination/corpus/registry-last.tsv against a newest readable SDK of 26.2; the 53 held rungs tools/cache-index/first-rung.py reads, 18.0 the newest of them"
+      "source": "the 16.4 build SDK this package compiles against and the 26.2 SDK tools/intents/generate.sh calls SDK_262, both read whole - 0 files of either name NSPredicateValidating and 0 name allowEvaluationWithValidator, NSPredicate itself in 95 files of the 16.4 and 88 of the 26.2 as the control; the row's introduced 26.4 from coordination/corpus/registry-last.tsv against a newest readable SDK of 26.2; the 53 held rungs tools/cache-index/first-rung.lua reads, 18.0 the newest of them"
     }
   ]
 }

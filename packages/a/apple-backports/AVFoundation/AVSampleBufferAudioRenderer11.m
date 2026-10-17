@@ -38,7 +38,7 @@
 // mapping is.
 //
 // ONE RELEASE PER OBJECT. Every symbol this file defines first appears in the 11.0 image: the class symbol
-// (tools/cache-index/first-rung.py _OBJC_CLASS_$_AVSampleBufferAudioRenderer answers 11.0) and nothing
+// (tools/cache-index/first-rung.lua _OBJC_CLASS_$_AVSampleBufferAudioRenderer answers 11.0) and nothing
 // else. Every member the 16.4 header declares for this class at another release - -currentTime,
 // -setRate:time:atHostTime:, -hasSufficientMediaDataForReliablePlaybackStart,
 // -delaysRateChangeUntilHasSufficientMediaData, -allowedAudioSpatializationFormats - is 12.0 or later and
@@ -642,7 +642,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
 - (void)charon_failWithReason:(NSString *)reason
 {
     // AVErrorUnknown is the release's own code for an error with no more specific one, and
-    // AVFoundationErrorDomain is its own symbol (tools/cache-index/first-rung.py _AVFoundationErrorDomain
+    // AVFoundationErrorDomain is its own symbol (tools/cache-index/first-rung.lua _AVFoundationErrorDomain
     // answers 4.0).
     _status = AVQueuedSampleBufferRenderingStatusFailed;
     if (!_error)

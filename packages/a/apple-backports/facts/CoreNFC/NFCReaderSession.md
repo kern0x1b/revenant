@@ -130,15 +130,15 @@ it is not rather than being quoted. `-ndefMessagePayload` is absent from all
 three, 11.0 included, and is first held at 16.0.
 
 12.0's arm64 cache carries no CoreNFC either, which is that cache's own state
-and not this port's; `tools/cache-index/first-rung.py` reads the same rungs and
+and not this port's; `tools/cache-index/first-rung.lua` reads the same rungs and
 the same answer (`NFCReaderSession` at 11.0, 16.0, 18.0 and at no other held
 rung), by a different reader again - the whole symbol table rather than the
 Objective-C metadata - which is why the two agree. The command, and its control:
 
 ```
-python3 tools/cache-index/first-rung.py --self-test          # 8 of 8, the checks that mean the rest
-python3 tools/cache-index/first-rung.py --rungs NFCReaderSession
-python3 tools/cache-index/first-rung.py _NFCISO15693TagResponseErrorKey
+xmake l tools/cache-index/first-rung.lua --self-test          # 8 of 8, the checks that mean the rest
+xmake l tools/cache-index/first-rung.lua --rungs NFCReaderSession
+xmake l tools/cache-index/first-rung.lua _NFCISO15693TagResponseErrorKey
 ```
 
 The last two print `NFCReaderSession  11.0,16.0,18.0` and

@@ -62,7 +62,7 @@ which is 145301 rows and carries `introduced` for every row below. The first hel
 NAME is a different question and a different tool:
 
 ```
-python3 tools/cache-index/first-rung.py NAME...
+xmake l tools/cache-index/first-rung.lua NAME...
 ```
 
 which answers PRESENCE over the held set (dense to 12.0, then a hole at 13.0, 14.0 and 15.0, so a 13.0
@@ -99,7 +99,7 @@ carry the initializer on, while the other two would place at 4.3. The registry's
 no API symbol and `tools/release-split.lua` checks zero symbols and reports it clean vacuously -
 `tools/release-split.lua`'s own header names this blind spot and says a clean run does not cover any
 category file. What the class-scoped ladder says instead: `playImmediatelyAtRate:`,
-`timeControlStatus` and `initWithOutputSettings:` first export at **10.0.1** (first-rung.py), so all
+`timeControlStatus` and `initWithOutputSettings:` first export at **10.0.1** (first-rung.lua), so all
 three belong to one release and one object, which is the property the script is there to protect.
 
 ## The 33 that stay absent, and what each is measured against

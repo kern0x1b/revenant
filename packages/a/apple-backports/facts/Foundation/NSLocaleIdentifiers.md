@@ -32,7 +32,7 @@ The measurement a category needs is the selector-string ladder, and it was run b
 **Is the name real, and in which held release** — presence, not introduction:
 
 ```
-python3 tools/cache-index/first-rung.py languageIdentifier regionCode
+xmake l tools/cache-index/first-rung.lua languageIdentifier regionCode
   languageIdentifier   8.0
   regionCode           4.3
 ```

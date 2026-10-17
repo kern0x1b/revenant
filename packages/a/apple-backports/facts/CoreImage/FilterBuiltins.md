@@ -72,7 +72,7 @@ not always the obvious one: `+colorMatrixFilter` answers `CIColorMatrix` and not
 `+CMYKHalftone` and `+KMeansFilter` carry no `Filter` at all.
 
 The filter's own arithmetic is the release's, not the port's: `+filterWithName:` is exported from iOS 3.0
-(`tools/cache-index/first-rung.py 'filterWithName:'` → 3.0), and it answers nil for a name the running system
+(`tools/cache-index/first-rung.lua 'filterWithName:'` → 3.0), and it answers nil for a name the running system
 has no filter of, which is what Apple documents for a filter that does not exist
 (`facts/CoreImage/ImageApplyingFilter.md`). So a constructor for a filter the release does not carry answers
 nil, on this port and on a real iOS 16, in the same way.
@@ -80,7 +80,7 @@ nil, on this port and on a real iOS 16, in the same way.
 ## Why seven objects and not one
 
 An object carries the API of one release, so the objects are cut by the release each selector itself first
-appears at, measured over the 50 held rungs with `tools/cache-index/first-rung.py`:
+appears at, measured over the 50 held rungs with `tools/cache-index/first-rung.lua`:
 
 | object | selectors | the release that exports them |
 | --- | --- | --- |
@@ -92,7 +92,7 @@ appears at, measured over the 50 held rungs with `tools/cache-index/first-rung.p
 | `CIFilterBuiltins18.m` | 8 | iOS 18.0 |
 | `CIFilterBuiltins26.m` | 6 | no held rung: the ladder ends at 10.3.4, so their SDK availability places them at iOS 26.0 |
 
-`CIFilter` itself is the release's own class from iOS 5.0 (`first-rung.py _OBJC_CLASS_$_CIFilter` → 5.0), so
+`CIFilter` itself is the release's own class from iOS 5.0 (`first-rung.lua _OBJC_CLASS_$_CIFilter` → 5.0), so
 these are a category on it and not a second definition of it. `charon_collect` installs a category method only
 where the class does not answer the selector, so a band at or above the release in the table gets the
 release's own constructor and a band below it gets this one; the band needs no `maximum` in the registry for
@@ -103,7 +103,7 @@ that, and none is written.
 `release-split.lua` and `check_releases` cannot see any of this: a category's method implementations compile
 to no exported symbol, so `nm -gU` on these seven objects reports nothing and both checks read them as empty.
 The table above is therefore not what relcheck measured — relcheck measured nothing here — it is
-`first-rung.py` over the selectors, and the split by hand is what makes each object single-release *true*
+`first-rung.lua` over the selectors, and the split by hand is what makes each object single-release *true*
 rather than merely unchecked.
 
 The six in the last row are placed by their SDK availability and by nothing else. The SDK of 26.2 writes

@@ -97,7 +97,7 @@ BOOL GCExtendedGamepadSnapShotDataV100FromNSData(GCExtendedGamepadSnapShotDataV1
 // only the snapshot API.
 // GCExtendedGamepadSnapshot is measured on the ladder at 7.0, the rung this object already
 // carries, so the class belongs here rather than in an object of its own:
-// `python3 tools/cache-index/first-rung.py GCExtendedGamepadSnapshot` answers 7.0. What it is,
+// `xmake l tools/cache-index/first-rung.lua GCExtendedGamepadSnapshot` answers 7.0. What it is,
 // is the header's own - a profile of the extended game's elements that holds the values it was
 // saved from and answers them again - so it holds the data and pushes it through the same
 // accessors a live game uses, and the layout it reads is the packed structure
@@ -178,7 +178,7 @@ BOOL GCExtendedGamepadSnapShotDataV100FromNSData(GCExtendedGamepadSnapShotDataV1
 @end
 
 // -[GCExtendedGamepad saveSnapshot] is 7.0 (GCExtendedGamepad.h:65) and returns
-// GCExtendedGamepadSnapshot, which first-rung.py also places at 7.0, so both live in this object and
+// GCExtendedGamepadSnapshot, which first-rung.lua also places at 7.0, so both live in this object and
 // the method's IMP has its class-ref answered inside it. That is the whole of what the wall recorded
 // in coordination/api-queue.md was: the method's IMP emits an objc-class-ref for its return type, and
 // while the class sat at 9.0 the 6.1.3 band had no 9.0 object to satisfy it. Measured on this object,

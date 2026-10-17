@@ -18,7 +18,7 @@ Added in this pass, in six objects of the same family: `ImageIONames1001.m` (4),
 `ImageIONames160b.m` (1), `ImageIONames174.m` (2), `ImageIONames180.m` (25) and `ImageIONames260b.m` (12).
 
 The band of a name is the release whose own caches first export **the symbol**, measured with
-`tools/cache-index/first-rung.py` over the 50 held rungs — an object carries API that arrived in one release,
+`tools/cache-index/first-rung.lua` over the 50 held rungs — an object carries API that arrived in one release,
 and this family exports real `const CFStringRef` variables, so release-split and `check_releases` both see
 this one and measure it themselves. Where no held rung carries the symbol — the ladder ends at 10.3.4, so
 nothing above 10.3.4 is placed by measurement — the name's own `IMAGEIO_AVAILABLE_STARTING` annotation places

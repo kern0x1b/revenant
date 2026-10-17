@@ -14,7 +14,7 @@ where the host cannot be the oracle.
 ## The release, and why one object file
 
 No release this port supports exports any of the fifty-eight. Measured over the fifty-one rungs of the
-ladder this port holds (1.1.4 through 18.0, read through `tools/cache-index/first-rung.py`), the first
+ladder this port holds (1.1.4 through 18.0, read through `tools/cache-index/first-rung.lua`), the first
 held rung carrying any of them is `NONE`, and the 26.2 header that declares them puts every one of them
 at 18.5. They are one object file because they are one release. The iPhoneOS 16.4 SDK this package
 compiles against declares none of them, so they are transcribed into

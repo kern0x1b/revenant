@@ -43,7 +43,7 @@ reader finds these names when they are there.
 ## The whole ladder, from the index
 
 ```
-python3 tools/cache-index/first-rung.py < .agent-work/runs/w01-mps-r13/names.txt
+xmake l tools/cache-index/first-rung.lua < .agent-work/runs/w01-mps-r13/names.txt
 ```
 
 Output — all 55 names:
@@ -64,12 +64,12 @@ directly. That is the claim this page rests on.
 ### Four controls, and what each one rules out
 
 ```
-$ printf 'MPSImageIntegral\nMPSImageGaussianBlur\nMPSImageBox\nMPSNDArrayAbs\n' | python3 tools/cache-index/first-rung.py
+$ printf 'MPSImageIntegral\nMPSImageGaussianBlur\nMPSImageBox\nMPSNDArrayAbs\n' | xmake l tools/cache-index/first-rung.lua
 MPSImageIntegral	9.0
 MPSImageGaussianBlur	9.0
 MPSImageBox	9.0
 MPSNDArrayAbs	NONE
-$ printf 'NSString\nUIView\nNotARealClassNameXyz\n' | python3 tools/cache-index/first-rung.py
+$ printf 'NSString\nUIView\nNotARealClassNameXyz\n' | xmake l tools/cache-index/first-rung.lua
 NSString	3.0
 UIView	3.0
 NotARealClassNameXyz	NONE

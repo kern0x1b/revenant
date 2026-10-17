@@ -6,7 +6,7 @@
 `MPS_CLASS_AVAILABLE_STARTING(macos(10.13), ios(11.0), macCatalyst(13.0), tvos(11.0))` above the class's
 declaration, so the object carries one release and nothing else does.
 
-**The ladder agrees independently**: `first-rung.py` answers `11.0` for all five class symbols, so the
+**The ladder agrees independently**: `first-rung.lua` answers `11.0` for all five class symbols, so the
 placement is the release's own cache and not the annotation alone.
 
 ## What decided that this is work and not a missing capability

@@ -15,7 +15,7 @@ written.
 
 ## THE MEASUREMENTS, AND THE COMMANDS A READER CAN RUN
 
-**Where each name is real.** `python3 tools/cache-index/first-rung.py NAME`:
+**Where each name is real.** `xmake l tools/cache-index/first-rung.lua NAME`:
 
 ```
 MLTask	16.0

@@ -57,7 +57,7 @@ project's own index, which needs the leading underscore:
         _CGPathAddLineToPoint _CGContextDrawImage _NSGetSizeAndAlignment _CGPathAddLines _CGPathCreateCopy \
         _CGPathApplyTransform _CGRectContainsPoint _CGRectGetMidY _CGRectGetHeight _CGRectGetWidth \
         _hypot _atan2 _sqrt _fabs _pow _cos _sin _CGPathGetBoundingBox _CGPathContainsPoint \
-        | python3 tools/cache-index/first-rung.py
+        | xmake l tools/cache-index/first-rung.lua
     ... every one of them 3.0, except _CGPathApplyTransform which prints NONE
 
 `nm -u` on the object, which is the import list the gate checks against the device's cache, is

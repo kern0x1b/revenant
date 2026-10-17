@@ -70,7 +70,7 @@ read out of.
 ## 2. Each name of this slice is real, and the first held rung that has it
 
 ```
-python3 tools/cache-index/first-rung.py VNClassifyImageRequest VNDetectFaceCaptureQualityRequest \
+xmake l tools/cache-index/first-rung.lua VNClassifyImageRequest VNDetectFaceCaptureQualityRequest \
     VNDetectHumanRectanglesRequest VNGenerateAttentionBasedSaliencyImageRequest \
     VNGenerateImageFeaturePrintRequest VNGenerateObjectnessBasedSaliencyImageRequest \
     VNRecognizeAnimalsRequest VNRecognizeTextRequest VNRecognizedText VNRecognizedTextObservation \
@@ -571,7 +571,7 @@ means the tool's "clean" here certifies nothing at all. It is the blind spot the
 warns about, met exactly. The symbol is not a release export by measurement either:
 
 ```
-python3 tools/cache-index/first-rung.py _OBJC_PROTOCOL_\$_VNRequestProgressProviding
+xmake l tools/cache-index/first-rung.lua _OBJC_PROTOCOL_\$_VNRequestProgressProviding
 ```
 
 ```

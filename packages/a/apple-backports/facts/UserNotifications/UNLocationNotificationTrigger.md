@@ -35,7 +35,7 @@ regions it watches. It inherits `-repeats` from `UNNotificationTrigger` and adds
 no `nextTriggerDate:` of its own, so a location trigger has no date - which is
 why a request carrying one is not scheduled at all.
 
-`first-rung.py triggerWithRegion:repeats: UNSLocationMonitor nextTriggerDate`
+`first-rung.lua triggerWithRegion:repeats: UNSLocationMonitor nextTriggerDate`
 answers `10.0.1` for each of the three, so the API and the trigger arrived
 together, and on iOS 10 the region is watched by `UNSLocationMonitor`, in
 `UserNotificationsServer`, which the facts page of `UNUserNotificationCenter`
@@ -43,7 +43,7 @@ names. `UNSLocationTrigger` answers `NONE`: there is no class of that name.
 
 ## What iOS 6 has to watch a region with
 
-`$ python3 tools/cache-index/first-rung.py --rungs initCircularRegionWithCenter:radius:identifier:`
+`$ xmake l tools/cache-index/first-rung.lua --rungs initCircularRegionWithCenter:radius:identifier:`
 
 ```
 4.0,4.3,4.3.5,5.0,5.1.1,6.0,6.0.2,6.1,6.1.3,6.1.4,6.1.6,7.0,7.0.1,7.0.6,7.1,7.1.1,7.1.2,
@@ -53,7 +53,7 @@ names. `UNSLocationTrigger` answers `NONE`: there is no class of that name.
 
 **Every held rung from 4.0 to 18.0 carries it**, 6.1.3 among them, so a release
 before `CLCircularRegion` (7.0) constructs its region the older way and the port
-never needs the newer class. With it, `first-rung.py` reads `CLRegion` at 4.0,
+never needs the newer class. With it, `first-rung.lua` reads `CLRegion` at 4.0,
 `startMonitoringForRegion:` at 5.0, `stopMonitoringForRegion:` and
 `monitoredRegions` at 4.0, `regionMonitoringEnabled` at 4.0 and
 `locationManager:didEnterRegion:` and `locationManager:didExitRegion:` at 4.0 -
@@ -91,7 +91,7 @@ The control is in that same read: 7187 classes came out of it, `CLRegion` and
 `CLLocationManager` are two of them, and the two region subclasses a reader would
 mistake for the older ones are not - so the absence is the release's, not the
 reader's. `CLCircularRegion` and `CLBeaconRegion` both arrive at 7.0
-(`first-rung.py`), which is why the port takes the plain `CLRegion` the trigger's
+(`first-rung.lua`), which is why the port takes the plain `CLRegion` the trigger's
 own property is typed as.
 
 ## What the port does with it

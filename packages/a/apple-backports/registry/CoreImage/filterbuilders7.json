@@ -10,7 +10,7 @@
       "reason": "iOS 6 answers no such selector, and iOS 7.0 first carries +gaussianBlurFilter, so every band below that release is the one that needs this one",
       "effect": "the CIGaussianBlur filter with its default values, which is what +[CIFilter filterWithName:] gives and what the host's own +[CIFilter gaussianBlurFilter] answers; nil when the running system has no filter of that name",
       "facts": "facts/CoreImage/FilterBuiltins.md",
-      "source": "the host's own CoreImage over all 239 of the SDK's constructors, by tests/backports/host/ciimagefilter, which builds the port's objects with their selectors prefixed and asks both in one process, with every input set to the value a fresh filter of that name already answers: 'compared 478 of 239 port constructors against the host's own, 237 rendered and compared, 0 different'; the 50 held rungs by tools/cache-index/first-rung.py for the release each selector first appears at"
+      "source": "the host's own CoreImage over all 239 of the SDK's constructors, by tests/backports/host/ciimagefilter, which builds the port's objects with their selectors prefixed and asks both in one process, with every input set to the value a fresh filter of that name already answers: 'compared 478 of 239 port constructors against the host's own, 237 rendered and compared, 0 different'; the 50 held rungs by tools/cache-index/first-rung.lua for the release each selector first appears at"
     }
   ]
 }

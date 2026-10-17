@@ -9,7 +9,7 @@
 > is not the one that runs.
 
 Corpus: `DEMAND-AVFoundation-10.tsv`, 5 rows, CRASH-ON-USE, each called by 1 app in the corpus.
-`python3 tools/cache-index/first-rung.py playImmediatelyAtRate: initWithOutputSettings: supportedColorSpaces automaticallyConfiguresCaptureDeviceForWideColor automaticallyWaitsToMinimizeStalling`
+`xmake l tools/cache-index/first-rung.lua playImmediatelyAtRate: initWithOutputSettings: supportedColorSpaces automaticallyConfiguresCaptureDeviceForWideColor automaticallyWaitsToMinimizeStalling`
 answers 10.0.1 for all five (10.0.1 is the oldest *held* rung that carries the names; the SDK's own
 `introduced` is 10.0, which is what the registry rows use).
 

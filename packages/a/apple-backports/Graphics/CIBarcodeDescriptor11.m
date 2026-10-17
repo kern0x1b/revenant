@@ -20,7 +20,7 @@
 // port deploys does not have), so carrying these classes does not make any filter render. That is named in
 // facts/CoreImage/BarcodeDescriptor.md, and it is a different row set.
 //
-// WHICH RELEASE: 11.0. tools/cache-index/first-rung.py over the 50 held rungs puts all five classes at 11.0
+// WHICH RELEASE: 11.0. tools/cache-index/first-rung.lua over the 50 held rungs puts all five classes at 11.0
 // and on no rung below it, which is what the SDK's own NS_CLASS_AVAILABLE(10_13, 11_0) says. This is a new
 // object of a family GraphicsBackports already carries and not a split.
 //

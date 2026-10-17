@@ -49,7 +49,7 @@ selector looked up on the class that declares it, not as a name somewhere in the
 | `-[AVAssetTrack samplePresentationTimeForTrackTime:]` | 4.0 | yes | yes |
 | `-[AVAssetTrack segmentForTrackTime:]` | 4.0 | yes | yes |
 
-First-rung answers come from `python3 tools/cache-index/first-rung.py NAME` over the held ladder, and a
+First-rung answers come from `xmake l tools/cache-index/first-rung.lua NAME` over the held ladder, and a
 selector is spelled **with its colons**: `tracksWithMediaType:` reads 4.0 and the bare
 `tracksWithMediaType` reads NONE, because a colon is part of the name and the index is exact. A lookup
 that drops it looks like an absence and is not one.
@@ -133,7 +133,7 @@ rather than taking an `id`.
 CHARON_ROOT="$PWD" xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv.tsv
 CHARON_ROOT="$PWD" xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7   > inv43.tsv
 CHARON_ROOT="$PWD" xmake l tools/corpus/cache-census.lua AV 6.1.3 4.3
-python3 tools/cache-index/first-rung.py 'tracksWithMediaType:' 'unusedTrackID' 'segmentForTrackTime:'
+xmake l tools/cache-index/first-rung.lua 'tracksWithMediaType:' 'unusedTrackID' 'segmentForTrackTime:'
 ```
 
 The inventory's selector column carries the leading `-`, so a selector is looked up as

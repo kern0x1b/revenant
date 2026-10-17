@@ -4,7 +4,7 @@ Four rows of `registry/AVFoundation/absent_AVFoundation.json`, three of them lan
 `-recommendedAudioSettingsForAssetWriterWithOutputFileType:`,
 `-recommendedVideoSettingsForAssetWriterWithOutputFileType:` and
 `AVAssetExportSession.metadataItemFilter`. Three objects carry only 7.0 API, and
-`tools/cache-index/first-rung.py` answers 7.0 for every name they carry, so no object mixes releases.
+`tools/cache-index/first-rung.lua` answers 7.0 for every name they carry, so no object mixes releases.
 
 ## The ladder
 

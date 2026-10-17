@@ -58,7 +58,7 @@ answerable here.
 The reading is the cache index `tools/cache-index/build.py` writes, one file per held rung: every
 registered selector (`__TEXT,__objc_methname`), every class name (`__TEXT,__objc_classname`), every C
 string literal (`__TEXT,__cstring`), the export trie and the whole symbol table. Every number below is
-`tools/cache-index/first-rung.py`'s own `_names_of()` over those files - names as **bytes**, the header
+`tools/cache-index/first-rung.lua`'s own `_names_of()` over those files - names as **bytes**, the header
 line skipped, a whitespace-only line not a name - so the name count is that reader's and the queries are
 the same bytes it searches.
 
@@ -71,17 +71,17 @@ the same bytes it searches.
 | 16.0 | arm64e | present | **yes** | **yes** | 5,104,177 |
 | 18.0 | arm64e | present | **yes** | **yes** | 6,919,864 |
 
-    $ python3 tools/cache-index/first-rung.py NSURLSessionTaskTransactionMetrics \
+    $ xmake l tools/cache-index/first-rung.lua NSURLSessionTaskTransactionMetrics \
         countOfRequestHeaderBytesSent countOfResponseHeaderBytesReceived
     NSURLSessionTaskTransactionMetrics       10.0.1
     countOfRequestHeaderBytesSent            16.0
     countOfResponseHeaderBytesReceived       16.0
 
-`first-rung.py` answers "the oldest held rung carrying the name", which is what the class column above
+`first-rung.lua` answers "the oldest held rung carrying the name", which is what the class column above
 rests on; the per-release answers come from the per-rung index files it reads, and one reader a reader can
 run over any subset is:
 
-    $ python3 -c 'import gzip,os,sys                       # first-rung.py _names_of(), inlined
+    $ python3 -c 'import gzip,os,sys                       # first-rung.lua _names_of(), inlined
     p=os.path.expanduser("~/.charon/cache-index/"+sys.argv[1]+".names.gz")
     with gzip.open(p,"rb") as h:
         h.readline(); body={l.rstrip(b"\n") for l in h if l.strip()}

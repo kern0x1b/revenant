@@ -137,7 +137,7 @@ It adds an image or a video to the saved photos, makes an album, enumerates albu
 
 The one thing a 6.1.3 caller gets is a broadcast, and it is measured twice over.
 
-    python3 tools/cache-index/first-rung.py ALAssetsLibraryChangedNotification ALAssetLibraryUpdatedAssetsKey
+    xmake l tools/cache-index/first-rung.lua ALAssetsLibraryChangedNotification ALAssetLibraryUpdatedAssetsKey
 
 ```
 ALAssetsLibraryChangedNotification	4.0
@@ -154,7 +154,7 @@ That is the whole of the release's account of a change, and each measured proper
 
 ## Where the family sits in the ladder
 
-`tools/cache-index/first-rung.py` over the 50 held rungs. First rung is PRESENCE, not version, and the ladder holds nothing between 12.0 and 16.0: 12.0 means "no held release before 12.0 carries it", and 16.0 means "after 12.0 and by 16.0", not a measured first release.
+`tools/cache-index/first-rung.lua` over the 50 held rungs. First rung is PRESENCE, not version, and the ladder holds nothing between 12.0 and 16.0: 12.0 means "no held release before 12.0 carries it", and 16.0 means "after 12.0 and by 16.0", not a measured first release.
 
 | name | first held rung |
 | --- | --- |
@@ -206,6 +206,6 @@ Not the arithmetic: the port already computes the inserted, the changed and the 
 
 The rows land `absent`, and the claim is about the release: on 6.1.3 there is no token to take, no history to read and no way to ask "since", so nothing in the release answers any of the four names.
 
-Source: the headers of the iOS 16.4 SDK for the declarations and their availability; `coordination/corpus/sdk-26.2-surface.tsv` for the `introduced` the registry carries; `CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0` and `... cache-census.lua Photos 4.3 6.1.3 12.0` for the two censuses and their controls; `CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7` for the release's whole Objective-C metadata, the 26 selectors of `ALAssetsLibrary`, the three `PH*` preference-bundle cells and the image counts; `tools/cache-index/first-rung.py` over the 50 held rungs for every first rung in the table above; one `strings -a` pass over the arm64 cache of 12.0 with the nonsense-selector control for the shape column; `Changes.md` ("Observing changes", and "The run of 2026-10-01, on the iPad 2") for what the release posts when the library changes, measured on an iPad 2 running 6.1.3.
+Source: the headers of the iOS 16.4 SDK for the declarations and their availability; `coordination/corpus/sdk-26.2-surface.tsv` for the `introduced` the registry carries; `CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0` and `... cache-census.lua Photos 4.3 6.1.3 12.0` for the two censuses and their controls; `CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7` for the release's whole Objective-C metadata, the 26 selectors of `ALAssetsLibrary`, the three `PH*` preference-bundle cells and the image counts; `tools/cache-index/first-rung.lua` over the 50 held rungs for every first rung in the table above; one `strings -a` pass over the arm64 cache of 12.0 with the nonsense-selector control for the shape column; `Changes.md` ("Observing changes", and "The run of 2026-10-01, on the iPad 2") for what the release posts when the library changes, measured on an iPad 2 running 6.1.3.
 
 What Apple's Photos of 16.0 answers for a token taken after a write the application never saw is **not** answered here. That needs a device whose Photos library holds assets and whose history is long enough to have dropped, which this machine has not; the question is not needed for any of these four rows, whose claim is about 6.1.3.

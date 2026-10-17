@@ -9,7 +9,7 @@
       "status": "owed",
       "reason": "build the class PHCollectionListChangeRequest",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the header of iOS 16.4 for the declarations and for the release's own AssetsLibrary.h:105; tools/cache-index/first-rung.py for the first held rung of each name and of the release's album selector; grep over the 16.4 AssetsLibrary headers for the words the reason turns on; facts/Photos/Changes.md for what the port's library can and cannot make on this release"
+      "source": "the header of iOS 16.4 for the declarations and for the release's own AssetsLibrary.h:105; tools/cache-index/first-rung.lua for the first held rung of each name and of the release's album selector; grep over the 16.4 AssetsLibrary headers for the words the reason turns on; facts/Photos/Changes.md for what the port's library can and cannot make on this release"
     },
     {
       "api": "PHContentEditingInputCancelledKey",
@@ -19,7 +19,7 @@
       "status": "owed",
       "reason": "build the constant PHContentEditingInputCancelledKey",
       "effect": "until built: the symbol is not exported",
-      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.py for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.lua for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
     },
     {
       "api": "PHContentEditingInputErrorKey",
@@ -29,7 +29,7 @@
       "status": "owed",
       "reason": "build the constant PHContentEditingInputErrorKey",
       "effect": "until built: the symbol is not exported",
-      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.py for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.lua for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
     },
     {
       "api": "PHContentEditingInputRequestOptions",
@@ -49,7 +49,7 @@
       "status": "owed",
       "reason": "build the constant PHContentEditingInputResultIsInCloudKey",
       "effect": "until built: the symbol is not exported",
-      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.py for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.lua for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
     },
     {
       "api": "PHLivePhoto",
@@ -59,7 +59,7 @@
       "status": "owed",
       "reason": "build the class PHLivePhoto",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the header of iOS 16.4 for the declarations and for the release's own AssetsLibrary.h:105; tools/cache-index/first-rung.py for the first held rung of each name and of the release's album selector; grep over the 16.4 AssetsLibrary headers for the words the reason turns on; facts/Photos/Changes.md for what the port's library can and cannot make on this release"
+      "source": "the header of iOS 16.4 for the declarations and for the release's own AssetsLibrary.h:105; tools/cache-index/first-rung.lua for the first held rung of each name and of the release's album selector; grep over the 16.4 AssetsLibrary headers for the words the reason turns on; facts/Photos/Changes.md for what the port's library can and cannot make on this release"
     },
     {
       "api": "PHLivePhotoInfoCancelledKey",
@@ -69,7 +69,7 @@
       "status": "owed",
       "reason": "build the constant PHLivePhotoInfoCancelledKey",
       "effect": "until built: the symbol is not exported",
-      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.py for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.lua for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
     },
     {
       "api": "PHLivePhotoInfoErrorKey",
@@ -79,7 +79,7 @@
       "status": "owed",
       "reason": "build the constant PHLivePhotoInfoErrorKey",
       "effect": "until built: the symbol is not exported",
-      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.py for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.lua for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
     },
     {
       "api": "PHLivePhotoInfoIsDegradedKey",
@@ -89,7 +89,7 @@
       "status": "owed",
       "reason": "build the constant PHLivePhotoInfoIsDegradedKey",
       "effect": "until built: the symbol is not exported",
-      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.py for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.lua for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
     },
     {
       "api": "PHLivePhotoRequestOptions",
@@ -99,7 +99,7 @@
       "status": "owed",
       "reason": "build the class PHLivePhotoRequestOptions",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the header of iOS 16.4 for the declarations and for the release's own AssetsLibrary.h:105; tools/cache-index/first-rung.py for the first held rung of each name and of the release's album selector; grep over the 16.4 AssetsLibrary headers for the words the reason turns on; facts/Photos/Changes.md for what the port's library can and cannot make on this release"
+      "source": "the header of iOS 16.4 for the declarations and for the release's own AssetsLibrary.h:105; tools/cache-index/first-rung.lua for the first held rung of each name and of the release's album selector; grep over the 16.4 AssetsLibrary headers for the words the reason turns on; facts/Photos/Changes.md for what the port's library can and cannot make on this release"
     },
     {
       "api": "PHLivePhotoEditingContext",
@@ -109,7 +109,7 @@
       "status": "owed",
       "reason": "build the class PHLivePhotoEditingContext",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the header of iOS 16.4 for the declarations and for the release's own AssetsLibrary.h:105; tools/cache-index/first-rung.py for the first held rung of each name and of the release's album selector; grep over the 16.4 AssetsLibrary headers for the words the reason turns on; facts/Photos/Changes.md for what the port's library can and cannot make on this release"
+      "source": "the header of iOS 16.4 for the declarations and for the release's own AssetsLibrary.h:105; tools/cache-index/first-rung.lua for the first held rung of each name and of the release's album selector; grep over the 16.4 AssetsLibrary headers for the words the reason turns on; facts/Photos/Changes.md for what the port's library can and cannot make on this release"
     },
     {
       "api": "PHLivePhotoFrame",
@@ -119,7 +119,7 @@
       "status": "owed",
       "reason": "build the protocol PHLivePhotoFrame",
       "effect": "until built: NSProtocolFromString answers nil",
-      "source": "the header of iOS 16.4 for the declarations and for the release's own AssetsLibrary.h:105; tools/cache-index/first-rung.py for the first held rung of each name and of the release's album selector; grep over the 16.4 AssetsLibrary headers for the words the reason turns on; facts/Photos/Changes.md for what the port's library can and cannot make on this release"
+      "source": "the header of iOS 16.4 for the declarations and for the release's own AssetsLibrary.h:105; tools/cache-index/first-rung.lua for the first held rung of each name and of the release's album selector; grep over the 16.4 AssetsLibrary headers for the words the reason turns on; facts/Photos/Changes.md for what the port's library can and cannot make on this release"
     },
     {
       "api": "PHLivePhotoShouldRenderAtPlaybackTime",
@@ -129,7 +129,7 @@
       "status": "owed",
       "reason": "build the constant PHLivePhotoShouldRenderAtPlaybackTime",
       "effect": "until built: the symbol is not exported",
-      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.py for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.lua for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
     },
     {
       "api": "PHCloudIdentifier",
@@ -169,7 +169,7 @@
       "status": "owed",
       "reason": "build the constant PHLocalIdentifiersErrorKey",
       "effect": "until built: the symbol is not exported",
-      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.py for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the value, read out of the device's own Photos.framework; tools/cache-index/first-rung.lua for the first held rung that carries the name; facts/Photos/Constants.md for all of it"
     },
     {
       "api": "PHPersistentChange",
@@ -179,7 +179,7 @@
       "status": "owed",
       "reason": "build the class PHPersistentChange",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the headers of the iOS 16.4 SDK (PHPersistentChange.h, PHPersistentChangeFetchResult.h, PHPersistentChangeToken.h, PHPersistentObjectChangeDetails.h) for the declarations and their availability; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.py for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
+      "source": "the headers of the iOS 16.4 SDK (PHPersistentChange.h, PHPersistentChangeFetchResult.h, PHPersistentChangeToken.h, PHPersistentObjectChangeDetails.h) for the declarations and their availability; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
     },
     {
       "api": "PHPersistentChangeFetchResult",
@@ -189,7 +189,7 @@
       "status": "owed",
       "reason": "build the class PHPersistentChangeFetchResult",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the headers of the iOS 16.4 SDK for the declaration of the class and of -enumerateChangesWithBlock:; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.py for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
+      "source": "the headers of the iOS 16.4 SDK for the declaration of the class and of -enumerateChangesWithBlock:; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
     },
     {
       "api": "PHPersistentChangeToken",
@@ -199,7 +199,7 @@
       "status": "owed",
       "reason": "build the class PHPersistentChangeToken",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the header PHPersistentChangeToken.h of the iOS 16.4 SDK for the declaration and its availability; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.py for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
+      "source": "the header PHPersistentChangeToken.h of the iOS 16.4 SDK for the declaration and its availability; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
     },
     {
       "api": "PHPersistentObjectChangeDetails",
@@ -209,7 +209,7 @@
       "status": "owed",
       "reason": "build the class PHPersistentObjectChangeDetails",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the header PHPersistentObjectChangeDetails.h of the iOS 16.4 SDK for the four declarations and their availability; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.py for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
+      "source": "the header PHPersistentObjectChangeDetails.h of the iOS 16.4 SDK for the four declarations and their availability; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
     },
     {
       "api": "PHAdjustmentData",

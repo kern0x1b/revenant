@@ -83,7 +83,7 @@ release: `UIView -setFrame:`, `UITableView -reloadData`, `UIBarButtonItem -tintC
 
 ### The early rungs are other classes', measured
 
-`first-rung.py` over the 107 distinct names: 94 read 16.0, and 13 read earlier. All 13 are
+`first-rung.lua` over the 107 distinct names: 94 read 16.0, and 13 read earlier. All 13 are
 explained, and none of them touches its row:
 
 | name | rung | what 6.1.3 actually says |

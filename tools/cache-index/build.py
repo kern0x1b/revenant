@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""build.py - one name index per held release, read once each, and the merged table first-rung.py answers from.
+"""build.py - one name index per held release, read once each, and the merged table first-rung.lua answers from.
 
     python3 tools/cache-index/build.py [--only RELEASE]... [--force] [--ladder armv7,armv7s]
 
@@ -288,7 +288,7 @@ def merge(full_ladder):
                 first_name = name
                 # The offset is taken BEFORE the member is written. raw.tell() after closing one is
                 # the start of the NEXT member, so recording it there shifts every block by one and
-                # first-rung.py's get() then reads the wrong member for every name -- which it did,
+                # first-rung.lua's get() then reads the wrong member for every name -- which it did,
                 # answering NONE for names the self-test's own dict had just found.
                 offset = raw.tell()
             batch.append("%s\t%s\n" % (name, first[name]))

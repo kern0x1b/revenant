@@ -25,7 +25,7 @@ and a caller learns a notification was pushed by asking whether its request's tr
 of this class, then reads the identifier, the body, the badge, the sound and the payload
 out of the request's content.
 
-`first-rung.py UNPushNotificationTrigger` answers `10.0.1`, the rung it arrived at
+`first-rung.lua UNPushNotificationTrigger` answers `10.0.1`, the rung it arrived at
 with the framework.
 
 ## What the release of iOS 6 has instead

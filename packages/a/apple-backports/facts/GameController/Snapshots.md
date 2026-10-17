@@ -49,7 +49,7 @@ version symbol for the plain gamepad, and the registry carries no row for one: i
 
 The ten functions, the two constants and the three objects do not share a release, so they are four
 objects, split by what the ladder first exports. The rung below is measured, not read off a header:
-`python3 tools/cache-index/first-rung.py <name>`, which is what `measured_names()` and so
+`xmake l tools/cache-index/first-rung.lua <name>`, which is what `measured_names()` and so
 `check_releases` reads.
 
 - `GCSnapshots7.m` — the plain game's V100 pair and the extended game's V100 pair, both at 7.0, and
@@ -90,7 +90,7 @@ It was absent for a measured reason, recorded in `coordination/api-queue.md`: th
 (`GCExtendedGamepad.h:65`), its return type was believed to be 9.0, and a method's IMP emits an
 `objc-class-ref` for its return type, so the 6.1.3 band had nothing to satisfy it. The measurement
 stands; **the premise did not**. The class was placed at 9.0 from the header's `API_AVAILABLE(ios(9.0))`
-rather than off the ladder, and `first-rung.py` answers 7.0. So the class and the method now share a
+rather than off the ladder, and `first-rung.lua` answers 7.0. So the class and the method now share a
 rung and an object, `GCSnapshots7.m`.
 
 Measured on the port's own object, before and after, with `nm -u`:
@@ -125,7 +125,7 @@ It was refused for a measured reason, recorded in `coordination/api-queue.md`: t
 return type was believed to be 9.0, and a method's IMP emits an `objc-class-ref` for its return type,
 so the 6.1.3 band had nothing to satisfy it. The measurement is still sound; **its premise was not**.
 The class was placed at 9.0 from `GCExtendedGamepadSnapshot.h`'s `API_AVAILABLE(ios(9.0))`, and
-`first-rung.py` answers 7.0. So the class and the method are now on the same rung in the same object
+`first-rung.lua` answers 7.0. So the class and the method are now on the same rung in the same object
 and the reference has something to resolve against. The method is still `absent` and is not added
 here: that is one more change, and it wants its own measurement on the gate's own path rather than a
 claim in a facts page.
@@ -138,7 +138,7 @@ ladder is what splits them:
 - `GCSnapshots7.m` -- `GCGamepadSnapshot` and `-[GCGamepad saveSnapshot]`, both first exported at 7.0;
 - and, by what the ladder says rather than by what the SDK header says:
   `GCExtendedGamepadSnapshot` is at **7.0** and lives in `GCSnapshots7.m` beside `GCGamepadSnapshot`
-  (`python3 tools/cache-index/first-rung.py GCExtendedGamepadSnapshot` -> 7.0), while
+  (`xmake l tools/cache-index/first-rung.lua GCExtendedGamepadSnapshot` -> 7.0), while
   `GCMicroGamepadSnapshot` is at **10.0.1** and lives in `GCSnapshots9.m` with the micro game's V100
   pair and `-[GCMicroGamepad saveSnapshot]` (first-rung -> 10.0.1). `measured_names()` reads classes
   and C functions off the held caches, so an Objective-C *method* measures `NONE` and its registry

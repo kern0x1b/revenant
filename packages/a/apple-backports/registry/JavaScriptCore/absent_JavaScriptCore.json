@@ -9,7 +9,7 @@
       "status": "owed",
       "reason": "build the function JSObjectGetArrayBufferByteLength()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSObjectGetArrayBufferBytesPtr()",
@@ -19,7 +19,7 @@
       "status": "owed",
       "reason": "build the function JSObjectGetArrayBufferBytesPtr()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSObjectGetTypedArrayBuffer()",
@@ -29,7 +29,7 @@
       "status": "owed",
       "reason": "build the function JSObjectGetTypedArrayBuffer()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSObjectGetTypedArrayByteLength()",
@@ -39,7 +39,7 @@
       "status": "owed",
       "reason": "build the function JSObjectGetTypedArrayByteLength()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSObjectGetTypedArrayByteOffset()",
@@ -49,7 +49,7 @@
       "status": "owed",
       "reason": "build the function JSObjectGetTypedArrayByteOffset()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSObjectGetTypedArrayBytesPtr()",
@@ -59,7 +59,7 @@
       "status": "owed",
       "reason": "build the function JSObjectGetTypedArrayBytesPtr()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSObjectGetTypedArrayLength()",
@@ -69,7 +69,7 @@
       "status": "owed",
       "reason": "build the function JSObjectGetTypedArrayLength()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSObjectMakeArrayBufferWithBytesNoCopy()",
@@ -79,7 +79,7 @@
       "status": "owed",
       "reason": "build the function JSObjectMakeArrayBufferWithBytesNoCopy()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSObjectMakeTypedArray()",
@@ -89,7 +89,7 @@
       "status": "owed",
       "reason": "build the function JSObjectMakeTypedArray()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSObjectMakeTypedArrayWithArrayBuffer()",
@@ -99,7 +99,7 @@
       "status": "owed",
       "reason": "build the function JSObjectMakeTypedArrayWithArrayBuffer()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSObjectMakeTypedArrayWithArrayBufferAndOffset()",
@@ -109,7 +109,7 @@
       "status": "owed",
       "reason": "build the function JSObjectMakeTypedArrayWithArrayBufferAndOffset()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSObjectMakeTypedArrayWithBytesNoCopy()",
@@ -119,7 +119,7 @@
       "status": "owed",
       "reason": "build the function JSObjectMakeTypedArrayWithBytesNoCopy()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSValueGetTypedArrayType()",
@@ -129,7 +129,7 @@
       "status": "owed",
       "reason": "build the function JSValueGetTypedArrayType()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
+      "source": "SDK 16.4 JSTypedArray.h for the contract and the ios(10.0) of each; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine; coordination/corpus/caches/6.0.tsv for what that engine does export"
     },
     {
       "api": "JSValueMakeSymbol()",
@@ -139,7 +139,7 @@
       "status": "owed",
       "reason": "build the function JSValueMakeSymbol()",
       "effect": "until built: the symbol is not exported",
-      "source": "SDK 16.4 JSValueRef.h for the contract; tools/cache-index/first-rung.py on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine"
+      "source": "SDK 16.4 JSValueRef.h for the contract; tools/cache-index/first-rung.lua on the 50 held rungs for presence; the 6.1.3 armv7 cache's own symbol table for the engine"
     }
   ]
 }

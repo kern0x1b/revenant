@@ -147,7 +147,7 @@ The 34 and the 11 are the control, in the same run and by the same reader as the
 include the three classes this object defines: their first appearance is 11.0, which is what places
 them in this object and no other.
 
-`python3 tools/cache-index/first-rung.py NFCTagCommandConfiguration` (self-test 8 of 8) gives each of
+`xmake l tools/cache-index/first-rung.lua NFCTagCommandConfiguration` (self-test 8 of 8) gives each of
 the three its first held rung at **11.0**, by the whole symbol table rather than the Objective-C
 metadata — a second reader, which is why the two agree.
 

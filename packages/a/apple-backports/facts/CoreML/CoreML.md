@@ -244,7 +244,7 @@ the three kinds of row answer differently:
   decided after this series was written.
 - **Seven rows are `absent` with what is missing named, read out of a cache and not out of a header.** The 16.0
   dyld shared cache on this machine answers, through `tools/corpus/objc-inventory.lua` (168,686 classes) and
-  `tools/cache-index/first-rung.py`, exactly what six of them are: `MLModelCollection` carries
+  `tools/cache-index/first-rung.lua`, exactly what six of them are: `MLModelCollection` carries
   `-initWithIdentifier:`, `-entries`, `-downloadWithProgress:`, `-registerForUpdates` and
   `-handleTrialUpdateForNamespaceName:`, which is Core ML's own model STORE - a container its daemon writes
   and syncs with Apple's servers; `MLModelCollectionEntry` is one row of that store (`-modelIdentifier`,
@@ -271,7 +271,7 @@ said so in the only terms that decide it:
     error: the registry does not describe what the backports carry:
       listed as implemented, but nothing of that name is built: MLMultiArrayDataType; MLMultiArrayDataTypeDouble; …
 
-`tools/cache-index/first-rung.py` answers NONE for `MLMultiArrayDataType` over the held caches for the same
+`tools/cache-index/first-rung.lua` answers NONE for `MLMultiArrayDataType` over the held caches for the same
 reason, and that is the third family to meet this wall after Metal's two. A row whose api has no symbol is
 `inert`, and its reason says the whole of it: an enumeration has no symbol, the cases are declared by the SDK
 header, and nothing here computes or exports one. Its effect says what a caller gets - the value the SDK's own
@@ -588,7 +588,7 @@ and 0 of 354 images name ML at all**, so no Core ML framework is in either cache
 finds 245 `ML*` classes and 23 `ML*` protocols in 12.0's arm64 cache, among them `MLArrayBatchProvider`,
 `MLFeatureValue` and `MLModel`, so a zero on the two armv7 rungs is the release's and not the
 reader's. `MLTask`, `MLUpdateTask`, `MLUpdateContext`, `MLUpdateProgressHandlers`, `MLWritable`,
-`MLKey`, `MLMetricKey` and `MLParameterKey` all read 16.0 from `tools/cache-index/first-rung.py`:
+`MLKey`, `MLMetricKey` and `MLParameterKey` all read 16.0 from `tools/cache-index/first-rung.lua`:
 the held ladder has a hole between 12.0 and 16.0, so a 13.0 name's first held rung is 16.0.
 
 ## Which translation units emit a protocol's metadata object, and what that means for the duplicate

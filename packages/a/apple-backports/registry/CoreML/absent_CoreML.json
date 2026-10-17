@@ -9,7 +9,7 @@
    "status": "owed",
    "reason": "its entries are a download from Core ML Model Deployment, kept by the daemon and synchronised with Apple servers, and the class is sunset in iOS 17.4, so the download is not reproducible offline and the class is owed, not denied",
    "effect": "the class is not there, and that is what a caller gets: NSClassFromString answers nil and a compile time reference to it does not link. On the releases where Core ML is present the system carries it instead (first held rung: 16.0)",
-   "source": "the 16.0 dyld shared cache on this machine, CoreML.framework's Objective-C metadata read by tools/corpus/objc-inventory.lua (168,686 classes; this class and its selectors come from there); the first held cache that carries it: %s, from tools/cache-index/first-rung.py",
+   "source": "the 16.0 dyld shared cache on this machine, CoreML.framework's Objective-C metadata read by tools/corpus/objc-inventory.lua (168,686 classes; this class and its selectors come from there); the first held cache that carries it: %s, from tools/cache-index/first-rung.lua",
    "facts": "facts/CoreML/ModelCollection.md"
   },
   {
@@ -20,7 +20,7 @@
    "status": "owed",
    "reason": "an entry is one row of the Core ML Model Deployment store that MLModelCollection reads, exists only through that store, and is sunset in iOS 18.0, so it is owed with its class",
    "effect": "the class is not there, and that is what a caller gets: NSClassFromString answers nil and a compile time reference to it does not link. On the releases where Core ML is present the system carries it instead (first held rung: 16.0)",
-   "source": "the 16.0 dyld shared cache on this machine, CoreML.framework's Objective-C metadata read by tools/corpus/objc-inventory.lua (168,686 classes; this class and its selectors come from there); the first held cache that carries it: %s, from tools/cache-index/first-rung.py",
+   "source": "the 16.0 dyld shared cache on this machine, CoreML.framework's Objective-C metadata read by tools/corpus/objc-inventory.lua (168,686 classes; this class and its selectors come from there); the first held cache that carries it: %s, from tools/cache-index/first-rung.lua",
    "facts": "facts/CoreML/ModelCollection.md"
   },
   {

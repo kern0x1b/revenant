@@ -89,10 +89,10 @@ the class - its `via=class-floor` - and filed them under 8.0. They are not 8.0's
 ("no release from 8.0 to 10.0 carries it") named a range where a measurement names an owner.
 
 ```
-$ python3 tools/cache-index/first-rung.py --rungs predicateForStatesOfMindWithKind:
+$ xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithKind:
 predicateForStatesOfMindWithKind:	18.0
 
-$ python3 tools/cache-index/first-rung.py --rungs HKStateOfMind
+$ xmake l tools/cache-index/first-rung.lua --rungs HKStateOfMind
 HKStateOfMind	18.0
 ```
 
@@ -138,14 +138,14 @@ API belongs to.
 selector's rung says nothing about its own owner, so both questions were asked:
 
 ```
-$ python3 tools/cache-index/first-rung.py startWorkoutSession: endWorkoutSession: pauseWorkoutSession: resumeWorkoutSession: HKWorkoutSession
+$ xmake l tools/cache-index/first-rung.lua startWorkoutSession: endWorkoutSession: pauseWorkoutSession: resumeWorkoutSession: HKWorkoutSession
 startWorkoutSession:	9.0
 endWorkoutSession:	9.0
 pauseWorkoutSession:	10.0.1
 resumeWorkoutSession:	10.0.1
 HKWorkoutSession	9.0
 
-$ python3 tools/cache-index/first-rung.py --rungs startWorkoutSession:
+$ xmake l tools/cache-index/first-rung.lua --rungs startWorkoutSession:
 startWorkoutSession:	9.0,9.0.2,9.1,9.2,9.2.1,9.3,9.3.5,9.3.6,10.0.1,10.1.1,10.2,10.2.1,10.3,10.3.1,10.3.2,10.3.3,10.3.4,11.0,12.0,16.0,18.0
 ```
 
@@ -153,7 +153,7 @@ startWorkoutSession:	9.0,9.0.2,9.1,9.2,9.2.1,9.3,9.3.5,9.3.6,10.0.1,10.1.1,10.2,
 
 ```
 $ printf '%s\n' predicateForObjectsFromWorkout: predicateForSamplesWithStartDate:endDate:options: \
-      zzNoSuchCharonSelectorControl: | python3 tools/cache-index/first-rung.py
+      zzNoSuchCharonSelectorControl: | xmake l tools/cache-index/first-rung.lua
 predicateForObjectsFromWorkout:	8.0
 predicateForSamplesWithStartDate:endDate:options:	8.0
 zzNoSuchCharonSelectorControl:	NONE

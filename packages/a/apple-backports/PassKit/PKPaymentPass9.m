@@ -39,7 +39,7 @@
 //     `+canMakePayments` that answers NO.
 //
 // ONE OBJECT PER RELEASE, and it is the whole of release 9 in this folder: every class here first
-// appears at 9.0 in the held cache ladder (tools/cache-index/first-rung.py, all three), and the
+// appears at 9.0 in the held cache ladder (tools/cache-index/first-rung.lua, all three), and the
 // PKPass member arrives with them. That is also what places the object. modules/apple/backports.lua's
 // band() drops an object from every band whose release already exports all of its symbols, so this
 // file is built exactly where the release lacks these classes and nowhere else -- which is what

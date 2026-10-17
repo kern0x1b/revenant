@@ -12,8 +12,8 @@ once with the load at 19–22, which is the bottleneck.
 Two tools, both read-only towards the caches:
 
     python3 tools/cache-index/build.py                 # read each cache once, write the index
-    python3 tools/cache-index/first-rung.py NAME...   # name <TAB> first held rung, or NONE
-    python3 tools/cache-index/first-rung.py --self-test
+    xmake l tools/cache-index/first-rung.lua NAME...   # name <TAB> first held rung, or NONE
+    xmake l tools/cache-index/first-rung.lua --self-test
 
 ## Measured, on this machine (2026-09-30, 50 held rungs, 24.6 GB of cache, load 13-22)
 
@@ -24,7 +24,7 @@ Two tools, both read-only towards the caches:
 | **BEFORE**, per-rung cost | 0.42 s at 80 MB, 1.38 s at 233 MB, 3.07 s at 494 MB, 6.04 s at 1002 MB — linear, **6 ms per MB** |
 | **BEFORE**, 500 names | **21.6 hours** (155.7 s x 500) |
 | **AFTER**, build the index once, all 50 rungs | 32.5 minutes of reading, niced, at load 15-19 |
-| **AFTER**, 500 names, `first-rung.py` | **1.90 s** (five runs: 2.00, 1.94, 1.90, 1.92, 1.90) |
+| **AFTER**, 500 names, `first-rung.lua` | **1.90 s** (five runs: 2.00, 1.94, 1.90, 1.92, 1.90) |
 | **AFTER**, 500 names, again after every index is current | 0.1 s to check 50 headers, nothing to read |
 | **AFTER**, a single name | 1.9 s, and 0.1 s of that is the python start-up |
 | index on disk | 448 MB for the 50 per-release files, 76 MB for the merged table |
@@ -39,7 +39,7 @@ at the 10-minute mark with two of the three unfinished.
     $HOME/.charon/cache-index/<release>.names.gz    one name per line, sorted, deduplicated
     $HOME/.charon/cache-index/first-rung.tsv.gz     every name -> the first held rung carrying it
 
-`first-rung.py` reads the merged file once and binary searches it, so a lookup costs a few
+`first-rung.lua` reads the merged file once and binary searches it, so a lookup costs a few
 milliseconds regardless of how many rungs there are. `--rungs NAME` answers from the per-release
 indexes instead, which is what tells you a release *between* two that carry a name may lack it.
 
@@ -108,12 +108,12 @@ between them.
 
 ## Reading it
 
-`first-rung.py` takes names as arguments, or one per line on stdin (`--stdin` to take both; blank
+`first-rung.lua` takes names as arguments, or one per line on stdin (`--stdin` to take both; blank
 lines and `#` comments are skipped, so a list file can be read directly):
 
-    python3 tools/cache-index/first-rung.py _NSFileSize NSFileSize 'setObject:forKey:'
-    printf '%s\n' _NSFileSize NSFileSize | python3 tools/cache-index/first-rung.py
-    python3 tools/cache-index/first-rung.py --rungs MTKTextureLoader
+    xmake l tools/cache-index/first-rung.lua _NSFileSize NSFileSize 'setObject:forKey:'
+    printf '%s\n' _NSFileSize NSFileSize | xmake l tools/cache-index/first-rung.lua
+    xmake l tools/cache-index/first-rung.lua --rungs MTKTextureLoader
 
 `--self-test` is the positive and negative controls: `_NSFileSize` must read `3.0`, `MTKTextureLoader`
 must read `9.0`, a nonsense name must read `NONE`, both spellings of a class must be present, every

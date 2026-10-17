@@ -31,7 +31,7 @@ much larger piece of work than this row, and it is not begun here.
 ## Measurement one: the ladder, with the control in the same run
 
 ```
-python3 tools/cache-index/first-rung.py --stdin < .agent-work/runs/metal-r16/names.txt
+xmake l tools/cache-index/first-rung.lua --stdin < .agent-work/runs/metal-r16/names.txt
 ```
 
 ```
@@ -139,7 +139,7 @@ CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua MTL 6.1.3 4.3 12.0
 and it is the one measurement the rulebook would have here for its "control in the same run over the
 release's own cache". It was started through `coordination/heavy.sh` and was still queued behind the
 load gate (12) when this band wrote its rows, so **no row above cites it and no number here is its
-output**. The rows do not need it: `first-rung.py` answers the same question over all 50 rungs with a
+output**. The rows do not need it: `first-rung.lua` answers the same question over all 50 rungs with a
 NONE control, and the port's own objects and headers answer the other half. Running the census would add
 the release's own class and protocol lists to the page and change no row.
 

@@ -56,7 +56,7 @@ static PHPickerFilter *charon_filter_naming(NSSet<NSString *> *types)
 // iOS 6's library answers ALAssetPropertyType with one of three values, ALAssetTypePhoto,
 // ALAssetTypeVideo or ALAssetTypeUnknown - ALAsset.h of the 16.4 SDK says so of its own property, and
 // nothing in the release names a fourth: _ALAssetTypePanorama and _ALAssetTypePhotoStream are in no
-// held release's symbol table (tools/cache-index/first-rung.py, both NONE over the 50 held rungs).
+// held release's symbol table (tools/cache-index/first-rung.lua, both NONE over the 50 held rungs).
 // So a panorama, a screenshot, a screen recording, a slow motion clip and a time lapse are one and
 // the same to this release, which keeps no record of any of them, and the filter naming one matches
 // nothing. That is not a gap in the filter: it is the whole of what the release can answer, and the

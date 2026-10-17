@@ -39,12 +39,12 @@ private `-initWithTrip:mapTemplate:`, and the private protocol `CPNavigationSess
 
 ## The two releases, measured per class, and why first-rung alone was not enough
 
-`first-rung.py` answers for NAMES, so three of the six 17.4 members read 16.0 — and every one of them
+`first-rung.lua` answers for NAMES, so three of the six 17.4 members read 16.0 — and every one of them
 is a **name collision**, not the member: `CPRouteGuidance` carries `currentLaneGuidance`,
 `currentRoadNameVariants` and `maneuverState` at 16.0. `tools/corpus/objc-inventory.lua` answers per
 class, and the two disagree exactly where they should:
 
-| member | `first-rung.py` (a name) | 16.0, per class | 18.0, per class |
+| member | `first-rung.lua` (a name) | 16.0, per class | 18.0, per class |
 | --- | --- | --- | --- |
 | `currentLaneGuidance` | 16.0 | **absent** | present |
 | `currentRoadNameVariants` | 16.0 | **absent** | present |

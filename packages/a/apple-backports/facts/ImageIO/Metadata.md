@@ -5,7 +5,7 @@ container nor the tags, and they are carried in `.gen/ImageIO/ImageIOMetadata7.m
 
 ## Why the whole surface is one object
 
-`tools/cache-index/first-rung.py`, asked for each of the 26 `CGImageMetadata*` and `CGImageSource*`
+`tools/cache-index/first-rung.lua`, asked for each of the 26 `CGImageMetadata*` and `CGImageSource*`
 symbols the iOS 7 headers declare, over the 50 held rungs (2026-09-30,
 `.agent-work/runs/io-rungs.txt`): **every one of them first appears on the 7.0 rung** and on no rung
 below it. The three rungs below 7.0 that carry the ladder's low end - 3.0, 4.0, 4.3, 5.0, 5.1.1,
@@ -139,7 +139,7 @@ to reach inside one. `registry/ImageIO/absent_ImageIO.json` carried them as `abs
 function arrived in iOS N, and nothing in iOS 6 has what it names", which is not a decision: it is the
 sentence a row gets before anyone has asked what the port could do about it.
 
-What settles them is one measured fact each, from `tools/cache-index/first-rung.py` over the 50 held rungs
+What settles them is one measured fact each, from `tools/cache-index/first-rung.lua` over the 50 held rungs
 (2026-09-30, `.agent-work/runs/io-rungs.txt`), and the shape of the objects:
 
 | row | first held rung | decision |

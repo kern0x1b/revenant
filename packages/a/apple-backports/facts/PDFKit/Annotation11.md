@@ -324,7 +324,7 @@ Five things are now settled, and three of them the old table listed as open:
 **The three colour-space NAMES this needs are marked `API_AVAILABLE(ios(9.0))` in this SDK, and the port's
 `minimum` is 6.0 - and the annotation is not the export.** Measured, and the row's minimum stands:
 
-    $ python3 tools/cache-index/first-rung.py _kCGColorSpaceGenericGray
+    $ xmake l tools/cache-index/first-rung.lua _kCGColorSpaceGenericGray
     _kCGColorSpaceGenericGray	3.0
     _kCGColorSpaceGenericGray	3.0        (the three: GenericGray, GenericRGB, GenericCMYK)
     _kCGColorSpaceGenericRGB	3.0
@@ -347,7 +347,7 @@ they resolve, which is the mechanism this repository already uses for every weak
 
 An earlier version of this page said the member could not be carried because of that annotation. It was
 wrong, and the mistake was reading a header's `API_AVAILABLE` as an export table - which is the one thing
-`tools/cache-index/first-rung.py` exists to stop.
+`tools/cache-index/first-rung.lua` exists to stop.
 
 ### `-font`: the name as written, then an EXACT table of THREE abbreviations
 

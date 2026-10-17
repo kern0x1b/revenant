@@ -507,7 +507,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "build -[NSURLSessionTaskDelegate URLSession:didCreateTask:]",
-      "source": "SDK 16.4 Foundation/NSURLSession.h:918-919 for the declaration and its ios(16.0) availability, :912-913 for what the message is; the package's own 2,350 .m, .h and .c sources read for the selector (0 occurrences, control becomeCurrentWithPendingUnitCount: with 8 occurrences); tools/cache-index/first-rung.py for the first held rung carrying either name (7.0), and its own _names_of() over ~/.charon/cache-index/4.3.names.gz and 6.1.3's, read for the selector, NSURLSession and NSURLSessionTaskDelegate (0 occurrences each of 317,453 and 568,965 names, controls UIView, NSObject and setObject:forKey: present in both); facts/Foundation/Foundation17ReleaseAbsences.md for the 4.3 and 6.0 class censuses",
+      "source": "SDK 16.4 Foundation/NSURLSession.h:918-919 for the declaration and its ios(16.0) availability, :912-913 for what the message is; the package's own 2,350 .m, .h and .c sources read for the selector (0 occurrences, control becomeCurrentWithPendingUnitCount: with 8 occurrences); tools/cache-index/first-rung.lua for the first held rung carrying either name (7.0), and its own _names_of() over ~/.charon/cache-index/4.3.names.gz and 6.1.3's, read for the selector, NSURLSession and NSURLSessionTaskDelegate (0 occurrences each of 317,453 and 568,965 names, controls UIView, NSObject and setObject:forKey: present in both); facts/Foundation/Foundation17ReleaseAbsences.md for the 4.3 and 6.0 class censuses",
       "status": "owed",
       "facts": "facts/Foundation/NSURLSession.md"
     },

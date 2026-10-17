@@ -12,7 +12,7 @@ release the SDK dates it: `modules/apple/backports.lua:2298` reads it with
 `dyld.first_releases(ladder(opt.architecture), ...)` over the HELD ladder, and the held set is dense
 to 12.0 and then has no 13.0, 14.0 or 15.0.
 
-`python3 tools/cache-index/first-rung.py` on all 47 names:
+`xmake l tools/cache-index/first-rung.lua` on all 47 names:
 
 | rung | rows |
 | --- | --- |
@@ -111,7 +111,7 @@ says so where it is written.
 ## The selector row, and the rulebook's trap about selectors
 
 `-[MPSCNNConvolutionDataSource copyWithZone:device:]` is `absent`, and the evidence is deliberately
-NOT `first-rung.py`. That tool answers `9.0` for the bare selector, which is `NSObject`'s own
+NOT `first-rung.lua`. That tool answers `9.0` for the bare selector, which is `NSObject`'s own
 `copyWithZone:` and says nothing about this owner. What the row rests on instead is that no object in
 `packages/a/apple-backports` defines `MPSCNNConvolutionDataSource` at all - a grep finds only this
 registry file's own rows for it - so there is no `@implementation` that could carry the method.
@@ -193,7 +193,7 @@ the HELD ladder, not the header's clause, because the release the port deploys o
 release's own export answers for, and no release is held between 12.0 and 16.0:
 
     $ printf 'MPSNNPad\nMPSCNNNormalizationMeanAndVarianceState\nMPSRNNMatrixTrainingState\n' \
-        | python3 tools/cache-index/first-rung.py
+        | xmake l tools/cache-index/first-rung.lua
     MPSNNPad                                 16.0
     MPSCNNNormalizationMeanAndVarianceState 12.0
     MPSRNNMatrixTrainingState                12.0
