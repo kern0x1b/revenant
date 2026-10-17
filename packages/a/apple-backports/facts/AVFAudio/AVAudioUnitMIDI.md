@@ -77,23 +77,38 @@ so the nonnull declaration holds for every description.
 ## The list form
 
 `-[AVAudioUnitMIDIInstrument sendMIDIEventList:]` (iOS 16) is **implemented**, and it is not
-`MusicDeviceMIDIEventList`, which this release does not export: the list is decoded in the port
-(`AVFAudio/CharonMIDIEventList.h`) and each MIDI 1.0 channel message in it goes out as one
-`MusicDeviceMIDIEvent`, in order.
+`MusicDeviceMIDIEventList`, which this release does not export. The list is walked in order by
+`CharonForEachMIDIMessage` (`AVFAudio/CharonMIDIEventList.h`), and each message goes to the release's own call:
+a MIDI 1.0 message to `MusicDeviceMIDIEvent`, a complete system-exclusive message to `MusicDeviceSysEx`.
 
-- A Universal MIDI Packet word of **type 2** (the MIDI 1.0 channel voice) carries status in bits 23-16, data1 in
-  15-8 and data2 in 7-0. Each such word is one call.
-- A word of **any other type** is skipped. That is the difference from the list form: a system message, a MIDI 2.0
-  channel voice, a SysEx or utility word is not sent, because the release has no call that could carry it. An
-  application that sends only channel messages, the usual case, sees no difference.
-- A `NULL` list, and a list with no type-2 word, send nothing.
+- **Type 1** (system common and realtime): the status and the data bytes its status takes. Not observed on the host's
+  sampler, which ignores system messages (the reset, `0xFF`, is not seen either, with type 1 or type 2).
+- **Type 2** (MIDI 1.0 channel voice): the bytes as written.
+- **Type 3** (SysEx7): packets are joined (start, continue, end; complete alone) into one `F0 ... F7` message, which goes
+  to `MusicDeviceSysEx`. A message not complete within the list is not sent. Not observed on the host's sampler, which
+  ignores the universal sysex it was given (master volume, master tuning, GM on, GS reset).
+- **Type 4** (MIDI 2.0 channel voice, two words), converted to MIDI 1.0. Measured bit for bit on the host's sampler
+  (`tests/backports/host/avfaudio/midi-host.m`, `checks=host-midi-equivalence failures=0`), each against the type-2
+  message the rule gives:
+  - note on: velocity = max(1, velocity16 >> 9). Measured at 0xFFFF (127), 0x8000 (64), 0x7FFF (63), 0x0100 (1),
+    0x0001 (1), 0xFE00 (127), 0x3F00 (31), 0xC000 (96) and 0 (1, so a velocity of 0 is not a note off);
+  - control change: value = value32 >> 25. Measured on controller 7 at 0xFFFFFFFF (127), 0x80000000 (64), 0x40000000 (32),
+    0x7FFFFFFF (63) and 1 (0). Other controllers are the same rule, not measured;
+  - pitch bend: 14-bit value = value32 >> 18, low seven bits then high seven. Measured at 0xFFFFFFFF (16383), 0 (0),
+    0xC0000000 (12288) and 0x80000001 (8192).
+  - Not observable on the sampler, so the UMP rule is what the port sends: note off velocity (velocity16 >> 9, no
+    minimum); poly pressure and channel pressure (value32 >> 25). The sampler ignores MIDI program changes, type 2 or
+    type 4, so the program change (bank MSB and LSB as controls 0 and 32 when the bank-valid bit is set, then the program
+    from bits 31-24 of the second word) is the UMP rule too.
+  - Dropped, with no MIDI 1.0 single-message form: the registered and assignable controllers, the per-note forms and the
+    relative forms (opcodes 0, 1, 2, 3, 4, 5, 6, 7, and 0xF).
+- Types 0 and 5 to 15 are not sent.
+- A `NULL` list sends nothing.
 
-`tests/backports/host/avfaudio/midilist.sh` checks seven type-2 words (note on, note off, controller, pitch bend,
-program change, channel pressure, poly pressure), with one type-4 word between them, against the MIDI 1.0 bytes each
-word encodes; a list with only a type-4 word sends nothing. The oracle is those bytes written out by hand, not the
-host, because the host's three-byte `sendMIDIEvent:data1:data2:` does not reach `MusicDeviceMIDIEvent` on this host:
-an interposer on that call records nothing from it, and AVFAudio's imports list no `MusicDevice*` symbol. So the test
-shows what the port sends to the release's call, and the host agrees only on the bytes it accepts.
+`tests/backports/host/avfaudio/midilist.sh` runs the walk over one list per case (26 checks: type 2, the type 1 system
+messages, the type 4 scalings and program change, the type 3 joins and the cases that must send nothing), against bytes
+written out by hand from the UMP definition. Its one-to-one check with the host is `midi-host.m`, which renders the
+host's sampler for each type-4 message and its type-2 equivalent and compares the renders bit for bit.
 
 ## What is still not carried
 

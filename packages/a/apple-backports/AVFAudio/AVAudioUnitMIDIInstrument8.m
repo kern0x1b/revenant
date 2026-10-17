@@ -23,8 +23,8 @@
 // are the release's own calls.
 //
 // MusicDeviceMIDIEventList is NOT among the four exports, so -[AVAudioUnitMIDIInstrument
-// sendMIDIEventList:] (iOS 16) cannot be the release's list call. It decodes the list to MusicDeviceMIDIEvent
-// instead, one channel message at a time (CharonMIDIEventList.h).
+// sendMIDIEventList:] (iOS 16) cannot be the release's list call. It decodes the list message by message
+// to MusicDeviceMIDIEvent, and a complete system-exclusive message to MusicDeviceSysEx (CharonMIDIEventList.h).
 
 @implementation AVAudioUnitMIDIInstrument {
     NSMutableDictionary<NSNumber *, NSNumber *> *_charon_notes;   // (channel << 8 | note) -> note instance
@@ -179,8 +179,12 @@
     if (unit == NULL) {
         return;
     }
-    CharonForEachMIDI1Message(eventList, ^(uint8_t status, uint8_t data1, uint8_t data2) {
-        MusicDeviceMIDIEvent(unit, status, data1, data2, 0);
+    CharonForEachMIDIMessage(eventList, ^(const uint8_t *bytes, UInt32 length) {
+        if (bytes[0] == 0xF0) {
+            MusicDeviceSysEx(unit, bytes, length);
+        } else {
+            MusicDeviceMIDIEvent(unit, bytes[0], length > 1 ? bytes[1] : 0, length > 2 ? bytes[2] : 0, 0);
+        }
     });
 }
 

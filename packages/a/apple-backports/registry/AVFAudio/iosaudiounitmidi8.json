@@ -54,7 +54,7 @@
       "status": "implemented",
       "facts": "facts/AVFAudio/AVAudioUnitMIDI.md",
       "source": "SDK 16.4 and 26.2 AVFAudio AVAudioUnitMIDIInstrument.h, over the release's own MusicDevice send API: AudioToolbox of the real armv7 6.1.3 cache exports _MusicDeviceMIDIEvent, _MusicDeviceStartNote, _MusicDeviceStopNote and _MusicDeviceSysEx (dyld.load over all 580 libraries; see facts/AVFAudio/AVAudioUnitMIDI.md for the command and its output)",
-      "effect": "each Universal MIDI Packet word of type 2 (MIDI 1.0 channel voice) is sent as one MusicDeviceMIDIEvent with its status and data bytes, in order; words of other message types (system, MIDI 2.0 channel voice, SysEx, utility) are skipped, because this release has no call that can send them"
+      "effect": "every message of the list, in order: a type 1 system message as its MIDI 1.0 bytes; a type 2 word as written; a type 3 SysEx7 packet run joined into one complete F0 ... F7 message sent to MusicDeviceSysEx; a type 4 MIDI 2.0 channel voice message converted to MIDI 1.0 (note on velocity max(1, velocity16 >> 9), controller and pitch bend scalings measured bit for bit on the host's sampler; note off, pressures and program change by the UMP rule, which the sampler does not show); other types are not sent"
     },
     {
       "api": "-[AVAudioUnitMIDIInstrument sendMIDISysExEvent:]",

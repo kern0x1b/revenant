@@ -1,87 +1,137 @@
-// -[AVAudioUnitMIDIInstrument sendMIDIEventList:]: the list's type-2 words decoded and sent as MusicDeviceMIDIEvent.
+// -[AVAudioUnitMIDIInstrument sendMIDIEventList:]: the list's messages as the port's walk turns them into MIDI 1.0 bytes
+// and system-exclusive messages.
 //
-// The oracle is the MIDI 1.0 bytes each UMP type-2 word encodes (status = bits 23-16, data1 = 15-8, data2 = 7-0),
-// written out below by hand. It is not the host: the host's sendMIDIEvent:data1:data2: does not reach
-// MusicDeviceMIDIEvent on this host (AVFAudio imports AUAudioUnit's MIDI path, and an interposer on
-// MusicDeviceMIDIEvent sees nothing from it), so there is no host call to record. The recorder
-// (midilist-record.c) takes the MusicDeviceMIDIEvent calls the decode makes, and the probe compares them to the bytes.
-// The decode is the body of the port's method; the probe runs the same block the method runs.
-//
-// A word that is not a type-2 message is in the list too: nothing may be sent for it.
+// The port's walk is CharonForEachMIDIMessage in packages/a/apple-backports/AVFAudio/CharonMIDIEventList.h, the header the
+// method includes, so this probe runs the very code the method runs. Each expectation below is written out by hand from
+// the UMP definition, and the type-4 scalings are the ones the host's own sampler answers bit for bit (midi-host.m, which
+// measures them on the host and prints each equivalence). The host's sendMIDIEventList is not observed here: an interposer
+// on MusicDeviceMIDIEvent saw nothing from it, so the bytes are checked against what the walk produces, not against a
+// recording of the host's call.
 #import <AVFoundation/AVFoundation.h>
-#import <AudioToolbox/AudioToolbox.h>
 #import <CoreMIDI/MIDIServices.h>
 #include <stdio.h>
+#include <string.h>
 #include "../../../../packages/a/apple-backports/AVFAudio/CharonMIDIEventList.h"
 
-extern unsigned charon_midi_count;
-extern unsigned char charon_midi_record[256][3];
-
 static int failures = 0;
+static int checks = 0;
 
-// Seven type-2 messages, one of each channel voice kind on different channels, and a type-4 word between them.
-static const UInt32 kWords[] = {
-    0x20903C64,   // note on, channel 0, note 60, velocity 100:       90 3C 64
-    0x40900000,   // type 4: skipped
-    0x20833C00,   // note off, channel 3, note 60, velocity 0:       83 3C 00
-    0x20B1077F,   // controller, channel 1, controller 7, value 127: B1 07 7F
-    0x20E20040,   // pitch bend, channel 2, low 0, high 64:          E2 00 40
-    0x20C50900,   // program change, channel 5, program 9:           C5 09 00
-    0x20D42100,   // channel pressure, channel 4, 33:                D4 21 00
-    0x20A74032,   // poly pressure, channel 7, key 64, value 50:     A7 40 32
-};
-static const unsigned char kExpected[][3] = {
-    { 0x90, 0x3C, 0x64 }, { 0x83, 0x3C, 0x00 }, { 0xB1, 0x07, 0x7F }, { 0xE2, 0x00, 0x40 },
-    { 0xC5, 0x09, 0x00 }, { 0xD4, 0x21, 0x00 }, { 0xA7, 0x40, 0x32 },
-};
+// What the walk produced for one list: each message's bytes, in order.
+typedef struct {
+    unsigned count;
+    unsigned char bytes[32][16];
+    UInt32 length[32];
+} Sent;
+
+static void recordList(const UInt32 *words, UInt32 wordCount, Sent *sent)
+{
+    Byte buffer[1024];
+    MIDIEventList *list = (MIDIEventList *)buffer;
+    MIDIEventPacket *packet = MIDIEventListInit(list, kMIDIProtocol_2_0);
+    MIDIEventListAdd(list, sizeof(buffer), packet, 0, wordCount, words);
+    memset(sent, 0, sizeof *sent);
+    CharonForEachMIDIMessage(list, ^(const uint8_t *bytes, UInt32 length) {
+        if (sent->count < 32 && length <= 16) {
+            memcpy(sent->bytes[sent->count], bytes, length);
+            sent->length[sent->count] = length;
+            sent->count++;
+        }
+    });
+}
+
+static void expect(const char *name, const UInt32 *words, UInt32 wordCount, const unsigned char *want, UInt32 wantLength)
+{
+    checks++;
+    Sent sent;
+    recordList(words, wordCount, &sent);
+    if (wantLength == 0) {
+        if (sent.count != 0) {
+            printf("FAIL %s: sent %u messages, want none\n", name, sent.count);
+            failures++;
+        }
+        return;
+    }
+    if (sent.count != 1 || sent.length[0] != wantLength || memcmp(sent.bytes[0], want, wantLength) != 0) {
+        printf("FAIL %s: sent %u messages; first is %u bytes %02X %02X %02X ... , want %u bytes\n", name, sent.count,
+               sent.count ? sent.length[0] : 0, sent.count ? sent.bytes[0][0] : 0, sent.count ? sent.bytes[0][1] : 0,
+               sent.count ? sent.bytes[0][2] : 0, wantLength);
+        failures++;
+    }
+}
+
+static void expectSequence(const char *name, const UInt32 *words, UInt32 wordCount, const unsigned char *want, const UInt32 *lengths, unsigned n)
+{
+    checks++;
+    Sent sent;
+    recordList(words, wordCount, &sent);
+    unsigned offset = 0;
+    int ok = sent.count == n;
+    for (unsigned i = 0; ok && i < n; i++) {
+        if (sent.length[i] != lengths[i] || memcmp(sent.bytes[i], want + offset, lengths[i]) != 0) {
+            ok = 0;
+        }
+        offset += lengths[i];
+    }
+    if (!ok) {
+        printf("FAIL %s: %u messages, want %u in sequence\n", name, sent.count, n);
+        failures++;
+    }
+}
 
 int main(void)
 {
     @autoreleasepool {
-        // The unit the method would send to. The recorder does not forward, so any non-NULL value does; a
-        // sampler is what the port's method has in practice.
-        AVAudioUnitSampler *sampler = [[AVAudioUnitSampler alloc] init];
-        MusicDeviceComponent unit = (MusicDeviceComponent)sampler.audioUnit;
+        // Type 2 (MIDI 1.0 channel voice): bytes as written.
+        { const UInt32 w[] = {0x20903C64}; const unsigned char e[] = {0x90, 0x3C, 0x64}; expect("type2 note on", w, 1, e, 3); }
+        { const UInt32 w[] = {0x20B1077F}; const unsigned char e[] = {0xB1, 0x07, 0x7F}; expect("type2 controller", w, 1, e, 3); }
+        { const UInt32 w[] = {0x20C50900}; const unsigned char e[] = {0xC5, 0x09}; expect("type2 program change", w, 1, e, 2); }
+        { const UInt32 w[] = {0x20D42100}; const unsigned char e[] = {0xD4, 0x21}; expect("type2 channel pressure", w, 1, e, 2); }
 
-        Byte buffer[1024];
-        MIDIEventList *list = (MIDIEventList *)buffer;
-        MIDIEventPacket *packet = MIDIEventListInit(list, kMIDIProtocol_1_0);
-        packet = MIDIEventListAdd(list, sizeof(buffer), packet, 0, 2, kWords);
-        packet = MIDIEventListAdd(list, sizeof(buffer), packet, 0, 6, kWords + 2);
+        // Type 1 (system): the status with the data bytes its status takes; a system exclusive status is not a type-1 word.
+        { const UInt32 w[] = {0x11F80000}; const unsigned char e[] = {0xF8}; expect("type1 timing clock", w, 1, e, 1); }
+        { const UInt32 w[] = {0x11F20102}; const unsigned char e[] = {0xF2, 0x01, 0x02}; expect("type1 song position", w, 1, e, 3); }
+        { const UInt32 w[] = {0x11F10300}; const unsigned char e[] = {0xF1, 0x03}; expect("type1 time code", w, 1, e, 2); }
+        { const UInt32 w[] = {0x11F70000}; expect("type1 end of exclusive is not sent alone", w, 1, NULL, 0); }
 
-        charon_midi_count = 0;
-        CharonForEachMIDI1Message(list, ^(uint8_t status, uint8_t data1, uint8_t data2) {
-            MusicDeviceMIDIEvent(unit, status, data1, data2, 0);
-        });
-        unsigned expected = sizeof(kExpected) / sizeof(kExpected[0]);
-        if (charon_midi_count != expected) {
-            printf("FAIL messages: %u != %u\n", charon_midi_count, expected);
-            failures++;
-        }
-        for (unsigned i = 0; i < expected && i < charon_midi_count; i++) {
-            for (int b = 0; b < 3; b++) {
-                if (charon_midi_record[i][b] != kExpected[i][b]) {
-                    printf("FAIL message %u byte %d: %02X != %02X\n", i, b, charon_midi_record[i][b], kExpected[i][b]);
-                    failures++;
-                }
-            }
-        }
+        // Type 4 (MIDI 2.0 channel voice), two words each. Note on: velocity16 >> 9, and 1 at least (measured bit for bit).
+        { const UInt32 w[] = {0x40903C00, 0xFFFF0000}; const unsigned char e[] = {0x90, 0x3C, 127}; expect("type4 note on 0xFFFF is 127", w, 2, e, 3); }
+        { const UInt32 w[] = {0x40903C00, 0x80000000}; const unsigned char e[] = {0x90, 0x3C, 64}; expect("type4 note on 0x8000 is 64", w, 2, e, 3); }
+        { const UInt32 w[] = {0x40903C00, 0x01000000}; const unsigned char e[] = {0x90, 0x3C, 1}; expect("type4 note on 0x0100 is 1", w, 2, e, 3); }
+        { const UInt32 w[] = {0x40903C00, 0x00000000}; const unsigned char e[] = {0x90, 0x3C, 1}; expect("type4 note on 0 is 1, not a note off", w, 2, e, 3); }
+        // Note off: velocity16 >> 9, no minimum (not observable on the sampler; the UMP scaling).
+        { const UInt32 w[] = {0x40803C00, 0x80000000}; const unsigned char e[] = {0x80, 0x3C, 64}; expect("type4 note off 0x8000 is 64", w, 2, e, 3); }
+        // Control change: value32 >> 25 (measured on controller 7: 0xFFFFFFFF -> 127, 0x80000000 -> 64, 1 -> 0).
+        { const UInt32 w[] = {0x40B30700, 0xFFFFFFFF}; const unsigned char e[] = {0xB3, 0x07, 127}; expect("type4 cc7 0xFFFFFFFF is 127", w, 2, e, 3); }
+        { const UInt32 w[] = {0x40B30700, 0x80000000}; const unsigned char e[] = {0xB3, 0x07, 64}; expect("type4 cc7 0x80000000 is 64", w, 2, e, 3); }
+        { const UInt32 w[] = {0x40B30700, 0x00000001}; const unsigned char e[] = {0xB3, 0x07, 0}; expect("type4 cc7 1 is 0", w, 2, e, 3); }
+        // Pitch bend: value32 >> 18 as 14 bits, low seven then high seven (measured: 0xFFFFFFFF -> 16383, 0xC0000000 -> 12288).
+        { const UInt32 w[] = {0x40E00000, 0xFFFFFFFF}; const unsigned char e[] = {0xE0, 0x7F, 0x7F}; expect("type4 bend max", w, 2, e, 3); }
+        { const UInt32 w[] = {0x40E00000, 0xC0000000}; const unsigned char e[] = {0xE0, 0x00, 0x60}; expect("type4 bend 0xC0000000 is 12288", w, 2, e, 3); }
+        { const UInt32 w[] = {0x40E00000, 0x00000000}; const unsigned char e[] = {0xE0, 0x00, 0x00}; expect("type4 bend zero", w, 2, e, 3); }
+        // Program change with the bank valid: bank MSB and LSB as controls 0 and 32, then the program.
+        { const UInt32 w[] = {0x40C00001, 0x09000203};
+          const unsigned char e[] = {0xB0, 0x00, 0x02, 0xB0, 0x20, 0x03, 0xC0, 0x09};
+          const UInt32 l[] = {3, 3, 2};
+          expectSequence("type4 program with bank", w, 2, e, l, 3); }
+        // Channel pressure: value32 >> 25.
+        { const UInt32 w[] = {0x40D00000, 0xFFFFFFFF}; const unsigned char e[] = {0xD0, 127}; expect("type4 channel pressure max", w, 2, e, 2); }
 
-        // A list with no type-2 word sends nothing, and a NULL list sends nothing.
-        Byte other[256];
-        MIDIEventList *none = (MIDIEventList *)other;
-        MIDIEventPacket *np = MIDIEventListInit(none, kMIDIProtocol_2_0);
-        UInt32 type4 = 0x40900000;
-        MIDIEventListAdd(none, sizeof(other), np, 0, 1, &type4);
-        charon_midi_count = 0;
-        CharonForEachMIDI1Message(none, ^(uint8_t s, uint8_t a, uint8_t b) { MusicDeviceMIDIEvent(unit, s, a, b, 0); });
-        CharonForEachMIDI1Message(NULL, ^(uint8_t s, uint8_t a, uint8_t b) { MusicDeviceMIDIEvent(unit, s, a, b, 0); });
-        if (charon_midi_count != 0) {
-            printf("FAIL a list with no type-2 word sent %u\n", charon_midi_count);
-            failures++;
-        }
+        // Type 3 (SysEx7): complete, and joined from start and end; an incomplete one and a continuation with no start are not sent.
+        { const UInt32 w[] = {0x30067F7F, 0x04010020};
+          const unsigned char e[] = {0xF0, 0x7F, 0x7F, 0x04, 0x01, 0x00, 0x20, 0xF7};
+          expect("type3 complete master volume", w, 2, e, 8); }
+        { const UInt32 w[] = {0x30167F7F, 0x04010020, 0x30311000, 0x00000000};
+          const unsigned char e[] = {0xF0, 0x7F, 0x7F, 0x04, 0x01, 0x00, 0x20, 0x10, 0xF7};
+          expect("type3 start and end", w, 4, e, 9); }
+        { const UInt32 w[] = {0x30167F7F, 0x04010020};
+          expect("type3 start without end is not sent", w, 2, NULL, 0); }
+        { const UInt32 w[] = {0x30267F7F, 0x04010020};
+          expect("type3 continue without start is not sent", w, 2, NULL, 0); }
 
-        printf("messages=%u checks=midi-list-bytes failures=%d\n", expected, failures);
+        // Types 0 and 5 to 15 send nothing: a utility word and a reserved type.
+        { const UInt32 w[] = {0x00000000, 0x50000000}; expect("types 0 and 5 send nothing", w, 2, NULL, 0); }
+
+        printf("messages checked=%d checks=midi-list-bytes failures=%d\n", checks, failures);
     }
     return failures == 0 ? 0 : 1;
 }
