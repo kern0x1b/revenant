@@ -29,6 +29,9 @@ package("apple-backports")
     add_deps("charon@zlib v1.3.2", {alias = "zlib"})
     add_deps("charon@lz4 v1.9.2", {alias = "lz4"})
     add_deps("charon@xz v5.8.4", {alias = "xz"})
+    -- apple-compat's __sincos_stret, the pair of sine and cosine iOS 7 adds: GraphicsBackports takes the pair of a singular
+    -- shear through it, and a build for an older release links the shim's copy, so the image imports nothing the release lacks.
+    add_deps("charon@apple-compat", {alias = "apple-compat"})
 
     local add_configs = add_configs
     local modules = path.join(os.scriptdir(), "..", "..", "..", "modules")

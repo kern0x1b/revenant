@@ -10,26 +10,21 @@
 // through one call, and the shear of a singular transform is a quotient of rounding, so the port does the same.
 // A matrix with a zero first row has no such angle: the rotation is zero, or a half circle when d is negative.
 
-/* The release takes the sine and the cosine of an angle through __sincos_stret, where the image carries it (iOS 7 and
-   later, and macOS). The reference is weak, so it is NULL on an older system, where the two are taken one at a time,
-   as the SDK does for a deployment target before 7.0. */
+/* The release takes the sine and the cosine of an angle through __sincos_stret (iOS 7 and later, and macOS). A build for
+   an older release links apple-compat's copy of it, which takes the two one at a time, as the SDK does for a deployment
+   target before 7.0 (facts/CoreGraphics/AffineComponents.md). */
 typedef struct {
     double sine;
     double cosine;
 } charon_sine_cosine;
 
-extern charon_sine_cosine charon_sincos_stret(double) __asm("___sincos_stret") __attribute__((weak_import));
+extern charon_sine_cosine charon_sincos_stret(double) __asm("___sincos_stret");
 
 static void charon_sincos(CGFloat angle, CGFloat *sine, CGFloat *cosine)
 {
-    if (charon_sincos_stret != NULL) {
-        charon_sine_cosine pair = charon_sincos_stret(angle);
-        *sine = pair.sine;
-        *cosine = pair.cosine;
-        return;
-    }
-    *sine = sin(angle);
-    *cosine = cos(angle);
+    charon_sine_cosine pair = charon_sincos_stret(angle);
+    *sine = pair.sine;
+    *cosine = pair.cosine;
 }
 
 CGAffineTransformComponents CGAffineTransformDecompose(CGAffineTransform transform)

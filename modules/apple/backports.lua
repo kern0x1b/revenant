@@ -27,7 +27,9 @@ LIBRARIES = {
     {name = "BrowserKitBackports", folder = "BrowserKit", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}},
     {name = "CoreNFCBackports", folder = "CoreNFC", frameworks = {"Foundation", "CoreFoundation"}, libraries = {"FoundationBackports"}},
     {name = "GameKitBackports", folder = "GameKit", frameworks = {"GameKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}},
-    {name = "GraphicsBackports", folder = "Graphics", generated = {"ImageIO", "CoreImage"}, frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "ImageIO", "Foundation"}, libraries = {"FoundationBackports"}},
+    -- apple-compat's __sincos_stret, linked because the singular shear's pair comes through it: its folder has no Objective-C++
+    -- object, so the archive is a c_archives too, as on SecurityBackports above.
+    {name = "GraphicsBackports", folder = "Graphics", generated = {"ImageIO", "CoreImage"}, frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "ImageIO", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, c_archives = {"apple-compat"}},
     {name = "UIKitBackports", folder = "UIKit", frameworks = {"UIKit", "Foundation", "CFNetwork", "CoreGraphics", "QuartzCore", "MobileCoreServices", "ImageIO", "CoreLocation"}, libraries = {"FoundationBackports", "GraphicsBackports"}, archives = {"box2d"}},
     {name = "CoreLocationBackports", folder = "CoreLocation", frameworks = {"CoreLocation", "Foundation"}, libraries = {"FoundationBackports"}},
     {name = "CoreTextBackports", folder = "CoreText", frameworks = {"CoreText", "Foundation"}, libraries = {"FoundationBackports"}},

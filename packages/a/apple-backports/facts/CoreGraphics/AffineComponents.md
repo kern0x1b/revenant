@@ -81,9 +81,14 @@ libm's `sin` except on 479 angles (0.24%), every one of them with |x| < 1 and on
 (the true value, rounded once) agrees with libm's sine where the pair does not, so the pair itself is not correctly
 rounded: it differs from the true value on about 3.7% of the same angles.
 
-The port takes the pair through `__sincos_stret` where the image exports it (iOS 7 and later, and macOS), and through
-the separate `sin` and `cos` where it does not (iOS 6.1.3). Over 2000 generated singular transforms the iOS 7 path
-agrees with the host, and the separate-call path differs in the last digits of 12 of them. Both are within what the
-header promises; the test holds the components to a relative 1e-12, which the separate-call path also meets on the
-fixed battery. This is the reference the port follows: the value of the decomposition up to the rounding of the pair,
-not the pair's last bit.
+The port takes the pair through `__sincos_stret`. The image links it: a build for a release before 7.0 links
+apple-compat's `__sincos_stret`, which takes the sine and the cosine as two separate calls, because iOS 6.1.3 exports no
+pair: its armv7 dyld cache names neither `_sincos` nor `__sincos_stret`, the 7.0 armv7 cache names `__sincos_stret`, and
+the 10.3.4 armv7s cache names `_sincos`.
+
+The separate calls do not reproduce the host on every singular transform. Measured with the affine differential
+(`sweep("generated singular", 1, 1000)`), one generated singular transform disagrees with the host by a relative 4.78
+(a flip of the rotation, where `across` is at rounding level), and the same battery with the system pair agrees on all
+1000 (largest relative difference 6.7e-16 over the whole test). So the iOS 6 path differs from the host by more than
+rounding on at least one singular transform, and the earlier figure of 12 differences in the last digits came from an
+earlier generator. The crutch is recorded in coordination/crutches.md.
