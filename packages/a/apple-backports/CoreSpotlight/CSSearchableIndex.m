@@ -196,24 +196,27 @@ static NSString *CharonSpotlightCategory(void)
 // Runs a change and saves it; when the save fails, the entries and the client state go back to what
 // they were, so memory never holds what the caller was told was not stored - a later save would write
 // it without searchd being told, and -fetchLastClientState would answer it.
+// The store's lock: a change and a search's copy of the entries are never interleaved.
 - (NSError *)apply:(void (^)(void))change
 {
-    NSMutableDictionary<NSString *, NSData *> *entries = [_entries mutableCopy];
-    NSData *clientState = _clientState;
-    @try {
-        change();
-    } @catch (NSException *exception) {
-        // An item that cannot be archived raises from inside the change; what it changed so far goes too.
-        _entries = entries;
-        _clientState = clientState;
-        @throw;
+    @synchronized (self) {
+        NSMutableDictionary<NSString *, NSData *> *entries = [_entries mutableCopy];
+        NSData *clientState = _clientState;
+        @try {
+            change();
+        } @catch (NSException *exception) {
+            // An item that cannot be archived raises from inside the change; what it changed so far goes too.
+            _entries = entries;
+            _clientState = clientState;
+            @throw;
+        }
+        NSError *error = [self save];
+        if (error) {
+            _entries = entries;
+            _clientState = clientState;
+        }
+        return error;
     }
-    NSError *error = [self save];
-    if (error) {
-        _entries = entries;
-        _clientState = clientState;
-    }
-    return error;
 }
 
 - (void)setItem:(CSSearchableItem *)item
@@ -259,6 +262,21 @@ static NSString *CharonSpotlightCategory(void)
 }
 
 @end
+
+NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
+{
+    CharonSpotlightStore *store = [CharonSpotlightStore storeNamed:@"__defaultIndex"];
+    NSMutableArray<CSSearchableItem *> *items = [NSMutableArray array];
+    @synchronized (store) {
+        NSArray<NSString *> *identifiers = [store.entries.allKeys sortedArrayUsingSelector:@selector(compare:)];
+        for (NSString *identifier in identifiers) {
+            CSSearchableItem *item = [store itemForIdentifier:identifier];
+            if (item)
+                [items addObject:item];
+        }
+    }
+    return items;
+}
 
 @interface CSSearchableIndex ()
 @property (nonatomic, copy) NSString *charonName;
