@@ -1,0 +1,93 @@
+{
+  "framework": "AVFAudio",
+  "entries": [
+    {
+      "api": "AudioComponentGetLastActiveTime",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; an application that asks when a component was last used links against this",
+      "effect": "0 for every component: the host's answer for the generic output component before it is used, and after it is instantiated and initialized",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox AUComponent.h (declared, deprecated at iOS 13), and the host's own symbol, called through dlsym by tests/backports/host/audiotoolbox-functions/functions.m (checks=audiotoolbox-functions failures=0)"
+    },
+    {
+      "api": "AudioOutputUnitGetHostIcon",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; the function returns the hosting application's icon, which an application that asks for it links against",
+      "effect": "nil for every unit: the host's answer for a unit it has in its own process (measured on the generic output at size 32); this port hosts every unit in its own process",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox AUComponent.h (declared with a UIImage return, iOS only), and the host's answer printed by tests/backports/host/audiotoolbox-functions/functions.m; the port's definition is compiled for iOS only"
+    },
+    {
+      "api": "AudioServicesPlayAlertSoundWithCompletion",
+      "kind": "function",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; an application that asks to be told when an alert sound ends links against this",
+      "effect": "plays the alert sound and runs the block once, off the main thread, after the play call: on the release's completion registration if the release takes it, else on the default-priority global queue at once (the host's answer: -1500 from the registration, then the block off the main thread about a millisecond later)",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox AudioServices.h (declared, iOS 9), and the host's completion for a valid and an invalid sound ID, measured by tests/backports/host/audiotoolbox-functions/functions.m (checks=audiotoolbox-functions failures=0)"
+    },
+    {
+      "api": "AudioServicesPlaySystemSoundWithCompletion",
+      "kind": "function",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; an application that asks to be told when a system sound ends links against this",
+      "effect": "plays the system sound and runs the block once, off the main thread, after the play call: on the release's completion registration if the release takes it, else on the default-priority global queue at once (the host's answer: -1500 from the registration, then the block off the main thread about a millisecond later)",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox AudioServices.h (declared, iOS 9), and the host's completion for a valid and an invalid sound ID, measured by tests/backports/host/audiotoolbox-functions/functions.m (checks=audiotoolbox-functions failures=0)"
+    },
+    {
+      "api": "AudioComponentInstantiate",
+      "kind": "function",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; an application that instantiates a component through its completion handler links against this",
+      "effect": "makes the instance with AudioComponentInstanceNew and calls the handler before returning, on the calling thread, with the instance and status 0; for no component, the handler gets no instance and -3000 (the host's answers). The options are not used: this port loads every unit in its own process",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox AudioComponent.h (declared, iOS 9), and the host's handler call measured by tests/backports/host/audiotoolbox-functions/functions.m (checks=audiotoolbox-functions failures=0)"
+    },
+    {
+      "api": "AudioUnitExtensionCopyComponentList",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; an application that asks which components an app extension provides links against this",
+      "effect": "NULL for every identifier: the host's answer for an identifier nobody set, and for a NULL identifier; this port can register no app extension",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox AUComponent.h (declared, iOS 11), and the host's answers measured by tests/backports/host/audiotoolbox-functions/functions.m (checks=audiotoolbox-functions failures=0)"
+    },
+    {
+      "api": "AudioUnitExtensionSetComponentList",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; an application that sets the components of an app extension links against this",
+      "effect": "returns 'bnd?' (0x626E643F) for every identifier and list: the host's status for an identifier it does not know, with an empty list, with one description, and for a NULL identifier; this port can register no app extension",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox AUComponent.h (declared, iOS 11), and the host's status measured by tests/backports/host/audiotoolbox-functions/functions.m (checks=audiotoolbox-functions failures=0)"
+    },
+    {
+      "api": "MusicDeviceMIDIEventList",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name, and the release has neither the list call nor a selector for it; an application that sends a MIDI event list to a music device links against this",
+      "effect": "sends each MIDI 1.0 message of the list to MusicDeviceMIDIEvent at the offset given, and each complete system-exclusive message to MusicDeviceSysEx, in order; the sampler renders the same as the host's list call, bit for bit, for a note on, two velocities, a control change and a pitch bend",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox MusicDevice.h (declared, iOS 15), and the host's list call rendering the sampler, compared bit for bit by tests/backports/host/audiotoolbox-functions/functions.m (checks=audiotoolbox-functions failures=0)"
+    }
+  ]
+}
