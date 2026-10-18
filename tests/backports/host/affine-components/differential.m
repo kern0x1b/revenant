@@ -1,8 +1,11 @@
 // differential.m - the port's CGAffineTransformDecompose and CGAffineTransformMakeWithComponents, held to the host's own
 // CoreGraphics on the battery below. The port's source is linked in with its two functions renamed (run.sh), so both
-// stand in one process. Three checks per transform: the components the two answer for the same matrix, the matrix the
-// port rebuilds from its own components, and the matrix each answers for the host's components.
+// stand in one process. run.sh links the port twice: once with the sine and the cosine through the system's pair, and
+// once through apple-compat's shim, which is what a build for an older release runs. Three checks per transform: the
+// components the two answer for the same matrix, the matrix the port rebuilds from its own components, and the matrix
+// each answers for the host's components.
 #import <CoreGraphics/CoreGraphics.h>
+#include <float.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -44,12 +47,88 @@ static int same_matrix(CGAffineTransform h, CGAffineTransform p)
         && agree(h.tx, p.tx) && agree(h.ty, p.ty);
 }
 
+/* Where the sign of a decomposition is decided by rounding. The sign of across is the sign of d*cos - c*sin, the difference
+   of two products of size terms = |d*cos| + |c*sin|. The host and the port take the sine and the cosine of the same angle
+   from two sources (the host's pair, the port's libm or shim), which may be one ulp apart, and each product and the
+   difference round once. So across is known only to within ROUNDING_ULPS * DBL_EPSILON * terms, and inside that bound its
+   sign is either sign: both decompositions are valid, and the test checks that each rebuilds the transform.
+   A y scale and a shear divide by across, so their relative error is that bound over |across|: they agree to the test's
+   1e-12 only where |across| exceeds the bound by 1e-12. The shear divides the numerator c*cos + d*sin as well, whose
+   error is the same kind of bound over its own terms. Where either is inside the wider bound, the sign and the length and
+   the rotation are held, and the rebuild decides the rest. Outside it, everything is held exact. */
+#define ROUNDING_ULPS 4
+
+enum band { EXACT, SCALE_BAND, SIGN_BAND };
+
+static int within(double value, double terms, double tolerance)
+{
+    return terms > 0 && fabs(value) <= ROUNDING_ULPS * DBL_EPSILON * terms / tolerance;
+}
+
+static enum band band_of(CGAffineTransform m)
+{
+    if (hypot(m.a, m.b) == 0)
+        return EXACT;
+    double angle = atan2(m.b, m.a);
+    double sine = sin(angle), cosine = cos(angle);
+    double across = m.d * cosine - m.c * sine;
+    double across_terms = fabs(m.d * cosine) + fabs(m.c * sine);
+    double numerator = m.c * cosine + m.d * sine;
+    double numerator_terms = fabs(m.c * cosine) + fabs(m.d * sine);
+    if (within(across, across_terms, 1))
+        return SIGN_BAND;
+    if (within(across, across_terms, 1e-12) || within(numerator, numerator_terms, 1e-12))
+        return SCALE_BAND;
+    return EXACT;
+}
+
+/* Whether components rebuild the matrix to rounding. The first row always; the second only where the y scale is not zero,
+   since a zero y scale carries no second row (the host's own answer for a singular transform with exactly zero across).
+   An entry is held to the size of the largest entry of the matrix, not its own: a small entry beside a large one carries
+   the large one's rounding (a shear of 5e18 with a y scale of 1e-16 leaves an entry near 1 with an error of 400 ulps). */
+static int rebuilds(CGAffineTransform m, CGAffineTransformComponents k)
+{
+    CGAffineTransform r = CGAffineTransformMakeWithComponents(k);
+    double size = fmax(fmax(fabs(m.a), fabs(m.b)), fmax(fabs(m.c), fabs(m.d)));
+    size = size > 1 ? size : 1;
+    double errors[4] = {fabs(m.a - r.a), fabs(m.b - r.b), fabs(m.c - r.c), fabs(m.d - r.d)};
+    int second = k.scale.height != 0;
+    for (int i = 0; i < 4; i++) {
+        if (i >= 2 && !second)
+            continue;
+        if (errors[i] / size > worst)
+            worst = errors[i] / size;
+        if (errors[i] / size > 1e-12)
+            return 0;
+    }
+    return agree(m.tx, r.tx) && agree(m.ty, r.ty);
+}
+
+/* Whether the port's decomposition is held for the host's, in the band the matrix is in. */
+static int accepts(CGAffineTransform m, CGAffineTransformComponents h, CGAffineTransformComponents p, enum band band)
+{
+    if (band == EXACT)
+        return same_components(h, p);
+    if (!agree(fabs(h.scale.width), fabs(p.scale.width)))
+        return 0;
+    if (band == SCALE_BAND && ((h.scale.width < 0) != (p.scale.width < 0) || !agree(h.rotation, p.rotation)))
+        return 0;
+    return rebuilds(m, p) && rebuilds(m, h);
+}
+
 static void battery(const char *label, double a, double b, double c, double d, double tx, double ty)
 {
     CGAffineTransform m = CGAffineTransformMake(a, b, c, d, tx, ty);
     CGAffineTransformComponents hc = CGAffineTransformDecompose(m);
     CGAffineTransformComponents pc = CharonHostDecompose(m);
-    report(label, "decompose agrees with the host", same_components(hc, pc));
+    enum band band = band_of(m);
+    if (band == EXACT)
+        report(label, "decompose agrees with the host", accepts(m, hc, pc, band));
+    else if (band == SCALE_BAND)
+        report(label, "decompose agrees with the host on the sign, length and rotation, and both rebuild the matrix (rounding band)",
+               accepts(m, hc, pc, band));
+    else
+        report(label, "both decompositions rebuild the matrix (sign within the rounding band)", accepts(m, hc, pc, band));
     report(label, "the port's components rebuild the matrix as the host's do",
            same_matrix(CGAffineTransformMakeWithComponents(pc), CharonHostMakeWithComponents(pc)));
     /* A singular transform with two rows that are not zero does not come back from its components: the host does
@@ -72,7 +151,7 @@ static double next_unit(void)
 
 static void sweep(const char *label, int singular, int count)
 {
-    int disagreeing = 0;
+    int disagreeing = 0, flips = 0, bands[3] = {0, 0, 0};
     for (int index = 0; index < count; index++) {
         double scale = pow(10, (double)(index % 7) - 3);
         double a = next_unit() * scale, b = next_unit() * scale, c, d;
@@ -85,11 +164,20 @@ static void sweep(const char *label, int singular, int count)
             d = next_unit() * scale;
         }
         CGAffineTransform m = CGAffineTransformMake(a, b, c, d, 0, 0);
-        if (!same_components(CGAffineTransformDecompose(m), CharonHostDecompose(m)))
+        CGAffineTransformComponents hc = CGAffineTransformDecompose(m);
+        CGAffineTransformComponents pc = CharonHostDecompose(m);
+        enum band band = band_of(m);
+        bands[band]++;
+        if (!accepts(m, hc, pc, band))
             disagreeing++;
+        if ((hc.scale.width < 0) != (pc.scale.width < 0))
+            flips++;
     }
-    report(label, disagreeing ? "some decompositions disagree with the host" : "every decomposition agrees with the host",
+    report(label, disagreeing ? "some decompositions disagree with the host outside the rounding band"
+                              : "every decomposition agrees with the host, or is valid within the rounding band",
            disagreeing == 0);
+    printf("  %d exact, %d in the scale band, %d in the sign band; the sign of the x scale differs on %d\n",
+           bands[EXACT], bands[SCALE_BAND], bands[SIGN_BAND], flips);
 }
 
 int main(void)

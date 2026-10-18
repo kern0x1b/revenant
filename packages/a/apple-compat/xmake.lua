@@ -42,8 +42,10 @@ package("apple-compat")
         local objects = {}
         for _, symbol in ipairs(package:data("provided")) do
             local object = path.absolute(symbol .. ".o")
+            -- -fno-builtin: at -Os LLVM merges a sin and a cos of one argument into a call to __sincos_stret, which for a
+            -- shim of __sincos_stret is a call to itself. The shim's sin and cos are the library's, called as two calls.
             os.vrunv(toolchain:tool("cc"), {"-target", triple, "-miphoneos-version-min=" .. toolchain:config("deployment"), "-isysroot", toolchain:config("sdkdir"), "-Os",
-                               "-fvisibility=hidden", "-c", path.join(package:scriptdir(), "src", symbol .. ".c"), "-o", object})
+                               "-fno-builtin", "-fvisibility=hidden", "-c", path.join(package:scriptdir(), "src", symbol .. ".c"), "-o", object})
             table.insert(objects, object)
             local header = path.join(package:scriptdir(), "include", "charon", symbol .. ".h")
             if os.isfile(header) then
