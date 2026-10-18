@@ -22,8 +22,9 @@ the 11.0 photo the bracket's callbacks deliver (`AVCapturePhoto11.m`, facts/AVFo
 
 - The objc inventory of the 6.1.3 armv7 shared cache (`objc.inventory`, facts/AVFoundation/Demand8.md) finds no
   AVCapturePhotoOutput, no AVCapturePhotoSettings, no AVCapturePhoto and no AVCapturePhotoBracketSettings
-  (`first-rung.py _OBJC_CLASS_$_AVCapturePhoto` answers NONE). The port's output is an AVCaptureStillImageOutput subclass
-  (facts/AVFoundation/AVCapturePhotoOutput.md, "Why the output is a still image output").
+  (`tools/cache-index/first-rung.lua _OBJC_CLASS_$_AVCapturePhoto` answers 11.0, the first held rung that carries it, so
+  no rung of 6.1.3 or before does; re-measured 2026-10-18 on the current index). The port's output is an
+  AVCaptureStillImageOutput subclass (facts/AVFoundation/AVCapturePhotoOutput.md, "Why the output is a still image output").
 - `AVCaptureDevice`'s own exposure selectors on 6.1.3 (Demand8.md, the same query on the 8.0 cache for the public names):
   the private `-setAutoExposureBias:` and `-autoExposureBias`; the private `-setExposureDuration:`, `-exposureDuration`,
   `-setExposureGain:`, `-exposureGain`; `-setExposureMode:`, `-exposureMode`, `-isExposureModeSupported:`;
