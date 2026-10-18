@@ -36,6 +36,19 @@ typedef OSStatus
                                         AudioBufferList *               ioData,
                                         AudioStreamPacketDescription * __nullable * __nullable outDataPacketDescription,
                                         void * __nullable               inUserData);
+
+// The enumerator cases of iOS 17 to 26 that the 16.4 SDK does not declare, with the iOS 26.2 SDK's values (the constants host test,
+// tests/backports/host/audiotoolbox-constants, checks each against that SDK).
+enum {
+    kAUVoiceIOProperty_OtherAudioDuckingConfiguration = 2108,
+    kAudioUnitProperty_SpatialMixerAnyInputIsUsingPersonalizedHRTF = 3116,
+    kAUAudioMixParameter_RemixAmount = 1,
+    kAUAudioMixParameter_Style = 0,
+    kAUAudioMixProperty_EnableSpatialization = 5001,
+    kAUAudioMixProperty_SpatialAudioMixMetadata = 5000,
+    kAUSoundIsolationSoundType_HighQualityVoice = 0,
+    kAudioUnitSubType_AUAudioMix = 0x616D6978 /* 'amix' */
+};
 #endif
 
 // AudioConverter.h, iOS 18: the converter made with options, and the asynchronous preparation.

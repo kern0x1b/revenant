@@ -22,6 +22,11 @@ Each one is an enumerator of an anonymous or named `enum` in the SDK's headers. 
 symbol to define: an application compiled against the SDK gets the value inline. The row's `kind` is `case`, and the port's
 answer is the header the build reads, which declares it.
 
+The eight cases of iOS 17 to 26 (the table's rows for 17.0, 18.0 and 26.0 except `kAudioUnitProperty_SpatialMixerEnableHeadTracking`
+and `_PersonalizedHRTFMode`, which the 16.4 SDK declares) are not in the 16.4 SDK, so `AVFAudio/CharonAudioToolboxDeclarations.h`
+declares them, under the same `CA_REALTIME_API` guard as the iOS 26 types, with the iOS 26.2 SDK's values. The constants host test
+checks each value against the 26.2 SDK.
+
 Their values and iOS availability, as the 26.2 declarations give them (`spec/AudioToolbox/declarations.tsv`):
 
 | iOS | enumerators | values |
