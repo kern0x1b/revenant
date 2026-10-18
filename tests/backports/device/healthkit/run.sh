@@ -15,28 +15,35 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-root=$(cd "$here/../../.." && pwd)
+root=$(cd "$here/../../../.." && pwd)
 export HEALTHKIT_ROOT=$root
 build=${HEALTHKIT_BUILD:-$(runs_folder charon-healthkit-device)}
 device=${HEALTHKIT_DEVICE:-iPhone4,1}
 releases=${HEALTHKIT_RELEASES:-"6.1.3"}
 rm -rf "$build"
 mkdir -p "$build"
-cp "$here/xmake.lua" "$build/"
+# The constant objects of HealthKit are written into .gen/HealthKit by gen, as the build writes them, from the SDK the spec is measured on
+# (CHARON_GEN_SDK, the variable the gate sets). xmake.lua reads that folder, so gen runs first; a failure stops the run.
+sdk=${CHARON_GEN_SDK:?set CHARON_GEN_SDK to the iPhoneOS 26.2 SDK}
+corpus=${CHARON_CORPUS:-$HOME/Git/projects/ios/coordination/corpus}
+(cd "$root" && xmake l tools/gen.lua gen --tree "$root" --framework HealthKit --sdk "$sdk" --coordination "$corpus") > "$build/gen.log" 2>&1 || {
+    echo "gen HealthKit failed:"; tail -n 20 "$build/gen.log"; exit 1; }
+cp "$here/xmake.lua" "$here/control" "$build/"
 cd "$build"
 xmake f -p iphoneos -a armv7 -y > configure.log 2>&1
 xmake build -y > build.log 2>&1
 failed=0
 for release in $releases; do
-    xmake emulate -d "$device" -r "$release" install > "install-$release.log" 2>&1
+    xmake emulate -d "$device" -r "$release" install > "install-$release.log" 2>&1 || {
+        echo "$release: install failed:"; tail -n 20 "install-$release.log"; exit 1; }
     xmake emulate -d "$device" -r "$release" run /usr/libexec/healthkit > "$release.log" 2>&1 || true
     if grep -q '^FAIL' "$release.log" || ! grep -Eq 'pass.{0,12} on iPhone' "$release.log"; then
         echo "$release: not a pass"
         grep -E '^FAIL|crash|timeout|blocked' "$release.log" || true
         failed=1
     else
-        echo "$release: $(grep -E ' checks, ' "$release.log")"
-        grep -E '^health: ' "$release.log" | sed 's/^/  /' || true
+        echo "$release: $(grep -E 'pass.{0,12} on iPhone' "$release.log")"
+        grep -E 'health: ' "$release.log" | sed 's/^/  /' || true
     fi
 done
 echo "logs=$build"

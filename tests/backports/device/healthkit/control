@@ -1,0 +1,7 @@
+Package: org.charon.healthkitdevice
+Name: Charon HealthKit device probe
+Architecture: iphoneos-arm
+Description: Whether the port's HealthKit answers the three questions a 6.1.3 device without Health data can answer, against Apple's headers
+Maintainer: charon
+Author: charon
+Section: Development
