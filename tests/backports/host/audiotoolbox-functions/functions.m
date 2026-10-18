@@ -5,8 +5,10 @@
 // so the host's symbol and the port's definition can sit in one process. The host's answers are the oracle; a port answer
 // that differs from the host's on any case fails the check.
 //
-// Not checked here, and why: AudioOutputUnitGetHostIcon's port definition is iOS-only (its return type is UIImage, which
-// macOS does not have), so the port's icon is not compiled on the host; the host's own answer is printed for the record.
+// Not checked here, and why: AudioOutputUnitGetHostIcon, AudioComponentGetIcon and AudioComponentCopyIcon have port definitions
+// that are iOS-only (their return type is UIImage, which macOS does not have), so the port's icons are not compiled on the host;
+// the host's own answers are printed for the record. The two configuration and work-interval functions of the round are owed
+// (facts/AVFAudio/AudioToolboxFunctions.md), so they have no port definition to check.
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <AudioToolbox/AUComponent.h>
@@ -52,6 +54,11 @@ typedef OSStatus (*SetListFn)(CFStringRef, CFArrayRef);
 typedef void (*InstantiateFn)(AudioComponent, UInt32, void (^)(AudioComponentInstance, OSStatus));
 typedef void (*PlaySoundFn)(SystemSoundID, void (^)(void));
 typedef OSStatus (*MIDIListFn)(MusicDeviceComponent, UInt32, const MIDIEventList *);
+typedef id (*IconFn)(AudioComponent, float);
+typedef id (*CopyIconFn)(AudioComponent);
+typedef OSStatus (*PublishFn)(const AudioComponentDescription *, CFStringRef, UInt32, AudioUnit);
+typedef OSStatus (*BankNameFn)(CFURLRef, CFStringRef *);
+typedef OSStatus (*BankInfoFn)(CFURLRef, CFArrayRef *);
 
 // The port's definitions, compiled from packages/a/apple-backports/AVFAudio/AudioToolboxFunctions{7,9,11,15}.m under these
 // names (functions.sh). The SDK's own declarations of these names are not used here: the macOS header marks some of them
@@ -96,6 +103,10 @@ OSStatus CharonTestAudioQueueNewOutputWithDispatchQueue(AudioQueueRef *outAQ, co
 OSStatus CharonTestAudioQueueNewInputWithDispatchQueue(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat,
                                                        UInt32 inFlags, dispatch_queue_t inCallbackDispatchQueue,
                                                        AudioQueueInputCallbackBlock inCallbackBlock);
+OSStatus CharonTestAudioOutputUnitPublish(const AudioComponentDescription *inDesc, CFStringRef inName, UInt32 inVersion,
+                                          AudioUnit inOutputUnit);
+OSStatus CharonTestCopyNameFromSoundBank(CFURLRef inURL, CFStringRef __nullable *outName);
+OSStatus CharonTestCopyInstrumentInfoFromSoundBank(CFURLRef inURL, CFArrayRef __nullable *outInstrumentInfo);
 
 static AudioComponent genericOutput(void)
 {
@@ -776,6 +787,187 @@ static void checkQueueDispatch(void)
     }
 }
 
+// CFRelease for a result that a failed call leaves NULL.
+static void releaseCF(CFTypeRef ref)
+{
+    if (ref != NULL) {
+        CFRelease(ref);
+    }
+}
+
+// The icons: the host's answers, printed for the record (the port's icons are iOS-only, see the comment at the top of this file).
+// The host answers an image of 32 by 32 points for the generic output at every size asked, and nil for NULL.
+static void printIcons(void)
+{
+    IconFn hostGetIcon = hostSymbol("AudioComponentGetIcon");
+    CopyIconFn hostCopyIcon = hostSymbol("AudioComponentCopyIcon");
+    AudioComponent component = genericOutput();
+    float sizes[] = {0, 16, 32, 64, 128};
+    for (int i = 0; i < 5; i++) {
+        id icon = hostGetIcon(component, sizes[i]);
+        NSSize size = icon == nil ? NSZeroSize : [[(NSObject *)icon valueForKey:@"size"] sizeValue];
+        printf("host: AudioComponentGetIcon(generic output, %g) is %s, %gx%g\n", sizes[i], icon == nil ? "nil" : "an image",
+               size.width, size.height);
+    }
+    id copied = hostCopyIcon(component);
+    printf("host: AudioComponentCopyIcon(generic output) is %s\n", copied == nil ? "nil" : "an image");
+    printf("host: AudioComponentGetIcon(NULL, 32) is %s\n", hostGetIcon(NULL, 32) == nil ? "nil" : "an image");
+    printf("host: AudioComponentCopyIcon(NULL) is %s\n", hostCopyIcon(NULL) == nil ? "nil" : "an image");
+}
+
+// AudioOutputUnitPublish: the port's answer is the host's for each input. The description is one no other unit uses, so the
+// host's registration in this process cannot change the generic output's answers. The host's answer for the new description
+// is printed: it is not findable in this process after the call.
+static void checkPublish(void)
+{
+    PublishFn hostPublish = hostSymbol("AudioOutputUnitPublish");
+    AudioComponentDescription description = {0};
+    description.componentType = kAudioUnitType_Output;
+    description.componentSubType = 'chrn';
+    description.componentManufacturer = 'Chrn';
+    AudioComponentInstance instance = NULL;
+    AudioComponentInstanceNew(genericOutput(), &instance);
+    AudioUnit unit = (AudioUnit)instance;
+    CFStringRef name = CFSTR("Charon test publication");
+
+    check(CharonTestAudioOutputUnitPublish(&description, name, 1, unit) == hostPublish(&description, name, 1, unit),
+          "AudioOutputUnitPublish: the port's answer is the host's for a description and a unit");
+    check(CharonTestAudioOutputUnitPublish(&description, name, 1, NULL) == hostPublish(&description, name, 1, NULL),
+          "AudioOutputUnitPublish: the port's answer is the host's for a NULL unit");
+    check(CharonTestAudioOutputUnitPublish(&description, NULL, 1, unit) == hostPublish(&description, NULL, 1, unit),
+          "AudioOutputUnitPublish: the port's answer is the host's for a NULL name");
+    check(CharonTestAudioOutputUnitPublish(&description, name, 0, unit) == hostPublish(&description, name, 0, unit),
+          "AudioOutputUnitPublish: the port's answer is the host's for version 0");
+    check(CharonTestAudioOutputUnitPublish(NULL, name, 1, unit) == hostPublish(NULL, name, 1, unit),
+          "AudioOutputUnitPublish: the port's answer is the host's for a NULL description");
+    printf("host: AudioComponentFindNext for the published description is %s\n",
+           AudioComponentFindNext(NULL, &description) == NULL ? "NULL" : "a component");
+    AudioComponentInstanceDispose(instance);
+}
+
+// The sound banks, read from the host's own gs_instruments.dls and from copies of it in the folder this test writes. The
+// host's name and instrument list are the oracle; the port's must equal them. A few inputs are printed and not counted, where
+// the host's answer is not one the port can give (a truncated bank) or where the host traps or hangs, so the host is not called.
+static void checkSoundBanks(const char *folder)
+{
+    static const char *gmBank = "/System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls";
+    BankNameFn hostName = hostSymbol("CopyNameFromSoundBank");
+    BankInfoFn hostInfo = hostSymbol("CopyInstrumentInfoFromSoundBank");
+    NSFileManager *files = [NSFileManager defaultManager];
+    NSString *dir = [NSString stringWithUTF8String:folder];
+    NSData *bankBytes = [NSData dataWithContentsOfFile:[NSString stringWithUTF8String:gmBank]];
+    if (bankBytes == nil) {
+        printf("FAIL the host has no %s\n", gmBank);
+        exit(1);
+    }
+
+    // The DLS bank: name and instrument list.
+    CFURLRef bank = (__bridge CFURLRef)[NSURL fileURLWithPath:[NSString stringWithUTF8String:gmBank]];
+    CFStringRef hostNameValue = NULL;
+    CFStringRef portNameValue = NULL;
+    OSStatus hostNameStatus = hostName(bank, &hostNameValue);
+    OSStatus portNameStatus = CharonTestCopyNameFromSoundBank(bank, &portNameValue);
+    check(hostNameStatus == 0 && portNameStatus == hostNameStatus,
+          "CopyNameFromSoundBank: the port's status is the host's for gs_instruments.dls");
+    check(hostNameValue != NULL && portNameValue != NULL &&
+          [(__bridge NSString *)hostNameValue isEqualToString:(__bridge NSString *)portNameValue],
+          "CopyNameFromSoundBank: the port's name is the host's for gs_instruments.dls");
+    printf("host: CopyNameFromSoundBank(gs_instruments.dls) is %s\n", hostNameValue ? [(__bridge NSString *)hostNameValue UTF8String] : "NULL");
+    releaseCF(hostNameValue);
+    releaseCF(portNameValue);
+
+    CFArrayRef hostList = NULL;
+    CFArrayRef portList = NULL;
+    OSStatus hostListStatus = hostInfo(bank, &hostList);
+    OSStatus portListStatus = CharonTestCopyInstrumentInfoFromSoundBank(bank, &portList);
+    NSArray *hostArray = (__bridge NSArray *)hostList;
+    NSArray *portArray = (__bridge NSArray *)portList;
+    check(hostListStatus == 0 && portListStatus == hostListStatus,
+          "CopyInstrumentInfoFromSoundBank: the port's status is the host's for gs_instruments.dls");
+    check(hostArray != nil && [portArray isEqualToArray:hostArray],
+          "CopyInstrumentInfoFromSoundBank: the port's 235 entries are the host's for gs_instruments.dls");
+    printf("host: CopyInstrumentInfoFromSoundBank(gs_instruments.dls) status %d, %lu entries\n", (int)hostListStatus,
+           (unsigned long)hostArray.count);
+    releaseCF(hostList);
+    releaseCF(portList);
+
+    // The same DLS bytes under a .sf2 name: the host reads the bank by its content, and so does the port (instrument list only;
+    // the host traps on the name call for this file, so it is not made).
+    NSString *sf2Path = [dir stringByAppendingPathComponent:@"copy.sf2"];
+    [bankBytes writeToFile:sf2Path atomically:NO];
+    CFURLRef sf2 = (__bridge CFURLRef)[NSURL fileURLWithPath:sf2Path];
+    CFArrayRef hostSf2List = NULL;
+    CFArrayRef portSf2List = NULL;
+    OSStatus hostSf2Status = hostInfo(sf2, &hostSf2List);
+    OSStatus portSf2Status = CharonTestCopyInstrumentInfoFromSoundBank(sf2, &portSf2List);
+    check(hostSf2Status == 0 && portSf2Status == hostSf2Status &&
+          [(__bridge NSArray *)portSf2List isEqualToArray:(__bridge NSArray *)hostSf2List],
+          "CopyInstrumentInfoFromSoundBank: the port reads a DLS bank named .sf2 as the host does");
+    releaseCF(hostSf2List);
+    releaseCF(portSf2List);
+
+    // A missing file: the name is kAudioUnitErr_InvalidFile with the last path component, and the list is fnfErr.
+    CFURLRef missing = (__bridge CFURLRef)[NSURL fileURLWithPath:[dir stringByAppendingPathComponent:@"absent.dls"]];
+    CFStringRef hostMissingName = NULL;
+    CFStringRef portMissingName = NULL;
+    OSStatus hostMissingStatus = hostName(missing, &hostMissingName);
+    OSStatus portMissingStatus = CharonTestCopyNameFromSoundBank(missing, &portMissingName);
+    check(hostMissingStatus == -10871 && portMissingStatus == hostMissingStatus,
+          "CopyNameFromSoundBank: a missing file's status is the host's");
+    check(hostMissingName != NULL && portMissingName != NULL &&
+          [(__bridge NSString *)hostMissingName isEqualToString:(__bridge NSString *)portMissingName],
+          "CopyNameFromSoundBank: a missing file's name is the host's last path component");
+    releaseCF(hostMissingName);
+    releaseCF(portMissingName);
+    CFArrayRef hostMissingList = NULL;
+    CFArrayRef portMissingList = NULL;
+    OSStatus hostMissingListStatus = hostInfo(missing, &hostMissingList);
+    OSStatus portMissingListStatus = CharonTestCopyInstrumentInfoFromSoundBank(missing, &portMissingList);
+    check(hostMissingListStatus == -43 && portMissingListStatus == hostMissingListStatus,
+          "CopyInstrumentInfoFromSoundBank: a missing file's status is the host's (fnfErr)");
+
+    // A directory, and a text file: kAudioUnitErr_InvalidFile for the list. The host's name call is not made for the text file.
+    NSString *directory = [dir stringByAppendingPathComponent:@"bankdir.dls"];
+    [files createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:nil error:NULL];
+    CFURLRef dirURL = (__bridge CFURLRef)[NSURL fileURLWithPath:directory];
+    CFStringRef hostDirName = NULL;
+    CFStringRef portDirName = NULL;
+    OSStatus hostDirStatus = hostName(dirURL, &hostDirName);
+    OSStatus portDirStatus = CharonTestCopyNameFromSoundBank(dirURL, &portDirName);
+    check(hostDirStatus == -10871 && portDirStatus == hostDirStatus,
+          "CopyNameFromSoundBank: a directory's status is the host's");
+    releaseCF(hostDirName);
+    releaseCF(portDirName);
+    CFArrayRef hostDirList = NULL;
+    CFArrayRef portDirList = NULL;
+    OSStatus hostDirListStatus = hostInfo(dirURL, &hostDirList);
+    OSStatus portDirListStatus = CharonTestCopyInstrumentInfoFromSoundBank(dirURL, &portDirList);
+    check(hostDirListStatus == -10871 && portDirListStatus == hostDirListStatus,
+          "CopyInstrumentInfoFromSoundBank: a directory's status is the host's");
+
+    NSString *textPath = [dir stringByAppendingPathComponent:@"notabank.dls"];
+    [[@"not a bank\n" dataUsingEncoding:NSUTF8StringEncoding] writeToFile:textPath atomically:NO];
+    CFURLRef text = (__bridge CFURLRef)[NSURL fileURLWithPath:textPath];
+    CFArrayRef portTextList = NULL;
+    OSStatus portTextStatus = CharonTestCopyInstrumentInfoFromSoundBank(text, &portTextList);
+    check(portTextStatus == -10871, "CopyInstrumentInfoFromSoundBank: a text file is kAudioUnitErr_InvalidFile, as the host answers");
+
+    // A truncated bank (the first 100 bytes): the host reads the instruments that are whole in part of the bank; the port reads
+    // only the whole ones, so the counts are printed, not compared.
+    NSString *truncatedPath = [dir stringByAppendingPathComponent:@"truncated.dls"];
+    [[bankBytes subdataWithRange:NSMakeRange(0, 100)] writeToFile:truncatedPath atomically:NO];
+    CFURLRef truncated = (__bridge CFURLRef)[NSURL fileURLWithPath:truncatedPath];
+    CFArrayRef hostTruncatedList = NULL;
+    CFArrayRef portTruncatedList = NULL;
+    OSStatus hostTruncatedStatus = hostInfo(truncated, &hostTruncatedList);
+    OSStatus portTruncatedStatus = CharonTestCopyInstrumentInfoFromSoundBank(truncated, &portTruncatedList);
+    printf("host: CopyInstrumentInfoFromSoundBank(first 100 bytes) status %d, %lu entries; port status %d, %lu entries (not counted)\n",
+           (int)hostTruncatedStatus, (unsigned long)[(__bridge NSArray *)hostTruncatedList count], (int)portTruncatedStatus,
+           (unsigned long)[(__bridge NSArray *)portTruncatedList count]);
+    releaseCF(hostTruncatedList);
+    releaseCF(portTruncatedList);
+}
+
 int main(int argc, const char *argv[])
 {
     @autoreleasepool {
@@ -789,6 +981,9 @@ int main(int argc, const char *argv[])
         checkInstantiate();
         checkSoundCompletions();
         checkMIDIList();
+        printIcons();
+        checkPublish();
+        checkSoundBanks(argv[1]);
         checkUserData(argv[1]);
         checkValidate();
         checkConverters();

@@ -209,6 +209,81 @@
       "effect": "the release's packet write; the dependencies are not written anywhere (the host's answer for PCM: noErr with a NULL array and with one given, measured on a WAV file); a format that employs dependent packets is not measured",
       "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
       "source": "SDK 16.4 does not declare it: the iOS 26.2 declaration is in AVFAudio/CharonAudioToolboxDeclarations.h (the iOS 26.2 declarations, for the 16.4 SDK), and the host's status and packet counts, measured by tests/backports/host/audiotoolbox-functions/functions.m (checks=audiotoolbox-functions failures=0)"
+    },
+    {
+      "api": "AudioComponentGetIcon",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; an application that asks for a component's icon links against this",
+      "effect": "nil for NULL; for a component, a blank image of 32 by 32 points (the host's answer for the generic output at every size asked, measured on the macOS host). The host's artwork is not carried, so the pixels differ",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox AUComponent.h (declared, deprecated at iOS 14); the host's own symbol, called through dlsym by tests/backports/host/audiotoolbox-functions/functions.m, which prints the host's answers (the iOS-only port definition is not compiled on the host)"
+    },
+    {
+      "api": "AudioComponentCopyIcon",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; an application that asks for a component's icon links against this",
+      "effect": "nil for NULL; for the generic output, a blank image of 32 by 32 points (the host's answer, measured on the macOS host). The host's artwork is not carried, so the pixels differ",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox AUComponent.h (declared at iOS 14.0); the host's own symbol, called through dlsym by tests/backports/host/audiotoolbox-functions/functions.m, which prints the host's answers (the iOS-only port definition is not compiled on the host)"
+    },
+    {
+      "api": "AudioOutputUnitPublish",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; an application that publishes an audio unit for other applications links against this",
+      "effect": "noErr for every input measured (NULL unit, NULL name, NULL description, version 0 and 1); nothing is published: the host does not make the description findable in its own process either. Publication to other processes is not reproduced",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox AUComponent.h (declared at iOS 7.0, deprecated at iOS 13.0); the host's own symbol, called through dlsym by tests/backports/host/audiotoolbox-functions/functions.m (checks=audiotoolbox-functions failures=0)"
+    },
+    {
+      "api": "CopyNameFromSoundBank",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; an application that reads a DLS or SF2 bank's name links against this",
+      "effect": "the bank's INAM name for a DLS bank ('QuickTime Music Synthesizer  ' for gs_instruments.dls); kAudioUnitErr_InvalidFile (-10871) and the URL's last path component for a missing file, a directory, or a file that is not a bank. A SoundFont (SF2) bank is not read: no SF2 file was on the measured host",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox.h (declared at iOS 7.0); the host's own symbol, called through dlsym by tests/backports/host/audiotoolbox-functions/functions.m (checks=audiotoolbox-functions failures=0)"
+    },
+    {
+      "api": "CopyInstrumentInfoFromSoundBank",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; an application that lists a DLS or SF2 bank's instruments links against this",
+      "effect": "one dictionary per instrument of a DLS bank (LSB, MSB, program, name), 235 entries equal to the host's for gs_instruments.dls; fnfErr (-43) for a missing file, kAudioUnitErr_InvalidFile (-10871) for a directory or a file that is not a bank. A SoundFont (SF2) bank is not read; a truncated bank gives only its whole instruments, where the host gives some partial ones",
+      "facts": "facts/AVFAudio/AudioToolboxFunctions.md",
+      "source": "SDK 16.4 AudioToolbox.h (declared at iOS 7.0); the host's own symbol, called through dlsym by tests/backports/host/audiotoolbox-functions/functions.m (checks=audiotoolbox-functions failures=0)"
+    },
+    {
+      "api": "AudioComponentCopyConfigurationInfo",
+      "kind": "function",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the function: the dictionary it returns is the component's own configuration (its icon URL, channel configurations, validation result), read from the component's bundle, which the port has no bundle to read",
+      "effect": "until built: the symbol is absent from the release. The host answers -3000 for NULL and for an absent component, and status 0 with a dictionary for the generic output (facts/AVFAudio/AudioToolboxFunctions.md)",
+      "source": "SDK 16.4 AudioToolbox AUComponent.h (declared at iOS 16.0)"
+    },
+    {
+      "api": "AudioWorkIntervalCreate",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the function: it returns an os_workgroup interval, and the port has no os_workgroup to return (the iOS 6.1.3 runtime has no workgroups to join)",
+      "effect": "until built: the symbol is absent from the release. The host returns a non-NULL interval for a name, clock and NULL attributes (facts/AVFAudio/AudioToolboxFunctions.md)",
+      "source": "SDK 16.4 AudioToolbox AudioWorkInterval.h (declared at iOS 14.0)"
     }
   ]
 }

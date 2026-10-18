@@ -1,15 +1,14 @@
-# AudioToolbox's functions, first batch: eight functions, iOS 7 to 15
+# AudioToolbox's functions, iOS 7 to 26: 24 implemented, 2 owed
 
 Carried in `libAVFAudioBackports.dylib`. The registry is `registry/AVFAudio/iosaudiotoolboxfunctions.json`. The sources are
-`AVFAudio/AudioToolboxFunctions7.m`, `AudioToolboxFunctions9.m`, `AudioToolboxFunctions11.m` and `AudioToolboxFunctions15.m`, named by
-the release that introduced each function. The release this port runs on (iOS 6.1.3, armv7) exports none of them
+`AVFAudio/AudioToolboxFunctions{7,9,10,11,14,15,16,17,18,26}.m`, named by the release that introduced each function. The release this port runs on (iOS 6.1.3, armv7) exports none of them
 (`tools/image-exports.lua 6.1.3 armv7`).
 
 The oracle is the host's own function of the same name, called through `dlsym` with the same inputs. The host test is
 `tests/backports/host/audiotoolbox-functions/functions.m`, and `functions.sh` runs it. Its last line is
 `checks=audiotoolbox-functions failures=0`. Each port definition is compiled under a `CharonTest` name, so the host's symbol and the
 port's sit in one process. Two mutations were run on purpose: the last-active time as 1 and the unknown-extension status as 0. The
-test failed on both (5 FAIL lines), and the sources were reverted.
+test failed on both (5 FAIL lines), and the sources were reverted. The drum bank's MSB changed to 119 fails two checks (2 FAIL lines), and the source was restored.
 
 ## iOS 7: `AudioComponentGetLastActiveTime`, `AudioOutputUnitGetHostIcon`
 
@@ -134,8 +133,78 @@ The three functions of this section are declared in `AVFAudio/CharonAudioToolbox
 have (`AudioStreamPacketDependencyDescription`, `AudioConverterOptions`, `AudioConverterComplexInputDataProcRealtimeSafe`). The header
 is guarded on `CA_REALTIME_API`, which the iOS 26 SDK defines, so a 26 SDK build does not see the types twice.
 
-## Not yet in this file
+## iOS 7: `AudioComponentGetIcon`
 
-`AudioComponentGetIcon`, `AudioComponentCopyIcon`, `AudioComponentCopyConfigurationInfo`, `AudioOutputUnitPublish`, the two sound bank
-functions and `AudioWorkIntervalCreate` are the rest of the round's functions. They are written in their own sections, with their own
-measurements, when they are in.
+The host answers nil for NULL. For the generic output it answers an image of 32 by 32 points at every size asked: 0, 16, 32,
+64 and 128 (measured on the macOS host; `functions.m`, `printIcons`). The port returns a blank image of that size for any
+component, and nil for NULL. The host's image is the component's own artwork, which the port does not carry, so the pixels
+differ. The iOS host's answer for a size is not measured, since the host test runs on macOS. The port's definition is
+iOS-only (its return type is UIImage), so the host test prints the host's answers and does not compile the port's
+definition. The SDK deprecates the function at iOS 14, in favour of `AudioComponentCopyIcon`.
+
+## iOS 14: `AudioComponentCopyIcon`
+
+The host answers an image for the generic output and nil for NULL (measured, `printIcons`). The port answers the same
+way: a blank 32 by 32 image, and nil for NULL. The pixels differ, as above. A component the macOS host does not find (the
+sampler, which `AudioComponentFindNext` answers NULL for in that process) was not measured, so the answer for it is not
+claimed.
+
+## iOS 7: `AudioOutputUnitPublish`
+
+The host answers noErr (0) for every input measured: a description with a unit, a NULL unit, a NULL name, version 0, and a
+NULL description (`checkPublish` compares each with the port's answer). After the call the host does not make the published
+description findable in its own process: `AudioComponentFindNext` answers NULL for it. The port does nothing and returns noErr,
+so an application in this process finds the same components before and after the call, as it does on the host.
+The release publishes the unit to other processes, which may find it through the audio component manager. This port hosts
+each unit in its own process, so there is no other process for the publication to reach; that is not reproduced.
+
+## iOS 7: `CopyNameFromSoundBank`, `CopyInstrumentInfoFromSoundBank`
+
+A DLS bank is a RIFF form `DLS ` with an `INFO` list holding the bank's name (its `INAM`) and a `lins` list holding one
+`ins ` list per instrument. The instrument's `insh` chunk gives its bank word and its program; its own `INFO` list gives its name.
+The port reads those chunks (`AudioToolboxFunctions7.m`).
+
+The host's name for `gs_instruments.dls` is "QuickTime Music Synthesizer  " (29 characters, with two trailing spaces),
+status 0. The host's instrument list has 235 entries, and the port's is equal to it entry for entry (`isEqualToArray`). Each
+entry's keys are `LSB`, `MSB`, `program` and `name`, and the mapping is:
+
+- `LSB` is the second byte of the bank word (`(bank >> 8) & 0x7f`). Bits 0 to 7 of the bank word are zero in this file, and
+  their use is not measured.
+- `MSB` is 120 when the bank word's top bit is set (the 12 drum entries) and 121 otherwise (`probe16`, `dls_expect.py`
+  against the host's output, all 235 lines).
+- `program` is the instrument's number, and `name` its `INAM`, with the trailing spaces the file has.
+
+The host reads a DLS bank whose name ends in `.sf2` by its content, and the port does too: the same bytes under the name
+`copy.sf2` give the same 235 entries from both (`checkSoundBanks`).
+
+The host's answers for the other files, measured on the macOS host:
+
+- A missing file: name -10871, with the URL's last path component as the name (for `absent.dls`); the instrument list is
+  fnfErr (-43). Both the port and the host are checked for these.
+- A directory: name -10871 with its last path component, and the list -10871. Both are checked.
+- A text file (the host's name call is not made, see below): the list is -10871. The port's answer is checked against it.
+- A bank cut to its first 100 bytes: the host's list status is 0 with 1 entry, and the port's is 0 with 0 entries (printed,
+  not counted). The host reads part of the instrument it cannot finish; the port reads only the instruments that are whole.
+- The host traps (exit 133) on the name call for an empty file, a text file and an `Info.plist`, and hangs on a truncated bank
+  (the 100-byte copy; no answer within four seconds). The host's answers for those names are not measured, so the port's
+  answer there is -10871 with the component, and the test does not call the host for them.
+
+A SoundFont bank (`sfbk`) is not read: no `.sf2` file was on the machine the host was measured on
+(`find /System/Library /Library -iname '*.sf2'` finds none). The port answers -10871 for a SoundFont, and that answer is not
+measured against the host's.
+
+## Owed in this file
+
+`AudioComponentCopyConfigurationInfo` (iOS 16) and `AudioWorkIntervalCreate` (iOS 14) are owed: the rows say so, and no
+port definition exists for either.
+
+`AudioComponentCopyConfigurationInfo` answers, for the generic output component, status 0 and a dictionary with
+`AvailableArchitectures`, `BusCountWritable`, `ChannelConfigurations`, `HasCustomView`, `IconURL`, `InitialInputs`,
+`InitialOutputs`, `MIDIProtocol`, `SupportedChannelLayoutTags` and `ValidationResult` (measured on the macOS host, `probe17`).
+It answers -3000 for NULL and for a component the process does not find. The dictionary is the component's own configuration,
+read from its bundle, which the port has no bundle to read, so the function stays owed until that is decided.
+
+`AudioWorkIntervalCreate` returns an `os_workgroup_interval_t` (`AudioWorkInterval.h`, iOS 14), and the port has no
+`os_workgroup` to return. The host returns a non-NULL interval for a name and for a NULL name, with a clock of 0 and NULL attributes
+(`probe19`, macOS host). The function stays owed until the port has a workgroup to return.
+

@@ -28,10 +28,13 @@ renames="-DAudioComponentGetLastActiveTime=CharonTestAudioComponentGetLastActive
 -DAudioConverterPrepare=CharonTestAudioConverterPrepare \
 -DAudioConverterFillComplexBufferRealtimeSafe=CharonTestAudioConverterFillComplexBufferRealtimeSafe \
 -DAudioConverterFillComplexBufferWithPacketDependencies=CharonTestAudioConverterFillComplexBufferWithPacketDependencies \
--DAudioFileWritePacketsWithDependencies=CharonTestAudioFileWritePacketsWithDependencies"
+-DAudioFileWritePacketsWithDependencies=CharonTestAudioFileWritePacketsWithDependencies \
+-DAudioOutputUnitPublish=CharonTestAudioOutputUnitPublish \
+-DCopyNameFromSoundBank=CharonTestCopyNameFromSoundBank \
+-DCopyInstrumentInfoFromSoundBank=CharonTestCopyInstrumentInfoFromSoundBank"
 
 objects=""
-for file in AudioToolboxFunctions7 AudioToolboxFunctions9 AudioToolboxFunctions11 AudioToolboxFunctions10 AudioToolboxFunctions15 AudioToolboxFunctions16 AudioToolboxFunctions17 AudioToolboxFunctions18 AudioToolboxFunctions26; do
+for file in AudioToolboxFunctions7 AudioToolboxFunctions14 AudioToolboxFunctions9 AudioToolboxFunctions11 AudioToolboxFunctions10 AudioToolboxFunctions15 AudioToolboxFunctions16 AudioToolboxFunctions17 AudioToolboxFunctions18 AudioToolboxFunctions26; do
     # The renames are split on the spaces between them, as separate arguments, on purpose.
     xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations -I "$avfaudio" $renames \
         -c "$avfaudio/$file.m" -o "$build/$file.o" 2> "$build/$file.err" || { echo "FAIL building $file"; head -10 "$build/$file.err"; exit 1; }
