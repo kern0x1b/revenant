@@ -92,11 +92,18 @@ Also measured and matched (`host/oslog-buffer`):
 
 Still open, measured on the host and not matched (`coordination/crutches.md`):
 
-- type 5 (unnamed) is written as `5 PRIVACY sz:N`, with the privacy word of nibble 0 or 1 `private` and nibble 2
-  `public`. The size is not a rule yet: a pointer to the bytes `00` gives `sz:1`, `01 00` gives 2, `05 00` gives 2,
-  `61 00` gives 2, `61 62 00` gives 4, `61 62 63 64 65 00` gives 1, `ff 00` gives 3 and `ff ff 00` gives 4 (the 32-byte
-  `x` pointer used above also gives 1). A length of 8 is the only length measured: a 16-byte item crashes the host, and
-  a 4-byte item traps it;
+- type 5 (a wide string, as `%ls` reads it) is a mismatch for `%d`, written as `5 PRIVACY sz:N`, with the privacy
+  word of nibble 0 or 1 `private` and nibble 2 `public`. Its size, for an item of 8 bytes (the length a 64-bit build
+  packs for a pointer), is read from the first two UTF-16LE units the pointer holds: a first unit of 0 gives 5 when
+  the second unit is 1 to 16, and 1 otherwise; otherwise the units before a nul among the first two are counted in
+  UTF-8 bytes, plus one (`50 39 00 00` gives 4, `41 00 00 00` gives 2); a surrogate before that nul, or no nul
+  among the two units, gives 1 (`41 00 42 00 43 00` gives 1). The rule matches the host on the 2000 and 3000 random
+  pointed values of a fixed-seed probe (not in the repo) and on the sweep of each byte of the first two units. A nul at the third
+  unit or later is not seen: `41 00 42 00 00 00` gives 1 and `41 00 42 00 43 00 00 00` gives 1 (crafted cases of the
+  oslog-buffer test). Not measured: any
+  other length (a 16-byte item crashes the host, and a 4-byte item traps it), the nibbles 1 and 2 of a NULL pointer (the
+  nibble 0 answer is measured: `[5 sz:0]`, no privacy word), a wide-string conversion other than `%d`, and a read-only
+  target at nibble 0;
 - the read-only test is measured on arm64 macOS and on 6.1.3 (armv7, the iPhone 4S emulator): the 32-bit segment
   branch gives the host's privacy words for every string case of the battery. The port half is built for armv7 and run
   with `xmake emulate -d iPhone4,1 -r 6.1.3 run /usr/libexec/oslogbuffer -` (the probe of

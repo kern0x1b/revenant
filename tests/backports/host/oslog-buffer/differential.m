@@ -193,6 +193,19 @@ int main(int argc, char **argv)
         } while (0);
         /* A string the host writes as private at nibble 0 is one in writable memory: the array below is on the stack. */
         char writable[] = "dyn";
+        /* Type 5 items point at eight bytes of UTF-16LE units: a unit run, a zero first unit with the second unit at the
+           edges of 1 to 16, a surrogate, a three-byte unit, no nul among the first two units, a nul at the second unit
+           only, a nul at the third unit (not seen), and an empty text. */
+        const uint8_t w5_ab[8] = {0x41, 0, 0x42, 0, 0, 0, 0, 0};
+        const uint8_t w5_a_nul[8] = {0x41, 0, 0, 0, 0, 0, 0, 0};
+        const uint8_t w5_abc_nul[8] = {0x41, 0, 0x42, 0, 0x43, 0, 0, 0};
+        const uint8_t w5_zero_one[8] = {0, 0, 0x01, 0, 0, 0, 0, 0};
+        const uint8_t w5_zero_sixteen[8] = {0, 0, 0x10, 0, 0, 0, 0, 0};
+        const uint8_t w5_zero_seventeen[8] = {0, 0, 0x11, 0, 0, 0, 0, 0};
+        const uint8_t w5_three_bytes[8] = {0x50, 0x39, 0, 0, 0, 0, 0, 0};
+        const uint8_t w5_surrogate[8] = {0x41, 0, 0x00, 0xdc, 0, 0, 0, 0};
+        const uint8_t w5_no_nul[8] = {0x41, 0, 0x42, 0, 0x43, 0, 0x44, 0};
+        const uint8_t w5_empty[8] = {0};
         CRAFT_CASE("v %d w", craft_pointer(2, 0, writable))
         CRAFT_CASE("v %m w", craft_value(6, 0, 0, 4))
         CRAFT_CASE("v %d w", craft_value(0, 0, 1, 8))
@@ -237,6 +250,21 @@ int main(int argc, char **argv)
         CRAFT_CASE("v %d w %d x", craft_value(0, 0, 7, 4), craft_claim(3))
         CRAFT_CASE("v %d w %d x", craft_value(0, 0, 7, 4), craft_value(0, 0, 0, 0), craft_claim(2))
         CRAFT_CASE("v %d w", craft_value(7, 0, 1, 8))
+        /* A type 5 item is a mismatch for %d, named 5 with its size from its units, and the next conversion takes the
+           next item. The privacy nibbles are 0 (a writable pointer, so private), 1 (private) and 2 (public). */
+        CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_ab))
+        CRAFT_CASE("v %d w", craft_pointer(5, 2, w5_ab))
+        CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_zero_one))
+        CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_zero_sixteen))
+        CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_zero_seventeen))
+        CRAFT_CASE("v %d w", craft_pointer(5, 1, w5_three_bytes))
+        CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_surrogate))
+        CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_no_nul))
+        CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_empty))
+        CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_a_nul))
+        CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_abc_nul))
+        CRAFT_CASE("v %d w", craft_pointer(5, 0, NULL))
+        CRAFT_CASE("v %d w %d x", craft_pointer(5, 0, w5_ab), craft_value(0, 0, 7, 4))
 #ifdef CHARON_PORT
         if (hex_output)
             fflush(stdout);

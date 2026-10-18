@@ -266,11 +266,14 @@ static BOOL in_read_only_segment(const void *pointer)
 
 /* Measured on the host, for the buffer path: an integer without a length modifier takes a scalar of up to four
    bytes or a type 6 item, %s takes a string, %@ a string or an object, and %.Np a byte run. Any other item is
-   written as a mismatch and consumed. Types 5 and 7 are not measured yet, so they are read as they always were. */
+   written as a mismatch and consumed. A type 5 item is a mismatch for %d, measured; a wide-string conversion reads
+   it as before, and the other conversions are taken to mismatch as well, not measured. A type 7 item is passed over. */
 static BOOL item_fits(const CharonSpec *spec, char conversion, const CharonItem *item)
 {
-    if (item->type == 5 || item->type == 7)
+    if (item->type == 7)
         return YES;
+    if (item->type == 5)
+        return conversion == 's' && spec->length[0] == 'l';
     switch (conversion) {
     case 'd': case 'i': case 'u': case 'o': case 'x': case 'X':
         if (spec->length[0])
@@ -287,10 +290,38 @@ static BOOL item_fits(const CharonSpec *spec, char conversion, const CharonItem 
     }
 }
 
+/* The size the host reports for a type 5 item of 8 bytes, a pointer to UTF-16LE units (measured on the host: the
+   random pointed values, a sweep of each byte position of the first two units, and crafted texts). A first unit of
+   0 gives 5 when the second unit is 1 to 16, and 1 otherwise. Otherwise the text is the units before a nul among the
+   first two units, counted in UTF-8 bytes, and the size is that count plus one; a surrogate before that nul, or no
+   nul among the two units, gives 1. A nul at the third unit or later is not seen. A NULL pointer gives 0, measured,
+   and at nibble 0 it has no privacy word. Other lengths of the item are not measured. */
+static unsigned long long wide_text_size(const void *pointer)
+{
+    const unsigned char *units = pointer;
+    if (!units)
+        return 0;
+    unsigned first = units[0] | (units[1] << 8);
+    unsigned second = units[2] | (units[3] << 8);
+    if (first == 0)
+        return second >= 1 && second <= 16 ? 5 : 1;
+    unsigned long long size = 0;
+    for (unsigned i = 0; i < 4; i += 2) {
+        unsigned unit = units[i] | (units[i + 1] << 8);
+        if (unit == 0)
+            return size + 1;
+        if (unit >= 0xD800 && unit <= 0xDFFF)
+            return 1;
+        size += unit < 0x80 ? 1 : unit < 0x800 ? 2 : 3;
+    }
+    return 1;
+}
+
 /* The mismatch marker: the conversion as the format writes it, the kind of the item the host names, the privacy
    words it prints, and the size it reports. Measured: a string's size is its length and a nul; a scalar's is its
    length byte; an object's is the length of its description and a nul; a count or byte run reports 0. Privacy
-   nibble 3 reports "public private" and a size of 0, and the value is not read. */
+   nibble 3 reports "public private" and a size of 0, and the value is not read. A type 5 item is named by its type
+   number, and its size is the wide_text_size of its pointer. */
 static void append_mismatch(CharonText *text, const char *label, size_t labelLength, const CharonItem *item)
 {
     const char *kind = "OBJECT";
@@ -302,6 +333,8 @@ static void append_mismatch(CharonText *text, const char *label, size_t labelLen
         kind = "STRING";
     else if (item->type == 3)
         kind = "DATA";
+    else if (item->type == 5)
+        kind = "5";
     unsigned level = item->privacy & 3;
     const void *pointer = (const void *)(uintptr_t)read_little_endian(item->data, item->length);
     const char *privacy = "";
@@ -314,7 +347,7 @@ static void append_mismatch(CharonText *text, const char *label, size_t labelLen
     else if (level == 3)
         privacy = "public private";
     /* Measured: a NULL string at nibble 0 has no word either, as a read-only one does. */
-    else if (item->type == 2 && !(item->privacy & 4) && pointer && !in_read_only_segment(pointer))
+    else if ((item->type == 2 || item->type == 5) && !(item->privacy & 4) && pointer && !in_read_only_segment(pointer))
         privacy = "private";
     unsigned long long size = 0;
     if (level == 3) {
@@ -322,6 +355,8 @@ static void append_mismatch(CharonText *text, const char *label, size_t labelLen
     } else if (item->type == 2) {
         const char *string = pointer;
         size = string ? strlen(string) + 1 : 0;
+    } else if (item->type == 5) {
+        size = wide_text_size(pointer);
     } else if (item->type == 0 || item->type == 6) {
         size = item->length;
     } else if (item->type == 4) {
