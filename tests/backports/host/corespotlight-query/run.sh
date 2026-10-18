@@ -38,6 +38,12 @@ port() {
         xcrun clang -fobjc-arc -Wall -Werror -Wno-deprecated-declarations -Wno-incomplete-implementation -I"$dir" -c "$dir/$file.m" -o "$dir/$file.o"
         objects="$objects $dir/$file.o"
     done
+    # The error domain is the generator's constant, rendered from 10.0 and not defined by hand in the sources; the port links
+    # the same generated file the band links. The generator's output is git-ignored, so a missing file is named, not guessed.
+    gen="$spotlight/../.gen/CoreSpotlight"
+    [ -f "$gen/CoreSpotlightConstants100.m" ] || { echo "missing $gen/CoreSpotlightConstants100.m: run the generator (the gate writes it)" >&2; exit 1; }
+    xcrun clang -fobjc-arc -Wall -Werror -Wno-deprecated-declarations -c "$gen/CoreSpotlightConstants100.m" -o "$dir/CoreSpotlightConstants100.o"
+    objects="$objects $dir/CoreSpotlightConstants100.o"
     xcrun clang -fobjc-arc -Wall -Werror -Wno-deprecated-declarations -I"$dir" "$here/differential.m" $objects -framework Foundation -o "$dir/differential"
     "$dir/differential"
 }
