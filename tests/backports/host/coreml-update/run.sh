@@ -97,4 +97,20 @@ case_run sgd sgd 0.1 0.0 0.999 1e-8
 case_run sgdm sgd 0.1 0.9 0.999 1e-8
 case_run adam adam 0.01 0.9 0.999 1e-8
 
+# Models whose convolution asks for too many output channels. 2^31 - 1 fails the check on the dimension itself;
+# 2^27 passes it, and the weights it implies (2^27 * 9) fail the check on the product. The sizes that follow
+# from them overflow a 32-bit product, so the trainer must refuse each by name, before any allocation.
+for channels in 2147483647 134217728; do
+    dir="$build/oversized-$channels"
+    mkdir -p "$dir"
+    "$build/gen" "$dir" sgd 0.1 0.0 0.999 1e-8 $minibatch $epochs $samples $seed $channels > "$dir/gen.log"
+    if "$build/train-check" "$dir/model.mlmodel" "$dir/input.f32" "$dir/target.f32" "$dir/port" $samples \
+        > "$dir/port.log" 2>&1; then
+        echo "oversized $channels: the trainer accepted it"
+        result=1
+    else
+        echo "oversized $channels: refused: $(cat "$dir/port.log")"
+    fi
+done
+
 exit $result

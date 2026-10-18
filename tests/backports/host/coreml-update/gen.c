@@ -155,10 +155,13 @@ static void write_file(const char *path, const void *data, size_t len)
 
 int main(int argc, char **argv)
 {
-    if (argc != 11) {
-        fprintf(stderr, "usage: gen OUTDIR sgd|adam LEARNING_RATE MOMENTUM_OR_BETA1 BETA2 EPS MINIBATCH EPOCHS SAMPLES SEED\n");
+    if (argc != 11 && argc != 12) {
+        fprintf(stderr, "usage: gen OUTDIR sgd|adam LEARNING_RATE MOMENTUM_OR_BETA1 BETA2 EPS MINIBATCH EPOCHS SAMPLES SEED [CONV_OUTPUT_CHANNELS]\n");
         return 2;
     }
+    /* the convolution's output channels: two unless the caller asks for another count, which the oversized-model
+     * refusal test does, with the weights of two channels left as they are */
+    uint64_t conv_out = argc == 12 ? (uint64_t)atoll(argv[11]) : 2;
     const char *outdir = argv[1];
     int adam = strcmp(argv[2], "adam") == 0;
     double learning_rate = atof(argv[3]);
@@ -180,7 +183,7 @@ int main(int argc, char **argv)
 
     /* conv: 1x6x6 -> 2x4x4 */
     buf conv = {0, 0, 0};
-    f_varint(&conv, 1, 2);
+    f_varint(&conv, 1, conv_out);
     f_varint(&conv, 2, 1);
     { uint64_t k[2] = {3, 3}; f_varints_packed(&conv, 20, k, 2); }
     { uint64_t s[2] = {1, 1}; f_varints_packed(&conv, 30, s, 2); }
