@@ -13,7 +13,7 @@ local emit = import("emit", {anonymous = true})
 
 -- The first part of one module's round trip: its model, rendered to its source. Returns the part the batches and the second part read, or nil
 -- and the reason the SDK's model has none.
-local function prepare(folder, out_dir, name, known, classes, public, headers, graph)
+local function prepare(folder, out_dir, name, known, classes, public, headers, graph, bounds)
     local sdk_rows, reason = swift_model.model(folder, name)
     if sdk_rows == nil then
         return nil, reason
@@ -26,7 +26,7 @@ local function prepare(folder, out_dir, name, known, classes, public, headers, g
     local identifiers = swift_model.non_ascii_identifiers(sdk_rows)
     -- the modules that depend on this one: a row that names one of them is that module's declaration (render, compare)
     local attributed = swift_model.dependents_of(graph, name)
-    local text, _, witnessed = swift_render.render(sdk_rows, name, known, classes, public, attributed)
+    local text, _, witnessed = swift_render.render(sdk_rows, name, known, classes, public, attributed, bounds)
     emit.file(source, text, identifiers)
     local underlying = headers and swift_roundtrip.underlying_of(headers, module_dir, name) or nil
     return {name = name, module_dir = module_dir, source = source, sdk_rows = sdk_rows, identifiers = identifiers,
@@ -127,6 +127,8 @@ function run(args)
     local public = swift_model.public_modules(args.sdk)
     -- the SDK's import graph: a module's skeleton names no module that depends on it (prepare)
     local graph = swift_model.import_graph(args.sdk)
+    -- the associated-type bounds of the SDK's protocols, each module's own (prepare)
+    local bounds = swift_model.associated_bounds(args.sdk)
     os.mkdir(args.out)
     local started = os.mclock()
     -- the digester's dumps of every module, run as one batch first: the superclass chains of every module are read from them, and each
@@ -149,7 +151,7 @@ function run(args)
         local entry = {name = name}
         try {
             function ()
-                entry.prep, entry.reason = prepare(folder, args.out, name, known, classes, public, args.headers, graph)
+                entry.prep, entry.reason = prepare(folder, args.out, name, known, classes, public, args.headers, graph, bounds[name])
             end,
             catch {
                 function (err)

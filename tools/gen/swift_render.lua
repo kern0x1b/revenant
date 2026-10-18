@@ -462,7 +462,9 @@ local function render_member(row, indent, access)
     access = access or ""
 
     if row.kind == "swift-associatedtype" then
-        table.insert(lines, pad .. "associatedtype " .. ident(row.name))
+        -- its inheritance (the bound the SDK's interface states, with_bounds) is the cell conformances
+        local bound = row.conformances ~= NO_VALUE and (" : " .. row.conformances) or ""
+        table.insert(lines, pad .. "associatedtype " .. ident(row.name) .. bound)
         return lines
     end
     if row.kind == "swift-constant" and row.container ~= NO_VALUE then
@@ -917,16 +919,101 @@ local function self_qualified_rows(rows, framework, classes)
     return out, changed
 end
 
+-- The rows with the framework's protocols given what their interfaces state and the digester's dump lacks (swift_model.associated_bounds):
+-- an associated type's bound goes into its row's conformances cell, and a protocol's primary associated types go into its signature
+-- (before any Self term, as generic_clause reads it). bounds is the framework's map (protocol -> {associated, primaries}), or nil.
+local function with_bounds(rows, bounds)
+    if bounds == nil then
+        return rows
+    end
+    local out = {}
+    for _, row in ipairs(rows) do
+        local copy = nil
+        local function own()
+            if copy == nil then
+                copy = {}
+                for k, v in pairs(row) do
+                    copy[k] = v
+                end
+            end
+            return copy
+        end
+        if row.kind == "swift-associatedtype" and row.conformances == NO_VALUE and bounds[row.container] then
+            local bound = bounds[row.container].associated[row.name]
+            if bound then
+                own().conformances = bound
+            end
+        elseif row.kind == "swift-protocol" and row.container == NO_VALUE and bounds[row.name] and bounds[row.name].primaries then
+            local primaries = bounds[row.name].primaries
+            local sig = row.generic_sig
+            if sig == NO_VALUE then
+                own().generic_sig = "<" .. primaries .. ">"
+            else
+                own().generic_sig = "<" .. primaries .. ", " .. string.sub(sig, 2)
+            end
+        end
+        table.insert(out, copy or row)
+    end
+    return out
+end
+
+-- The rows whose conformance is named like one of the row's own generic parameters, with the framework's qualifier on it: the parameter
+-- shadows the protocol in the inheritance clause (PreprocessingEstimator<Preprocessor, Estimator>: Estimator is "inheritance from
+-- non-protocol type 'Estimator'": 22 errors in CreateMLComponents). Only a name the framework declares is qualified.
+local function shadowed_rows(rows, framework)
+    local declared = {}
+    for _, row in ipairs(rows) do
+        if row.container == NO_VALUE and row.owner_module == NO_VALUE then
+            declared[row.name] = true
+        end
+    end
+    local out = {}
+    for _, row in ipairs(rows) do
+        local body = type(row.generic_sig) == "string" and row.generic_sig ~= NO_VALUE and string.match(row.generic_sig, "^<(.*)>$") or nil
+        local params, has_params = {}, false
+        if body ~= nil then
+            for term in string.gmatch(string.match(body, "^(.-)%s+where%s") or body, "[^,]+") do
+                local name = string.match(term, "^%s*([%w_]+)%s*$")
+                if name then
+                    params[name] = true
+                    has_params = true
+                end
+            end
+        end
+        if type(row.conformances) == "string" and row.conformances ~= NO_VALUE and has_params then
+            local items, changed = {}, false
+            for item in string.gmatch(row.conformances, "[^,]+") do
+                if params[item] and declared[item] then
+                    item = framework .. "." .. item
+                    changed = true
+                end
+                table.insert(items, item)
+            end
+            if changed then
+                local copy = {}
+                for k, v in pairs(row) do
+                    copy[k] = v
+                end
+                copy.conformances = table.concat(items, ",")
+                row = copy
+            end
+        end
+        table.insert(out, row)
+    end
+    return out
+end
+
 -- The text of a module's Swift skeleton: a header, the imports, the module-level declarations and the types. known is the set of the
 -- SDK's Swift module names (a set: name -> true). classes is the class index (swift_model.class_index) or nil: with it, a class lists
 -- only the conformances its superclass chain does not already provide. public is the implementation modules' public modules
--- (swift_model.public_modules), or nil for none. Returns the text and the set of the keys (swift_shard.key_of) of the rows the text
+-- (swift_model.public_modules), or nil for none. bounds is the framework's associated-type bounds (swift_model.associated_bounds), or
+-- nil. Returns the text and the set of the keys (swift_shard.key_of) of the rows the text
 -- declares: a row the renderer leaves out (an untyped one, an opaque typealias) is not in it. And the set of the witnesses it declares
 -- for an ObjC or Foundation protocol ("container<TAB>name", WITNESSES): members the model does not give, which the round trip reads as
 -- by design, not as extra.
-function render(rows, framework, known, classes, public, attributed)
+function render(rows, framework, known, classes, public, attributed, bounds)
     local typed = {}
-    for _, row in ipairs(rows) do
+    for _, row in ipairs(shadowed_rows(with_bounds(rows, bounds), framework)) do
         if not untyped(row) and not projected(row) and not attributed_row(row, attributed) then
             table.insert(typed, row)
         end

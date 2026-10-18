@@ -136,6 +136,44 @@ function dependents_of(graph, module)
     return out
 end
 
+-- The associated types of the SDK's protocols, read from their swiftinterfaces: the digester's dump names an associated type and none of
+-- its inheritance, so "associatedtype Transformer : CreateMLComponents.TabularTransformer" was rendered bare (Transformer.Input is "is not
+-- a member type": 424 errors in CreateMLComponents), and it names no primary associated types, so "public protocol Supervised<Transformer,
+-- Annotation>" was rendered without them (protocol 'X' does not have primary associated types: 164 errors there). Returns
+-- bounds[module][protocol] = {associated = {name = the text after the colon, up to a where clause}, primaries = "A, B" or nil}. A protocol
+-- block is the lines from "public protocol" to its closing brace at column 0.
+function associated_bounds(sdk)
+    local out = {}
+    for _, filepath in ipairs(files.glob(path.join(sdk, "**", "*.swiftinterface"))) do
+        local module = string.match(filepath, "([^/]+)%.swiftmodule/[^/]+%.swiftinterface$")
+        if module and out[module] == nil then
+            local bounds = {}
+            local current = nil
+            local handle = assert(io.open(filepath, "rb"), "cannot read " .. filepath)
+            for line in handle:lines() do
+                local declared, primaries = string.match(line, "^public protocol ([%w_]+)<([^>]*)>")
+                if declared == nil then
+                    declared = string.match(line, "^public protocol ([%w_]+)")
+                end
+                if declared then
+                    current = {associated = {}, primaries = primaries}
+                    bounds[declared] = current
+                elseif string.match(line, "^}") then
+                    current = nil
+                elseif current then
+                    local name, bound = string.match(line, "^%s+associatedtype ([%w_]+)%s*:%s*(.-)%s*$")
+                    if name then
+                        current.associated[name] = string.match(bound, "^(.-)%s+where%s") or bound
+                    end
+                end
+            end
+            handle:close()
+            out[module] = bounds
+        end
+    end
+    return out
+end
+
 -- The clang modules of the SDK a Swift file imports by name (name -> true) and that have no swiftinterface: a framework's modulemap
 -- (_LocationEssentials, Matter, whose frameworks are .tbd only) and the modules the SDK's usr/include modulemap declares (os_object).
 -- The skeleton names them in its types and needs them imported.

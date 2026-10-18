@@ -10,7 +10,7 @@ local order = import("order", {anonymous = true})
 
 -- Renders one module's model into out_dir/<name>.swift and out_dir/<name>.rendered. Returns the number of rows rendered, or nil and the
 -- reason it has none.
-local function write_swift(folder, out_dir, name, known, classes)
+local function write_swift(folder, out_dir, name, known, classes, bounds)
     -- a sidecar of an earlier run is removed first: a module this run does not render has none
     local sidecar = path.join(out_dir, name .. ".rendered")
     if os.isfile(sidecar) then
@@ -25,7 +25,7 @@ local function write_swift(folder, out_dir, name, known, classes)
     -- the SDK's non-ASCII identifiers are written as the SDK spells them (an identifier is a fact of the SDK, and this file is not
     -- committed); any other non-ASCII text is still refused
     local identifiers = swift_model.non_ascii_identifiers(rows)
-    local text, rendered = swift_render.render(rows, name, known, classes)
+    local text, rendered = swift_render.render(rows, name, known, classes, nil, nil, bounds)
     emit.file(filepath, text, identifiers)
     emit.file(sidecar, table.concat(order.keys(rendered), "\n") .. "\n", identifiers)
     return #rows
@@ -48,6 +48,7 @@ function run(args)
     local folder = swift_model.prefetch(args.tree, heavy, args.sdk, triple, all)
     -- the superclass chains of every module, read first (a class's inherited conformances come from the module it inherits from)
     local classes, no_model = swift_model.class_index(folder, all)
+    local bounds = swift_model.associated_bounds(args.sdk)
     for _, l in ipairs(no_model) do
         print("swiftcode: class index, no model: " .. l)
     end
@@ -59,7 +60,7 @@ function run(args)
         local rows, reason, failure = nil, nil, nil
         try {
             function()
-                rows, reason = write_swift(folder, args.out, name, known, classes)
+                rows, reason = write_swift(folder, args.out, name, known, classes, bounds[name])
             end,
             catch {
                 function(err)
