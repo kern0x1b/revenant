@@ -136,6 +136,10 @@ function compile_item(triple, sdk, source, module_dir, name, underlying)
         table.insert(words, "-F")
         table.insert(words, underlying)
         table.insert(words, "-import-underlying-module")
+    elseif os.isfile(path.join(sdk, "usr", "include", name, "module.modulemap")) then
+        -- a clang module of the SDK's own include tree (simd: usr/include/simd/module.modulemap): the compiler finds it through the SDK,
+        -- and its types are the module's ObjC-side declarations (2000 "no type named 'simd_double2'" without it; 44 errors with it)
+        table.insert(words, "-import-underlying-module")
     end
     local quoted = {}
     for i, word in ipairs(words) do

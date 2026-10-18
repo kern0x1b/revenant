@@ -84,6 +84,17 @@ function main()
     check(not flag_value(bare, "-import-underlying-module") and not flag_value(bare, "-F"),
           "a compile with no underlying folder has no -F and no -import-underlying-module")
 
+    -- a clang module of the SDK's include tree (usr/include/Clangy/module.modulemap, simd's shape) is the underlying module with no -F
+    local sdk = path.join(SCRATCH, "sdk")
+    write(path.join(sdk, "usr", "include", "Clangy", "module.modulemap"), "module Clangy [system] {\n  umbrella header \"Clangy.h\"\n}\n")
+    local sdk_item = roundtrip.compile_item("arm64e-apple-ios26.2", sdk, source, other_dir, "Clangy", nil)
+    local sdk_words = words_of(sdk_item.command)
+    check(flag_value(sdk_words, "-import-underlying-module") and not flag_value(sdk_words, "-F"),
+          "a clang module of the SDK's include tree is imported as the underlying module, with no -F")
+    local plain = roundtrip.compile_item("arm64e-apple-ios26.2", sdk, source, other_dir, "Other", nil)
+    check(not flag_value(words_of(plain.command), "-import-underlying-module"),
+          "a module with no clang module is not given an underlying import")
+
     print("swift underlying test: " .. (failures == 0 and "OK" or ("FAIL " .. failures)))
     if failures > 0 then
         os.exit(1)
