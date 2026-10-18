@@ -12,10 +12,30 @@
 }
 
 @synthesize enableRankedResults = _enableRankedResults;
-@synthesize disableSemanticSearch = _disableSemanticSearch;
 @synthesize maxResultCount = _maxResultCount;
 @synthesize maxSuggestionCount = _maxSuggestionCount;
-@synthesize maxRankedResultCount = _maxRankedResultCount;
+
+// disableSemanticSearch and maxRankedResultCount are declared from iOS 18 on. The 6.1.3 build compiles against the 16.4
+// SDK, which does not declare them, and a @synthesize needs the declaration, so the two accessors are written by hand.
+- (BOOL)disableSemanticSearch
+{
+    return _disableSemanticSearch;
+}
+
+- (void)setDisableSemanticSearch:(BOOL)disableSemanticSearch
+{
+    _disableSemanticSearch = disableSemanticSearch;
+}
+
+- (NSInteger)maxRankedResultCount
+{
+    return _maxRankedResultCount;
+}
+
+- (void)setMaxRankedResultCount:(NSInteger)maxRankedResultCount
+{
+    _maxRankedResultCount = maxRankedResultCount;
+}
 
 // The defaults are set by the factories: a context from init or from coding reads zero for the subclass's properties.
 + (CSUserQueryContext *)userQueryContext
