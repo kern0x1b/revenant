@@ -400,6 +400,36 @@
    "reason": "the parameters a model may be updated by, named as the specification's own update parameters name them",
    "facts": "facts/CoreML/CoreML.md",
    "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "+[MLUpdateTask updateTaskForModelAtURL:trainingData:configuration:completionHandler:error:]",
+   "kind": "method",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLUpdateTask.h:23-27, the constructor with a configuration and a completion handler; it carries no annotation of its own, so it is the class's 13.0. It reads the model file, makes the trainer, takes the samples from the batch provider and returns a task that is Suspended until it is resumed; the completion handler is called once, when training ends, with event 0 and the written snapshot. No progress is reported. The configuration is accepted and not used, so the training runs on the CPU. A model the trainer cannot train, a URL that is not a file, or samples it cannot read make it return nil with the reason in the error. Built in CoreMLUpdate13.m; not driven by any host case",
+   "facts": "facts/CoreML/Update13.md",
+   "source": "SDK 16.4, MLUpdateTask.h:23-27"
+  },
+  {
+   "api": "+[MLUpdateTask updateTaskForModelAtURL:trainingData:configuration:progressHandlers:error:]",
+   "kind": "method",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLUpdateTask.h:36-41, the constructor with a configuration and progress handlers; the same as the completion-handler one above, except that the handlers are the caller's. Progress is reported at the training's start, after each mini-batch and at the end of each epoch, with the model as it stands; the configuration is not used. Built in CoreMLUpdate13.m; the host case tests/backports/host/coreml-update/run.sh drives this constructor, and its events and weights are compared with the host's",
+   "facts": "facts/CoreML/Update13.md",
+   "source": "SDK 16.4, MLUpdateTask.h:36-41"
+  },
+  {
+   "api": "-[MLUpdateTask resumeWithParameters:]",
+   "kind": "method",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLUpdateTask.h:50, the resume that takes update parameters. An empty dictionary is accepted and the task resumes as -resume does, moving a Suspended task to Running and starting the training. A non-empty dictionary is refused by name, since a value passed there is not applied. Built in CoreMLUpdate13.m; the host case drives -resume, not this method",
+   "facts": "facts/CoreML/Update13.md",
+   "source": "SDK 16.4, MLUpdateTask.h:50"
   }
  ]
 }
