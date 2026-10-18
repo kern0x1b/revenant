@@ -6,6 +6,13 @@
 local WIDTH = 4
 local TIMEOUT = 1800
 local BATCH_TIMEOUT = 5400
+-- A bound sends SIGTERM, then SIGKILL KILL_AFTER seconds later (gtimeout -k): a command that ignores SIGTERM is never left running.
+local KILL_AFTER = 30
+
+-- The gtimeout words that bound a command to `timeout` seconds: "gtimeout -k 30 1800". Exported for tests/gen/dump_bound_test.lua.
+function bound_prefix(timeout)
+    return string.format("gtimeout -k %d %d", KILL_AFTER, timeout)
+end
 
 -- A word quoted for sh: in single quotes, with each single quote of the word written as '\''.
 function quote(word)
@@ -23,7 +30,8 @@ function run(heavy, folder, label, items, fresh)
             os.rm(item.base .. ".status")
         end
         if not os.isfile(item.base .. ".status") then
-            table.insert(commands, string.format("gtimeout %d %s ; echo $? > %s", TIMEOUT, item.command, quote(item.base .. ".status")))
+            table.insert(commands, string.format("%s %s ; echo $? > %s", bound_prefix(TIMEOUT), item.command,
+                                                 quote(item.base .. ".status")))
         end
     end
     if #commands > 0 then
@@ -33,7 +41,7 @@ function run(heavy, folder, label, items, fresh)
         -- counted below.
         try {
             function()
-                os.execv("gtimeout", {tostring(BATCH_TIMEOUT), heavy, "sh", "-c",
+                os.execv("gtimeout", {"-k", tostring(KILL_AFTER), tostring(BATCH_TIMEOUT), heavy, "sh", "-c",
                                       string.format("xargs -0 -P %d -n 1 sh -c < %s; true", WIDTH, jobs)})
             end,
             catch {

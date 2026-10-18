@@ -163,10 +163,14 @@ end
 -- behind the whole queue (measured 2026-10-17: one module's dump waited 42 minutes with 46 jobs ahead of it), and a queue wait with no
 -- output stops a stream read after ten minutes. The batch runs DUMP_WIDTH dumps at a time, each bounded by DUMP_TIMEOUT seconds, and the
 -- batch by BATCH_TIMEOUT. Each dump writes its JSON, its exit status and its standard error into the run's cache folder, so a dump the
--- cache holds is not run again.
+-- cache holds is not run again. A bound sends SIGTERM and, KILL_AFTER seconds later, SIGKILL (gtimeout -k): gtimeout without -k leaves a
+-- child that ignores SIGTERM running, and two dumps (AdAttributionKit, AppIntents) ran 10 to 13 hours that way.
 local DUMP_WIDTH = 4
 local DUMP_TIMEOUT = 1800
 local BATCH_TIMEOUT = 5400
+local KILL_AFTER = 30
+-- The exit statuses gtimeout gives when it stopped the command: 124 after SIGTERM, 137 after SIGKILL (-k).
+local STOPPED_BY_BOUND = {["124"] = true, ["137"] = true}
 local CACHE_ROOT = path.join(".agent-work", "digester-cache")
 
 -- The cache folder of a run's dumps: <tree>/.agent-work/digester-cache/<key>, the key the digester binary and the SDK's content hash to
@@ -192,9 +196,9 @@ local function dump_base(folder, variant, framework, mode)
 end
 
 -- The shell command of one dump: the digester's own arguments for its variant, with its JSON written to a file and its exit status
--- recorded beside it.
-local function dump_command(sdk, triple, framework, mode, base, variant)
-    local words = {"gtimeout", tostring(DUMP_TIMEOUT), "xcrun", DIGESTER, "-dump-sdk"}
+-- recorded beside it. Exported for tests/gen/dump_bound_test.lua.
+function dump_command(sdk, triple, framework, mode, base, variant)
+    local words = {"gtimeout", "-k", tostring(KILL_AFTER), tostring(DUMP_TIMEOUT), "xcrun", DIGESTER, "-dump-sdk"}
     if variant == "shard" then
         table.insert(words, mode == "" and "''" or mode)
     elseif mode ~= "" then
@@ -237,7 +241,7 @@ local function run_dumps(heavy, folder, sdk, triple, names, variant)
     -- reached has no status file, which is counted here.
     try {
         function()
-            os.execv("gtimeout", {tostring(BATCH_TIMEOUT), heavy, "sh", "-c",
+            os.execv("gtimeout", {"-k", tostring(KILL_AFTER), tostring(BATCH_TIMEOUT), heavy, "sh", "-c",
                                   string.format("xargs -0 -P %d -n 1 sh -c < %s; true", DUMP_WIDTH, jobs)})
         end,
         catch {
@@ -275,6 +279,9 @@ function cached_root(folder, variant, framework, mode)
         return nil, "the digester did not run (the dump batch stopped first)"
     end
     local status = string.gsub(io.readfile(base .. ".status"), "%s+$", "")
+    if STOPPED_BY_BOUND[status] then
+        return nil, string.format("the digester was stopped at its time bound (%d s, status %s)", DUMP_TIMEOUT, status)
+    end
     if status ~= "0" then
         return nil, string.format("the digester exited %s: %s", status, string.sub(io.readfile(base .. ".err") or "", -300))
     end
