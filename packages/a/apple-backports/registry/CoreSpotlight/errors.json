@@ -20,6 +20,16 @@
       "effect": "the Swift struct the compiler derives from CSIndexErrorCode: it wraps an NSError in CSIndexErrorDomain (init(_nsError:), errorDomain, code as the Code enum). It has no runtime of its own, so it is correct exactly where the enum and the domain are",
       "facts": "facts/CoreSpotlight/IndexErrors.md",
       "source": "spec/CoreSpotlight/swift.tsv (the swift-struct, swift-enum and swift-method rows of the 26.2 generator output) for the declared surface"
+    },
+    {
+      "api": "CSSearchQueryError",
+      "kind": "type",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the Swift struct the compiler derives from CSSearchQueryErrorCode: it wraps an NSError in CSSearchQueryErrorDomain (init(_nsError:), errorDomain, code as the Code enum). It has no runtime of its own, so it is correct exactly where the enum and the domain are, which is the window the enum's row gives",
+      "facts": "facts/CoreSpotlight/IndexErrors.md",
+      "source": "spec/CoreSpotlight/swift.tsv (the swift-struct, swift-enum and swift-method rows for CSSearchQueryError, ios=10.0, of the 26.2 generator output) for the declared surface"
     }
   ]
 }
