@@ -21,6 +21,8 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
+. "$here/../../common/generated.sh"
+ensure_generated "$here" Accessibility
 root=$(cd "$here/../../../.." && pwd)
 sources=${ACCESSIBILITY_SRC:-$root/packages/a/apple-backports/Accessibility}
 registry=${REGISTRY_ROOT:-$root/packages/a/apple-backports}
@@ -60,7 +62,7 @@ sources_m=$(ls "$build/generated"/*.m)
 xcrun clang -target arm64-apple-macos26.0 -isysroot "$sdk" -fobjc-arc -O0 -Wall -Wno-nonnull \
     -include "$sources/CharonBrailleMap.h" \
     "$here/protocol-check.m" "$sources/CharonBrailleMap.m" $sources_m \
-    -I"$root/packages/a/apple-backports" -I"$sources" -I"$build" \
+    -I"$root/packages/a/apple-backports" -I"$sources" -I"$build" -I"$root/packages/a/apple-backports/.gen/Accessibility" \
     -framework Foundation -framework CoreGraphics -o "$build/protocol" 2> "$build/build.log" || {
         echo "the protocol check did not build" >&2
         tail -20 "$build/build.log" >&2

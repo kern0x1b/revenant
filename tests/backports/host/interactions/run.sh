@@ -2,7 +2,14 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
+. "$here/../../common/generated.sh"
+ensure_generated "$here" UIKit
 sources=${INTERACTIONS_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
+# a source of the folder, or one the generated layer writes beside it in .gen/UIKit (UIKitConstants110.m is one of those)
+generated=$here/../../../../packages/a/apple-backports/.gen/UIKit
+source_of() {
+    if [ -f "$sources/$1" ]; then printf "%s\n" "$sources/$1"; else printf "%s\n" "$generated/$1"; fi
+}
 harness=${INTERACTIONS_HARNESS:-$here/../../device}
 build=${INTERACTIONS_BUILD:-$(runs_folder charon-interactions-host)}
 sdk=$(xcrun --show-sdk-path)
@@ -18,7 +25,7 @@ frameworks="-framework UIKit -framework Foundation -framework CoreGraphics"
 rm -rf "$build"
 mkdir -p "$build/plain" "$build/ours"
 for file in $files; do
-    xcrun clang $target -fobjc-arc -fvisibility=hidden -w -c "$sources/$file" -o "$build/plain/$file.o"
+    xcrun clang $target -fobjc-arc -fvisibility=hidden -w -c "$(source_of "$file")" -o "$build/plain/$file.o"
 done
 plain=""
 for file in $files; do plain="$plain $build/plain/$file.o"; done
@@ -34,7 +41,7 @@ for constant in $constants; do selectors="$selectors -D$constant=CharonHost$cons
 printf '%s\n' $selectors > "$build/flags"
 objects=""
 for file in $files; do
-    xcrun clang $target -fobjc-arc -fvisibility=default -w $(cat "$build/flags") -c "$sources/$file" -o "$build/ours/$file.o"
+    xcrun clang $target -fobjc-arc -fvisibility=default -w $(cat "$build/flags") -c "$(source_of "$file")" -o "$build/ours/$file.o"
     objects="$objects $build/ours/$file.o"
 done
 xcrun clang $target -fobjc-arc -Wall -Wno-deprecated-declarations -Wno-unguarded-availability-new -I"$harness" \

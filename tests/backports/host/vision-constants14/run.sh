@@ -8,6 +8,8 @@
 #   4. a plant on a scratch copy of the port's file - one value changed - must turn the comparison red
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/generated.sh"
+ensure_generated "$here" Vision
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
 build=${BUILD:-$here/../../../../.agent-work/runs/vision-constants14}
 mkdir -p "$build"

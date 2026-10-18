@@ -26,6 +26,8 @@
 # Run DIRECTLY: three small compiles, four small runs.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/generated.sh"
+ensure_generated "$here" AVFoundation
 root=$(cd "$here/../../../.." && pwd)
 avf=$root/packages/a/apple-backports/AVFoundation
 # the generated protocol header (tools/gen writes it into .gen/AVFoundation/ on gen --all)
