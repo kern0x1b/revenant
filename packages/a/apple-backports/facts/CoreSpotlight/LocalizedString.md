@@ -1,8 +1,9 @@
 # CSLocalizedString: which localization is chosen
 
-`CSLocalizedString` holds a dictionary of strings keyed by language identifier and answers one of them. It is not
-implemented yet: the rule that chooses the key is not pinned, so the class is not in the registry. This file records the
-measurements the rule has to meet, so the next session starts from them.
+`CSLocalizedString` holds a dictionary of strings keyed by language identifier and answers one of them. The class is
+implemented as the two-stage form in the section "The implemented form" below, and that form is held to the host in
+`tests/backports/host/corespotlight-localized`. The sections before it are the measurements that led to the form, kept
+because they show which rules were tried and where each one fails.
 
 The answers are the host's, measured with a scratch program (not committed) that builds one `NSDictionary` per key set,
 sets the preferred languages with the `-AppleLanguages` launch argument, and asks NSBundle's matcher
@@ -77,3 +78,51 @@ English region, under a preference list that has an English language. The host p
 The composite is not implemented: the coordinator's ruling was to stop at the first disagreement. The earlier
 pass-one chain rule (five disagreements, listed above) and this composite each fail rows the other passes, so no rule
 measured so far predicts all 966 rows.
+
+## The implemented form
+
+The choice is made each time `localizedString` is asked, from the user's `AppleLanguages` (`NSUserDefaults`), in two stages
+and then a fallback:
+
+1. `+[NSBundle preferredLocalizationsFromArray:forPreferences:]` over the dictionary's keys in the dictionary's own
+   enumeration order, with the preferred languages alone. The first answer that is a key wins.
+2. If that answers nothing, the same call with `en_US` appended to the preferred languages. The first answer that is a key
+   wins.
+3. If that answers nothing, the dictionary's first enumerated key.
+
+The matcher answers nothing when it has no localization, and then it returns its first element. So each call puts a probe
+(`charon.no-match`, which is not a language) first in the keys: an answer equal to the probe means the matcher answered
+nothing. The probe is not a key, so it cannot win.
+
+The matcher is the release's own call, `NSBundle`'s. The claim that on the device the release's own matcher decides stages 1
+and 2, as the host's does, is the coordinator's ruling and is not measured on a device here. The port carries no table of
+its own; the stage order is the only rule it adds.
+
+Measured on the host with the two-stage form (`twostage.m`, scratch, not committed; its answers are reproduced by the
+differential below):
+
+| Set | Rows | Decided by stage 1 | Stage 2 | Stage 3 | Disagreements with the host |
+| --- | --- | --- | --- | --- | --- |
+| Measured (23 preference lists x 42 key sets) | 966 | 806 | 0 | 160 | 0 |
+| Held out (12 new preference lists x 19 new key sets, fixed before the port was written) | 228 | 196 | 0 | 32 | 0 |
+
+Stage 2 decided no row in either set: wherever stage 1 had no answer, the matcher with `en_US` appended had none either, and
+stage 3 decided. Stage 2 is implemented as ruled, but no measured row needs it.
+
+The differential (`tests/backports/host/corespotlight-localized`) runs the port and the host over 35 preference lists (the
+23 measured and the 12 held out) against 61 key sets (the 42 measured and the 19 held out): 2,240 lines, identical after
+addresses are replaced. A planted control, with the fallback set to the last enumerated key, differs from the host on 678
+lines.
+
+### The NSString subclass, as the host measures it
+
+- The object is of class `CSLocalizedString`, reads as the string it localizes to (its length and characters), and is an
+  `NSString` (`isKindOfClass:`). `isEqualToString:` and `isEqual:` with the string answer equal.
+- `localizedString` returns the plain string, class `__NSCFConstantString` for the constant it is given.
+- `copy` returns a `CSLocalizedString` with the same dictionary; `mutableCopy` returns a mutable string (`__NSCFString`).
+- Archived and unarchived, it decodes as a plain `NSTaggedPointerString` with the same text.
+- An empty dictionary: `localizedString` is nil, and the object reads as the empty string (length 0).
+- A nil dictionary: `init` returns an object and `localizedString` crashes the host (exit 139). The port answers nil and
+  reads as empty, which is not the host's crash; that difference is not reproduced, and it is not in the differential.
+- The host copies the dictionary at initialisation: a change to the mutable dictionary afterwards is not seen (measured:
+  `before=one after=one`). The port copies it too, and the differential checks it.
