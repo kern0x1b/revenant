@@ -1,0 +1,16 @@
+{
+  "framework": "ImageIO",
+  "entries": [
+    {
+      "api": "CharonImageAnimation",
+      "kind": "class",
+      "introduced": "13.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "build the class CharonImageAnimation, which holds the source, the block, the frame index and the timer of one animation",
+      "effect": "built in Graphics/ImageIOAnimation134.m; the two animation functions create one per call",
+      "source": "no SDK header declares this name; the band is this port's own, the release whose object carries it, and the two functions it carries are first held at 13.4 (tools/cache-index/first-rung.lua over the 54 held rungs, 2026-10-18)",
+      "facts": "facts/ImageIO/Animation.md"
+    }
+  ]
+}

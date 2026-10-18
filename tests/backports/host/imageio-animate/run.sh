@@ -49,7 +49,7 @@ xcrun clang -w -fobjc-arc "$here/write-gifs.m" \
 grep -q '^read back delay 0 = 0.1' "$build/fixtures.txt" || { echo "FAIL  the three-frame fixture does not carry the delays the cases compare"; cat "$build/fixtures.txt" | sed 's/^/    /'; exit 1; }
 echo "  FIXTURES: three.gif carries per-frame delays 0.1, 0.3 and 0.5, written once for both builds"
 
-# THE PORT BUILD: its own object plus the option names it reads, which this band does not export below 16.0.
+# THE PORT BUILD: its own object plus the option names it reads, which this band does not export below 13.4.
 # A definition in an object wins over one in a dylib, which is what the port relies on at run time, and
 # cases.m proves it with dladdr.
 # shellcheck disable=SC2086  # $files is a LIST and must word-split
@@ -139,7 +139,7 @@ build_plant() {  # $1 = label; builds the planted port
 }
 
 # 1. the frame walk: stop after the first frame instead of wrapping
-animation=$plant/ImageIOAnimation16.m
+animation=$plant/ImageIOAnimation134.m
 sed -i '' 's/_index = index + 1;/_index = index;/' "$animation"
 hit=$(grep -c '_index = index;' "$animation" || true)
 [ "$hit" -eq 1 ] || { echo "FAIL  the first mutation changed nothing (the pattern is stale)"; exit 1; }

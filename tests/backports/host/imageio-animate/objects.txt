@@ -1,2 +1,2 @@
 # The port objects this harness builds into its own binary, one per line.
-ImageIOAnimation16.m
+ImageIOAnimation134.m

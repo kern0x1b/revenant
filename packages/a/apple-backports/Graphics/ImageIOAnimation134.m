@@ -1,12 +1,13 @@
 // CGAnimateImageAtURLWithBlock and CGAnimateImageDataWithBlock: the animation pair, over the release's own
 // CGImageSource, which is what decodes and indexes the frames.
 //
-// WHICH RELEASE THIS OBJECT IS: 16.0, and it is a new object of a family GraphicsBackports already has
-// twenty-eight objects of. tools/cache-index/first-rung.lua over the 50 held rungs puts
-// _CGAnimateImageAtURLWithBlock, _CGAnimateImageDataWithBlock and the three kCGImageAnimation... names at
-// 16.0 and on no rung below it, which is what makes this a 16.0-band object and not a 13.0 one: the SDK
-// annotates the pair 13.0, and the ladder the answer comes from has no rung between 13.0 and 16.0. It is not
-// a split of anything already carried - nothing else in the tree defines either function.
+// WHICH RELEASE THIS OBJECT IS: 13.4, and it is a new object of a family GraphicsBackports already has
+// twenty-eight objects of. tools/cache-index/first-rung.lua over the 54 held rungs puts
+// _CGAnimateImageAtURLWithBlock and _CGAnimateImageDataWithBlock at 13.4 and on no rung below it: the held
+// rungs at or above 12.0 are 12.0 (absent), 13.4, 16.0 and 18.0. The SDK annotates the pair 13.0, but no
+// held cache sits between 12.0 and 13.4, so the first held rung that exports them is the measured boundary.
+// Measured 2026-10-18; the object was 16.0 on 2026-10-03, before the 13.4 rung was indexed. It is not a split
+// of anything already carried - nothing else in the tree defines either function.
 //
 // WHAT IT DOES, AND EVERY PART OF IT MEASURED ON THE HOST'S OWN ImageIO on 2026-10-03
 // (tests/backports/host/imageio-animate/, which builds this object and the host's ImageIO into two
@@ -64,7 +65,8 @@
 #define CHARON_ANIMATION_PARAM_ERR (-50)
 
 // What the port carries and the release does not export below the band this object is for:
-// Graphics/ImageIONames130.m holds all three (first exported by the 16.0 caches, the SDK says 13.0), and
+// Graphics/ImageIONames130.m holds all three (first held rung 13.4, the SDK says 13.0; that file's band label
+// is an open follow-up in facts/ImageIO/Animation.md), and
 // this object is compiled in every band that compiles that one, so the symbols resolve in every band.
 extern CFStringRef const kCGImageAnimationStartIndex;
 extern CFStringRef const kCGImageAnimationDelayTime;

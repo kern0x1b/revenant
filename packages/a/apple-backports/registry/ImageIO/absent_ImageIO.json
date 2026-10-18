@@ -305,23 +305,23 @@
     {
       "api": "CGAnimateImageAtURLWithBlock()",
       "kind": "function",
-      "introduced": "13.0",
+      "introduced": "13.4",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "a release whose ImageIO has a reader but no animation call: the file is opened with the release's own CGImageSourceCreateWithURL, its frames are decoded by the release's own CGImageSourceCreateImageAtIndex at the index the block is given, and each frame is drawn on the main run loop after the delay that frame's own {GIF} dictionary declares. The frame order, the wrap, the start index, the loop count, the *stop flag, the status for each kind of file and the one-frame shape are all measured from the host's own ImageIO, and the object is a 16.0-band one because that is the first held rung exporting it (the SDK annotates 13.0 and the ladder has no rung between)",
+      "reason": "a release whose ImageIO has a reader but no animation call: the file is opened with the release's own CGImageSourceCreateWithURL, its frames are decoded by the release's own CGImageSourceCreateImageAtIndex at the index the block is given, and each frame is drawn on the main run loop after the delay that frame's own {GIF} dictionary declares. The frame order, the wrap, the start index, the loop count, the *stop flag, the status for each kind of file and the one-frame shape are all measured from the host's own ImageIO, and the object is a 13.4-band one because that is the first held rung exporting it (the SDK annotates 13.0 and no held cache sits between 12.0 and 13.4)",
       "effect": "0 once the animation is under way - the block runs on the main run loop afterwards, not inside this call, unless the file has exactly one frame - with the frames in file order and wrapping to 0, or from kCGImageAnimationStartIndex; the animation repeats until the block sets *stop or kCGImageAnimationLoopCount loops have been drawn; each frame is given the delay its own {GIF} dictionary declares, and kCGImageAnimationDelayTime is read out and not used because the host ignores it (measured with 0.02 and with 2.0 against the same file, both giving the frame's own delays); -22141 for a source that is not an animation (a PNG, a JPEG and a three-frame TIFF) and -50 for a NULL url or a url the release cannot open",
-      "source": "the host's own ImageIO, compared case by case by tests/backports/host/imageio-animate/run.sh, which builds this object and the host's ImageIO into two programs over one set of fixture files (397 records, 0 differences, 2 mutations); tools/cache-index/first-rung.lua over the 50 held rungs, which put the symbol at 16.0 and on no rung below it",
+      "source": "the host's own ImageIO, compared case by case by tests/backports/host/imageio-animate/run.sh, which builds this object and the host's ImageIO into two programs over one set of fixture files (397 records, 0 differences, 2 mutations); tools/cache-index/first-rung.lua over the 54 held rungs (2026-10-18), which put the symbol at 13.4 and on no rung below it",
       "facts": "facts/ImageIO/Animation.md"
     },
     {
       "api": "CGAnimateImageDataWithBlock()",
       "kind": "function",
-      "introduced": "13.0",
+      "introduced": "13.4",
       "minimum": "6.0",
       "status": "implemented",
       "reason": "the same animation as CGAnimateImageAtURLWithBlock, and one object carries both because one is the other's source: this one takes the bytes the caller already has, opens them with the release's own CGImageSourceCreateWithData and runs the animation the URL form would have run. It was an `undecided` row on main, and the decision is that the work is the URL form's work - the frames, the timing, the statuses and the measured behaviour are the same and are all compared in the same harness run, so the row is implemented rather than left to a decision",
       "effect": "what CGAnimateImageAtURLWithBlock answers for a file at the end of the URL, over the bytes themselves: 0 once the animation is under way with the block running on the main run loop afterwards (unless there is exactly one frame), the frames in file order and wrapping, the per-frame delay from each frame's own {GIF} dictionary, the animation ending at *stop or after kCGImageAnimationLoopCount loops, -22141 for bytes that are not an animation and -50 for NULL data",
-      "source": "the host's own ImageIO, compared case by case by tests/backports/host/imageio-animate/run.sh, which builds this object and the host's ImageIO into two programs over one set of fixture files (397 records, 0 differences, 2 mutations); tools/cache-index/first-rung.lua over the 50 held rungs, which put the symbol at 16.0 and on no rung below it",
+      "source": "the host's own ImageIO, compared case by case by tests/backports/host/imageio-animate/run.sh, which builds this object and the host's ImageIO into two programs over one set of fixture files (397 records, 0 differences, 2 mutations); tools/cache-index/first-rung.lua over the 54 held rungs (2026-10-18), which put the symbol at 13.4 and on no rung below it",
       "facts": "facts/ImageIO/Animation.md"
     },
     {
