@@ -11,8 +11,8 @@ static NSString *CharonLocalizedAnswer(NSArray *probe, NSArray *preferences)
     return [answer isEqualToString:CharonLocalizedNoMatch] ? nil : answer;
 }
 
-// The localized string for the user's languages: the preferred languages alone, then with en_US appended, then the
-// dictionary's first enumerated key. The first two choices are NSBundle's matcher, the same call the host makes.
+// The localized string for the user's languages: the first answer of NSBundle's matcher, the same call the host makes,
+// over the preferred languages; with no answer, the dictionary's first enumerated key.
 static NSString *CharonLocalizedValue(NSDictionary *localizedStrings)
 {
     if (localizedStrings.count == 0)
@@ -22,8 +22,6 @@ static NSString *CharonLocalizedValue(NSDictionary *localizedStrings)
     [probe addObjectsFromArray:keys];
     NSArray *preferences = [[NSUserDefaults standardUserDefaults] arrayForKey:@"AppleLanguages"] ?: @[];
     NSString *answer = CharonLocalizedAnswer(probe, preferences);
-    if (!answer)
-        answer = CharonLocalizedAnswer(probe, [preferences arrayByAddingObject:@"en_US"]);
     if (!answer)
         answer = keys[0];
     return localizedStrings[answer];

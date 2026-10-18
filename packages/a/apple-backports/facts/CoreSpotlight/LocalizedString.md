@@ -81,33 +81,34 @@ measured so far predicts all 966 rows.
 
 ## The implemented form
 
-The choice is made each time `localizedString` is asked, from the user's `AppleLanguages` (`NSUserDefaults`), in two stages
-and then a fallback:
+The choice is made each time `localizedString` is asked, from the user's `AppleLanguages` (`NSUserDefaults`), in two stages:
 
 1. `+[NSBundle preferredLocalizationsFromArray:forPreferences:]` over the dictionary's keys in the dictionary's own
-   enumeration order, with the preferred languages alone. The first answer that is a key wins.
-2. If that answers nothing, the same call with `en_US` appended to the preferred languages. The first answer that is a key
-   wins.
-3. If that answers nothing, the dictionary's first enumerated key.
+   enumeration order, with the preferred languages. The first answer that is a key wins.
+2. If that answers nothing, the dictionary's first enumerated key.
+
+An earlier draft had a third step, the same call with `en_US` appended. It was measured to decide no row (see below), so
+it is not in the port.
 
 The matcher answers nothing when it has no localization, and then it returns its first element. So each call puts a probe
 (`charon.no-match`, which is not a language) first in the keys: an answer equal to the probe means the matcher answered
 nothing. The probe is not a key, so it cannot win.
 
-The matcher is the release's own call, `NSBundle`'s. The claim that on the device the release's own matcher decides stages 1
-and 2, as the host's does, is the coordinator's ruling and is not measured on a device here. The port carries no table of
-its own; the stage order is the only rule it adds.
+The matcher is the release's own call, `NSBundle`'s. The claim that on the device the release's own matcher decides the first
+stage, as the host's does, is the coordinator's ruling and is not measured on a device here. The port carries no table of
+its own; the enumeration order is the only rule it adds.
 
-Measured on the host with the two-stage form (`twostage.m`, scratch, not committed; its answers are reproduced by the
+Measured on the host with the two-stage rule (`twostage.m`, scratch, not committed; its answers are reproduced by the
 differential below):
 
-| Set | Rows | Decided by stage 1 | Stage 2 | Stage 3 | Disagreements with the host |
-| --- | --- | --- | --- | --- | --- |
-| Measured (23 preference lists x 42 key sets) | 966 | 806 | 0 | 160 | 0 |
-| Held out (12 new preference lists x 19 new key sets, fixed before the port was written) | 228 | 196 | 0 | 32 | 0 |
+| Set | Rows | Decided by the matcher | Decided by the first enumerated key | Disagreements with the host |
+| --- | --- | --- | --- | --- |
+| Measured (23 preference lists x 42 key sets) | 966 | 806 | 160 | 0 |
+| Held out (12 new preference lists x 19 new key sets, fixed before the port was written) | 228 | 196 | 32 | 0 |
 
-Stage 2 decided no row in either set: wherever stage 1 had no answer, the matcher with `en_US` appended had none either, and
-stage 3 decided. Stage 2 is implemented as ruled, but no measured row needs it.
+The same run measured the `en_US`-appended matcher call as a third step: it decided no row in either set, because wherever
+the matcher with the preferred languages had no answer, the call with `en_US` appended had none either. The step was
+removed, and the two-stage rule above is what is measured and implemented.
 
 The differential (`tests/backports/host/corespotlight-localized`) runs the port and the host over 35 preference lists (the
 23 measured and the 12 held out) against 61 key sets (the 42 measured and the 19 held out): 2,240 lines, identical after
@@ -123,6 +124,13 @@ lines.
 - Archived and unarchived, it decodes as a plain `NSTaggedPointerString` with the same text.
 - An empty dictionary: `localizedString` is nil, and the object reads as the empty string (length 0).
 - A nil dictionary: `init` returns an object and `localizedString` crashes the host (exit 139). The port answers nil and
-  reads as empty, which is not the host's crash; that difference is not reproduced, and it is not in the differential.
+  reads as empty. This is a named difference (see "Named differences" below); the differential does not cover it.
 - The host copies the dictionary at initialisation: a change to the mutable dictionary afterwards is not seen (measured:
   `before=one after=one`). The port copies it too, and the differential checks it.
+
+## Named differences
+
+- **nil-dictionary**: `initWithLocalizedStrings:nil` returns an object on the host, and `localizedString` on that object
+  crashes the host (exit 139). The port treats nil as an empty dictionary: `localizedString` is nil and the object reads as
+  the empty string. The port does not crash and does not reproduce the host's crash. Not in the differential, because the
+  host's answer is a crash, which the differential cannot compare.
