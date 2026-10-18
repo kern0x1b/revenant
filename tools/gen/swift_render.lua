@@ -283,13 +283,30 @@ local function protocol_self_inheritance(signature)
     return out
 end
 
+-- The text up to the first comma outside brackets and parentheses: the direct superclass of a chain (a generic superclass has commas of its
+-- own: AppIntents.EntityQueryComparator<Property, PropertyType>, which the chain's first comma must not split).
+local function first_top_level(text)
+    local depth = 0
+    for i = 1, #text do
+        local ch = string.sub(text, i, i)
+        if ch == "<" or ch == "(" or ch == "[" then
+            depth = depth + 1
+        elseif ch == ">" or ch == ")" or ch == "]" then
+            depth = depth - 1
+        elseif ch == "," and depth == 0 then
+            return string.sub(text, 1, i - 1)
+        end
+    end
+    return text
+end
+
 -- The " : A, B" clause of a declaration from its superclass, its conformances (a list) and any extra terms.
 local function inheritance_of(superclass, conformances, extra)
     local out = {}
     if superclass ~= nil and superclass ~= NO_VALUE then
         -- a class has one superclass: the cell lists the chain above the class, direct superclass first ("UIKit.UIView,
         -- UIKit.UIResponder, ..."), and the list is "multiple inheritance from classes" (502 errors in 37 modules of the coordinator's sdk run)
-        table.insert(out, spell(string.match(superclass, "^[^,]+")))
+        table.insert(out, spell(first_top_level(superclass)))
     end
     for _, c in ipairs(extra or {}) do
         table.insert(out, spell(c))
@@ -358,6 +375,23 @@ local function names_in(text, name)
     return string.find(text, "%f[%w_]" .. name .. "%f[^%w_]") ~= nil
 end
 
+-- Whether the brackets and parentheses of a text balance (a type spelled in full, not cut inside a generic argument list).
+local function balanced(text)
+    local depth = 0
+    for i = 1, #text do
+        local ch = string.sub(text, i, i)
+        if ch == "<" or ch == "(" or ch == "[" then
+            depth = depth + 1
+        elseif ch == ">" or ch == ")" or ch == "]" then
+            depth = depth - 1
+            if depth < 0 then
+                return false
+            end
+        end
+    end
+    return depth == 0
+end
+
 -- The parameter types of a method with each `some C` replaced by a generic parameter the signature leaves unused, and the where text with
 -- the constraint C on that parameter. A parameter spelled some X declares its own implicit parameter, so the explicit one is never used
 -- and the compiler refuses the clause ("generic parameter 'W0' is not used in function signature": 820 errors in RegexBuilder's
@@ -394,8 +428,11 @@ local function generic_for_some(types, gparams, gwhere, result)
     for i, t in ipairs(types) do
         out[i] = t
         -- a parameter whose type ends in some X (X the rest of the type: "some X", or "() -> some X" for a closure's result)
-        local head, bound = string.match(t, "^(.-)some ([^%s].-)$")
-        if head ~= nil and not string.find(bound, "some ", 1, true) then
+        local head, bound = string.match(t, "^(%(%) %-> )some (.+)$")
+        if head == nil then
+            head, bound = "", string.match(t, "^some (.+)$")
+        end
+        if bound ~= nil and balanced(bound) then
             for k, name in ipairs(unused) do
                 if constraint_of[name] == nil or constraint_of[name] == bound then
                     out[i] = head .. name
@@ -833,6 +870,52 @@ function group(rows)
     return top, top_members
 end
 
+-- The framework's own name as a qualifier of a name it does not declare (simd.simd_double2: the clang module simd is the framework, and the
+-- qualifier names the Swift module being compiled, so the type is not found; SwiftUI.View: View is declared by SwiftUICore, the framework's
+-- implementation, whose public name is SwiftUI). The qualifier is dropped, the name stands alone, and the implementation modules of the
+-- framework are imported (self_qualified_rows, render). A name the framework declares keeps its qualifier.
+local SELF_FIELDS = {"type", "params", "conformances", "superclass", "generic_sig", "alias", "raw"}
+
+-- Returns copies of the rows with the self-qualifiers dropped, and whether any row changed.
+local function self_qualified_rows(rows, framework, classes)
+    local declared = {}
+    for _, row in ipairs(rows) do
+        if row.container == NO_VALUE then
+            declared[row.name] = true
+        end
+    end
+    -- a class of the framework that the skeleton does not declare (its class index holds it: "Fixture.Top") is declared by the
+    -- framework too
+    for key in pairs(classes or {}) do
+        local name = string.match(key, "^" .. framework .. "%.([%w_]+)$")
+        if name then
+            declared[name] = true
+        end
+    end
+    local changed = false
+    local out = {}
+    for _, row in ipairs(rows) do
+        local copy = {}
+        for k, v in pairs(row) do
+            copy[k] = v
+        end
+        for _, field in ipairs(SELF_FIELDS) do
+            if type(copy[field]) == "string" and copy[field] ~= NO_VALUE then
+                local text = string.gsub(copy[field], "%f[%w_]" .. framework .. "%.([%w_]+)", function(name)
+                    if declared[name] then
+                        return nil
+                    end
+                    changed = true
+                    return name
+                end)
+                copy[field] = text
+            end
+        end
+        table.insert(out, copy)
+    end
+    return out, changed
+end
+
 -- The text of a module's Swift skeleton: a header, the imports, the module-level declarations and the types. known is the set of the
 -- SDK's Swift module names (a set: name -> true). classes is the class index (swift_model.class_index) or nil: with it, a class lists
 -- only the conformances its superclass chain does not already provide. public is the implementation modules' public modules
@@ -847,6 +930,8 @@ function render(rows, framework, known, classes, public, attributed)
             table.insert(typed, row)
         end
     end
+    local self_changed
+    typed, self_changed = self_qualified_rows(typed, framework, classes)
     rows = swift_canonical.rows(typed)
     local rendered, witnessed = {}, {}
     -- the body is rendered first: the imports come after it, since a witness may name Foundation, which the model's rows do not
@@ -876,6 +961,16 @@ function render(rows, framework, known, classes, public, attributed)
     end
     -- the imports: the modules the model names, and Foundation when a witness spells one of its types (the module itself excepted)
     local modules = imports_of(rows, framework, known, public or {}, attributed)
+    -- the implementation modules of the framework (public names it, as SwiftUICore is SwiftUI's) hold the names dropped above
+    if self_changed then
+        for implementation, public_name in pairs(public or {}) do
+            if public_name == framework and known[implementation] and implementation ~= framework
+               and not (attributed and attributed[implementation]) and not contains(modules, implementation) then
+                table.insert(modules, implementation)
+            end
+        end
+        table.sort(modules, order.less)
+    end
     local foundation_depends = attributed ~= nil and attributed["Foundation"]
     if has_keys(witnessed) and framework ~= "Foundation" and not foundation_depends and not contains(modules, "Foundation") then
         table.insert(modules, "Foundation")

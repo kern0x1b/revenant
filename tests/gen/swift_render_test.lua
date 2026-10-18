@@ -153,8 +153,10 @@ function main()
           "a class lists its superclass and only the conformances the superclass does not provide")
     check(string.find(chained, "public class Leaf: Fixture.Sub, R {", 1, true) ~= nil,
           "the superclass chain is followed up: a conformance a grandparent gives is not listed")
+    -- without a class index Fixture.Top is no declaration of this module (no row, no index entry): its qualifier names the module being
+    -- compiled, so it is dropped (self_qualified_rows); every declared conformance is listed
     local unchained = render.render({sub, leaf}, "Fixture", known)
-    check(string.find(unchained, "public class Sub: Fixture.Top, P, Q {", 1, true) ~= nil,
+    check(string.find(unchained, "public class Sub: Top, P, Q {", 1, true) ~= nil,
           "without a class index every declared conformance is listed")
 
     -- A declared name that is a Swift keyword is spelled between backticks; a generic signature's module qualifier is imported.
@@ -222,7 +224,7 @@ function main()
     -- named T0_I, see the canonical check below).
     local generic_base = class_row("Sub", "Fixture.Base<\207\132_0_0>", "-")
     generic_base.generic_sig = "<Value>"
-    local spelled = render.render({generic_base}, "Fixture", known)
+    local spelled = render.render({generic_base}, "Fixture", known, {["Fixture.Base"] = class_row("Base", "-", "-")})
     check(string.find(spelled, "public class Sub<Value>: Fixture.Base<Value> {", 1, true) ~= nil,
           "a superclass argument that is the subclass's first parameter is spelled with its name")
     check(string.find(spelled, "\207\132", 1, true) == nil, "no canonical name is left in the rendered text")

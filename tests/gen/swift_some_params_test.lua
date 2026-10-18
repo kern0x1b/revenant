@@ -79,6 +79,16 @@ function main()
     check(string.find(capture_text, "where Output == (Swift.Substring, W)", 1, true) ~= nil,
           "a constraint with a parenthesised comma is kept whole")
 
+    -- a some nested in another type (Swift.Array<some X>) is no parameter's own some: it is not renamed to a generic (the bound's
+    -- balance is checked, and the mapping only takes a some that starts the parameter's type or a closure's result)
+    local nested = {row({kind = "swift-struct", name = "Nest", usr = "s:Nest"}),
+                    row({kind = "swift-method", container = "Nest", name = "take(_:)", side = "+",
+                         params = "Swift.Array<some _StringProcessing.RegexComponent>", type = "-", usr = "s:Nest.take",
+                         generic_sig = "<W where W : _StringProcessing.RegexComponent>"})}
+    local nested_text = render.render(nested, "Nest", known, nil, nil, nil)
+    check(string.find(nested_text, "take<W>(_ p0: Swift.Array<some _StringProcessing.RegexComponent>)", 1, true) ~= nil,
+          "a some nested in another type stays as it is")
+
     print("swift some params test: " .. (failures == 0 and "OK" or ("FAIL " .. failures)))
     if failures > 0 then
         os.exit(1)
