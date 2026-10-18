@@ -14,7 +14,8 @@ The port does not gate on the release; the registry row's `introduced` is the cl
   `maxSuggestionCount` 0, `maxRankedResultCount` 100.
 - `+userQueryContextWithCurrentSuggestion:nil` gives the factory's values with `maxSuggestionCount` 10. A non-nil suggestion is
   not measured: a `CSSuggestion` comes only from a user query, which the port does not answer (below).
-- Defaults from `-init` are not measured. The port's `-init` leaves the five at zero.
+- Defaults from `-init` (measured, the `init` line of the differential): all five are zero, including
+  `maxRankedResultCount`, which only the factory sets to 100.
 - Copy: the copy is a `CSUserQueryContext` and keeps `disableSemanticSearch`, `maxSuggestionCount` and
   `maxRankedResultCount`. It drops `enableRankedResults` and `maxResultCount`, which read back as their initial values.
 - Coding (keyed archive): only `disableSemanticSearch` survives; the other four subclass properties decode as zero,
