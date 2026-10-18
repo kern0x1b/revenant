@@ -878,9 +878,10 @@ local SELF_FIELDS = {"type", "params", "conformances", "superclass", "generic_si
 
 -- Returns copies of the rows with the self-qualifiers dropped, and whether any row changed.
 local function self_qualified_rows(rows, framework, classes)
+    -- a row another module owns (owner_module: SwiftUI's model holds SwiftUICore's View) declares nothing of this framework
     local declared = {}
     for _, row in ipairs(rows) do
-        if row.container == NO_VALUE then
+        if row.container == NO_VALUE and row.owner_module == NO_VALUE then
             declared[row.name] = true
         end
     end

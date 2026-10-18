@@ -42,6 +42,15 @@ function main()
     check(string.find(swiftui_text, "import SwiftUICore", 1, true) ~= nil, "the implementation module of the framework is imported")
     check(string.find(swiftui_text, "SwiftUI.View", 1, true) == nil, "the qualifier of View is dropped")
 
+    -- the SDK's SwiftUI model also holds View itself, a row SwiftUICore owns (owner_module): that row declares nothing of SwiftUI, so
+    -- the qualifier is still dropped (measured: 6212 "no type named 'View' in module 'SwiftUI'" errors kept it before this check)
+    local owned = {row({kind = "swift-struct", name = "Text", usr = "s:Text", conformances = "SwiftUI.View"}),
+                   row({kind = "swift-protocol", name = "View", usr = "s:7SwiftUI4ViewP", owner_module = "SwiftUICore"})}
+    local owned_text = render.render(owned, "SwiftUI", {SwiftUI = true, SwiftUICore = true, Swift = true}, nil,
+                                     {SwiftUICore = "SwiftUI"}, nil)
+    check(string.find(owned_text, "SwiftUI.View", 1, true) == nil, "a View another module owns does not keep the qualifier")
+    check(string.find(owned_text, "import SwiftUICore", 1, true) ~= nil, "and SwiftUICore is imported for it")
+
     -- a name the framework declares keeps its qualifier
     local own = {row({kind = "swift-struct", name = "Outer", usr = "s:Outer"}),
                  row({kind = "swift-struct", container = "Outer", name = "Inner", usr = "s:Outer.Inner"}),
