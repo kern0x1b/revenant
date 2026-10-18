@@ -51,3 +51,29 @@ the preferences, with the matcher's list as the tie-break (pass two), then the f
 
 Not measured yet: held-out preference lists and held-out key sets. The rule is not implemented until it predicts every
 row above and those held-out ones.
+
+## The composite: NSBundle's matcher over the keys, with en_US appended
+
+The composite takes the dictionary's keys in its own enumeration order, asks
+`+[NSBundle preferredLocalizationsFromArray:forPreferences:]` with the user's `AppleLanguages` plus `en_US`, takes the
+first answer, and falls back to the first enumerated key when the matcher answers nothing. Measured on the host over the
+same 966 rows (the enumeration order matches the recorded table in every row), it agrees with the host's
+`CSLocalizedString` in 940 rows and disagrees in 26. Every disagreement has `en_US` in the key set together with another
+English region, under a preference list that has an English language. The host picks the region; the composite picks
+`en_US`, which the appended fallback ranks first.
+
+| Preferences | Keys (given order) | Host | Composite |
+| --- | --- | --- | --- |
+| en-GB | `en_US,en_AU`; `en_AU,en_US` | `en_AU` | `en_US` |
+| en-AU | `en_US,en_GB`; `en_GB,en_US`; `en,en_GB,en_US` | `en_GB` | `en_US` |
+| fr-CA,en-GB | `en_US,en_AU`; `en_AU,en_US` | `en_AU` | `en_US` |
+| de-DE,en-AU | `en_US,en_GB`; `en_GB,en_US`; `en,en_GB,en_US` | `en_GB` | `en_US` |
+| en-IN | `en_US,en_GB`; `en_GB,en_US`; `en_GB,en_AU,en_US`; `en_US,en_GB,en_AU`; `en_AU,en_GB,en_US`; `en,en_GB,en_US` | `en_GB` | `en_US` |
+| en-IN | `en_US,en_AU`; `en_AU,en_US` | `en_AU` | `en_US` |
+| ja-JP,en-GB | `en_US,en_AU`; `en_AU,en_US` | `en_AU` | `en_US` |
+| zz-ZZ,en-AU | `en_US,en_GB`; `en_GB,en_US`; `en,en_GB,en_US` | `en_GB` | `en_US` |
+| it-IT,en-AU,de-DE | `en_US,en_GB`; `en_GB,en_US`; `en,en_GB,en_US` | `en_GB` | `en_US` |
+
+The composite is not implemented: the coordinator's ruling was to stop at the first disagreement. The earlier
+pass-one chain rule (five disagreements, listed above) and this composite each fail rows the other passes, so no rule
+measured so far predicts all 966 rows.
