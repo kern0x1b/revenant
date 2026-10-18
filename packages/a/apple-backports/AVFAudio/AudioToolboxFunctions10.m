@@ -15,6 +15,8 @@
 @end
 
 @implementation CharonAudioQueueDispatch
+@synthesize queue = _queue;
+@synthesize callback = _callback;
 @end
 
 static void CharonAudioQueueOutputCallback(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer)
