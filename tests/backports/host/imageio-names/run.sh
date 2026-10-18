@@ -10,6 +10,8 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../../../.." && pwd)
 port=$root/packages/a/apple-backports/Graphics
+# the band objects the generator writes (generate() in modules/apple/backports.lua builds them): a band is in the library's folder or here
+gen=$root/packages/a/apple-backports/.gen/ImageIO
 build=${BUILD:-$root/.agent-work/runs/imageio-names}
 mkdir -p "$build"
 obj=${PORT_OBJ:-$build/slice.o}
@@ -20,8 +22,9 @@ objects=$here/objects.txt
 [ -f "$objects" ] || { echo "FAIL  no objects.txt beside run.sh"; exit 1; }
 files=""
 while read -r f <&3 || [ -n "$f" ]; do
-  [ -f "$port/$f" ] || { echo "FAIL  objects.txt names $f and there is no $port/$f"; exit 1; }
-  files="$files $port/$f"
+  if [ -f "$port/$f" ]; then p="$port/$f"; elif [ -f "$gen/$f" ]; then p="$gen/$f"; else
+    echo "FAIL  objects.txt names $f and there is no $port/$f or $gen/$f (run generate(): the build writes .gen)"; exit 1; fi
+  files="$files $p"
 done 3< "$objects"
 files=${files# }   # the accumulator starts with a space and a leading one becomes a pathname
 # The count accepts BOTH spellings of a CFStringRef global - `CFStringRef const X` and `const CFStringRef
@@ -57,7 +60,7 @@ decl=$(wc -l < "$build/declared.txt" | tr -d ' ')
 # before this harness - and this assertion named all eleven on its first run. They were invisible to every
 # check below, which is exactly what a band missing from the list is.
 coverage_missing() {  # $1 = a list file; prints the band files on disk that it does not name
-  ls "$port"/ImageIONames*.m | xargs -n1 basename | sort > "$build/ondisk.txt"
+  ls "$port"/ImageIONames*.m "$gen"/ImageIONames*.m | xargs -n1 basename | sort > "$build/ondisk.txt"
   sort "$1" > "$build/listed.txt"
   comm -23 "$build/ondisk.txt" "$build/listed.txt"
 }

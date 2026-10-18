@@ -868,6 +868,11 @@ function generate(root)
         os.runv(os.programfile(), {"l", path.join(tree, "tools", "intents", "objects.lua"), "--sdk", sdk,
             "--out", path.join(root, ".gen", "Intents"), "--work", path.join(tree, ".agent-work", "intents-generation")})
     end
+    -- the ImageIO name objects are built into .gen/ImageIO from the spec snapshot the full run committed (spec/ImageIO/names.tsv), by
+    -- tools/gen/imageio_names.lua --objects, which measures nothing; the Graphics library reads that folder. A root with no snapshot has none
+    if os.isfile(path.join(root, "spec", "ImageIO", "names.tsv")) then
+        os.runv(os.programfile(), {"l", path.join(tree, "tools", "gen", "imageio_names.lua"), "", tree, "--objects"})
+    end
 end
 
 function sources(root, library)

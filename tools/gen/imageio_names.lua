@@ -12,14 +12,17 @@
 --   2. for every name, the first HELD RUNG that exports the SYMBOL, through tools/cache-index/first-rung.lua. A name no rung carries
 --      is placed by the ledger's own introduced release, because the ladder ends at 10.3.4 and nothing else says anything about it.
 --
--- It writes packages/a/apple-backports/Graphics/ImageIONames<TAG>.m and packages/a/apple-backports/registry/ImageIO/names<TAG>.json,
--- one pair per release, and rewrites tests/backports/host/imageio-names/objects.txt and expected.txt, which the harness pins.
+-- The full run (no mode) writes the spec snapshot packages/a/apple-backports/spec/ImageIO/names.tsv (one row per name: api, band,
+-- introduced, value), the objects into packages/a/apple-backports/.gen/ImageIO/ImageIONames<TAG>.m, the registry rows
+-- packages/a/apple-backports/registry/ImageIO/names<TAG>.json, and tests/backports/host/imageio-names/objects.txt and expected.txt,
+-- which the harness pins. --objects is the build's run (generate() in modules/apple/backports.lua): it reads the snapshot and writes
+-- only the objects into .gen/ImageIO. It compiles nothing and reads no index, so a clean checkout builds them.
 --
---     xmake l tools/gen/imageio_names.lua [LEDGER] [OUT]
+--     xmake l tools/gen/imageio_names.lua [LEDGER] [OUT] [--objects]
 --
--- LEDGER defaults to the committed spec copy. OUT is the root the generated files and the harness pins are written under; it
--- defaults to this repository, and a scratch run names a copy of the same layout so the committed files are not touched. The probe
--- compiles and runs one process per name, so run it under the slot: coordination/heavy.sh xmake l tools/gen/imageio_names.lua
+-- LEDGER defaults to the committed spec copy. OUT is the root the files are written under; it defaults to this repository, and a
+-- scratch run names a copy of the same layout so the committed files are not touched. The probe compiles and runs one process per
+-- name, so run the full run under the slot: coordination/heavy.sh xmake l tools/gen/imageio_names.lua
 
 local tsv = import("tsv", {anonymous = true})
 local pyjson = import("pyjson", {anonymous = true})
@@ -203,43 +206,73 @@ local function missing_constants(ledger)
     return introduced, count
 end
 
-function main(ledger, out)
-    ledger = ledger or SPEC_LEDGER
+function main(ledger, out, mode)
+    local objects_only = mode == "--objects"
     out = out or ROOT
-    local graphics = path.join(out, PORT, "Graphics")
-    local registry = path.join(out, PORT, "registry", FRAMEWORK)
+    local port = path.join(out, PORT)
+    local registry = path.join(port, "registry", FRAMEWORK)
     local harness = path.join(out, "tests", "backports", "host", "imageio-names")
+    local spec = path.join(port, "spec", FRAMEWORK, "names.tsv")
+    local objects_dir = path.join(port, ".gen", FRAMEWORK)
+    os.mkdir(objects_dir)
 
-    assert(os.isfile(ledger), "no ledger at " .. ledger)
-    local introduced = missing_constants(ledger)
-    local api_names = {}
-    for api in pairs(introduced) do
-        table.insert(api_names, api)
+    -- the values, the introduced releases and the band of each name: the full run measures them and commits them as the spec snapshot,
+    -- and the build's run (--objects) reads that snapshot, so a build measures nothing and needs no cache index
+    local introduced, values, suffix_of = {}, {}, {}
+    if objects_only then
+        assert(os.isfile(spec), "no spec snapshot at " .. spec .. ": the full run (tools/gen/imageio_names.lua with no mode) writes it")
+        for _, row in ipairs(tsv.records(read_bytes(spec))) do
+            introduced[row.api] = row.introduced
+            values[row.api] = row.value
+            suffix_of[row.api] = row.band
+        end
+    else
+        ledger = (ledger and ledger ~= "") and ledger or SPEC_LEDGER
+        assert(os.isfile(ledger), "no ledger at " .. ledger)
+        introduced = missing_constants(ledger)
+        local api_names = {}
+        for api in pairs(introduced) do
+            table.insert(api_names, api)
+        end
+        assert(#api_names > 0, "the ledger names no missing ImageIO constant")
+        byteorder.sort(api_names)
+
+        local build = path.join(ROOT, ".agent-work", "imageio-names")
+        values = measure_values(api_names, build)
+        os.tryrm(build)
+        local rungs = measure_rungs(api_names)
+
+        for _, name in ipairs(api_names) do
+            local release = rungs[name]
+            if release == "NONE" then
+                release = introduced[name]
+            end
+            local suffix = nil
+            for tag, band in pairs(BANDS) do
+                if band[1] == release then
+                    suffix = tag
+                end
+            end
+            assert(suffix, "no band for " .. name .. " at " .. tostring(release))
+            suffix_of[name] = suffix
+        end
+
+        local rows = {"api\tband\tintroduced\tvalue"}
+        for _, name in ipairs(api_names) do
+            table.insert(rows, name .. "\t" .. suffix_of[name] .. "\t" .. introduced[name] .. "\t" .. values[name])
+        end
+        os.mkdir(path.directory(spec))
+        write_bytes(spec, table.concat(rows, "\n") .. "\n")
     end
-    assert(#api_names > 0, "the ledger names no missing ImageIO constant")
-    byteorder.sort(api_names)
-
-    local build = path.join(ROOT, ".agent-work", "imageio-names")
-    local values = measure_values(api_names, build)
-    os.tryrm(build)
-    local rungs = measure_rungs(api_names)
 
     local cut = {}
-    for _, name in ipairs(api_names) do
-        local release = rungs[name]
-        if release == "NONE" then
-            release = introduced[name]
-        end
-        local suffix = nil
-        for tag, band in pairs(BANDS) do
-            if band[1] == release then
-                suffix = tag
-            end
-        end
-        assert(suffix, "no band for " .. name .. " at " .. tostring(release))
+    local api_names = {}
+    for name, suffix in pairs(suffix_of) do
         cut[suffix] = cut[suffix] or {}
         table.insert(cut[suffix], name)
+        table.insert(api_names, name)
     end
+    byteorder.sort(api_names)
 
     local suffixes = {}
     for suffix in pairs(cut) do
@@ -263,7 +296,7 @@ function main(ledger, out)
             externs = table.concat(externs, "\n"),
             definitions = table.concat(definitions, "\n"),
         })
-        write_bytes(path.join(graphics, "ImageIONames" .. suffix .. ".m"), object)
+        write_bytes(path.join(objects_dir, "ImageIONames" .. suffix .. ".m"), object)
 
         local entries = {}
         for _, name in ipairs(names) do
@@ -280,14 +313,26 @@ function main(ledger, out)
             }})
         end
         local document = {object = {{"framework", FRAMEWORK}, {"entries", {array = entries}}}}
-        write_bytes(path.join(registry, "names" .. suffix .. ".json"), pyjson.encode(document, "  ") .. "\n")
+        if not objects_only then
+            write_bytes(path.join(registry, "names" .. suffix .. ".json"), pyjson.encode(document, "  ") .. "\n")
+        end
         print(string.format("%-28s %3d constants", "ImageIONames" .. suffix .. ".m", #names))
     end
 
-    -- the harness counts every band object on disk and pins the total, so both files move with the slice
-    local on_disk = {}
-    for _, file in ipairs(os.files(path.join(graphics, "ImageIONames*.m"))) do
-        table.insert(on_disk, path.filename(file))
+    -- the build's run stops here: the registry rows and the harness pins are committed, and only the full run writes them
+    if objects_only then
+        return
+    end
+
+    -- the harness counts every band object there is, in the library's folder or the generated one, and pins the total, so both
+    -- files move with the slice; a band object is one or the other, never both
+    local on_disk, where = {}, {}
+    for _, dir in ipairs({path.join(port, "Graphics"), objects_dir}) do
+        for _, file in ipairs(os.files(path.join(dir, "ImageIONames*.m"))) do
+            local name = path.filename(file)
+            table.insert(on_disk, name)
+            where[name] = file
+        end
     end
     local ordered = harness_order(on_disk)
     write_bytes(path.join(harness, "objects.txt"), table.concat(ordered, "\n") .. "\n")
@@ -295,7 +340,7 @@ function main(ledger, out)
     -- the names the harness can see, declared or defined, are the number it pins
     local counted = {}
     for _, name in ipairs(on_disk) do
-        counted_names(read_bytes(path.join(graphics, name)), counted)
+        counted_names(read_bytes(where[name]), counted)
     end
     local total = 0
     for _ in pairs(counted) do
