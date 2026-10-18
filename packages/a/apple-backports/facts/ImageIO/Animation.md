@@ -100,7 +100,8 @@ format is covered.
 
 `CharonImageAnimation` holds the source, the block, the frame index and the timer of one animation. No SDK
 header declares it, so it carries one registry row of its own - `registry/ImageIO/animate134.json`, status
-`implemented` (the class is built in `Graphics/ImageIOAnimation134.m`), the shape `registry/Metal/ios80classes.json`
-uses for a class of the port's own, because the ledger is an SDK ledger and nothing is claimed about SDK behaviour
-with a name no SDK header declares. The two
+`owed`, the shape `registry/Metal/ios80classes.json` uses for a class of the port's own, because the ledger is an SDK
+ledger and nothing is claimed about SDK behaviour with a name no SDK header declares. The class's methods are built in
+`Graphics/ImageIOAnimation134.m`, but on the gate's 6.1.3 build the class symbol is local (`s`, not `S` in the dylib's
+nm), and the registry check counts only exported class symbols, so the row stays owed until that symbol is exported. The two
 functions' rows are in `absent_ImageIO.json`, where they already were.
