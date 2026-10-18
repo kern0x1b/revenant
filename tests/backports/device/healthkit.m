@@ -96,9 +96,17 @@ static void run_checks(void)
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        charon_log_to([results_folder stringByAppendingPathComponent:@"healthkit.log"]);
+        NSString *log = [results_folder stringByAppendingPathComponent:@"healthkit.log"];
+        charon_log_to(log);
         NSLog(@"health: starting");
         run_checks();
+        fflush(stdout);
+        // The checks' lines are in the guest's log; read that file back here, as the guest sees it, and echo each line through
+        // NSLog, which the emulator's run captures on the host. A missing file echoes nothing, and run.sh counts the lines it saw.
+        NSString *written = [NSString stringWithContentsOfFile:log encoding:NSUTF8StringEncoding error:NULL];
+        for (NSString *line in [written componentsSeparatedByString:@"\n"])
+            if (line.length)
+                NSLog(@"guest log: %@", line);
         charon_log_to(nil);
         return charon_failures == 0 ? 0 : 1;
     }
