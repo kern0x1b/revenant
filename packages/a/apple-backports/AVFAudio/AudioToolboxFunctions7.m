@@ -11,7 +11,7 @@
 // host's answer for the same input (tests/backports/host/audiotoolbox-functions measures every case below against the
 // host's own symbol, and facts/AVFAudio/AudioToolboxFunctions.md has the figures).
 
-// AudioComponentGetLastActiveTime. The host answers 0 for a component it has not been asked to use and still answers 0
+// AudioComponentGetLastActiveTime. The host answers 0 for a component nobody has used yet, and still answers 0
 // after the component is instantiated and initialized, which is every case measured. This port keeps no record of
 // use, so the answer is the one the host gives, for every component.
 CFAbsoluteTime AudioComponentGetLastActiveTime(AudioComponent comp)

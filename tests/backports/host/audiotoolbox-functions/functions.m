@@ -134,7 +134,7 @@ static void checkLastActive(void)
 }
 
 // The host application icon: the host's answer is nil for a unit it has in this process (printed; the port's
-// definition is iOS-only, see the comment at the top of this file).
+// definition is iOS-only, see the comment above).
 static void printHostIcon(void)
 {
     HostIconFn hostIcon = hostSymbol("AudioOutputUnitGetHostIcon");
@@ -795,7 +795,7 @@ static void releaseCF(CFTypeRef ref)
     }
 }
 
-// The icons: the host's answers, printed for the record (the port's icons are iOS-only, see the comment at the top of this file).
+// The icons: the host's answers, printed for the record (the port's icons are iOS-only, see the comment above).
 // The host answers an image of 32 by 32 points for the generic output at every size asked, and nil for NULL.
 static void printIcons(void)
 {

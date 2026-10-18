@@ -7,7 +7,7 @@
 // function and a user-data pointer; these take a block and a dispatch queue, and the port's callback hands each call to the block
 // on that queue. The host runs the block on the queue it was given (tests/backports/host/audiotoolbox-functions measures it).
 
-// The block and the queue one queue's callbacks go to. The release keeps the pointer for the life of the audio queue, and the
+// The block and the queue one queue's callbacks go to. The release holds the pointer until the audio queue is disposed, and the
 // port has no hook for the dispose, so one small object is kept per audio queue made this way.
 @interface CharonAudioQueueDispatch : NSObject
 @property (nonatomic, strong) dispatch_queue_t queue;
