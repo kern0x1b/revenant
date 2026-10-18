@@ -240,9 +240,9 @@ static CSSearchableItem *CharonSearchFetchedCopy(CSSearchableItem *item, NSArray
     }
 }
 
-// The search runs on the default queue. Its handler is called once with every match, if there is one, and the count is
-// set before the completion handler runs. A query that does not parse, or a cancelled query, has no matches and reports
-// its error to the completion handler.
+// Matching runs on the default global queue. The found handler receives the matches in one call, and only when there are
+// some; the match count is stored first, then the completion handler is invoked. A query that fails to parse, or one
+// cancelled before it finishes, yields no matches and passes its error to the completion handler.
 - (void)start
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
