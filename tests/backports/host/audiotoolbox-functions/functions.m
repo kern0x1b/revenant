@@ -64,6 +64,38 @@ void CharonTestAudioComponentInstantiate(AudioComponent inComponent, AudioCompon
 void CharonTestAudioServicesPlaySystemSoundWithCompletion(SystemSoundID inSystemSoundID, void (^inCompletionBlock)(void));
 void CharonTestAudioServicesPlayAlertSoundWithCompletion(SystemSoundID inSystemSoundID, void (^inCompletionBlock)(void));
 OSStatus CharonTestMusicDeviceMIDIEventList(MusicDeviceComponent inUnit, UInt32 inOffsetSampleFrame, const MIDIEventList *evtList);
+OSStatus CharonTestAudioFileGetUserDataSize64(AudioFileID inAudioFile, UInt32 inUserDataID, UInt32 inIndex, UInt64 *outUserDataSize);
+OSStatus CharonTestAudioFileGetUserDataAtOffset(AudioFileID inAudioFile, UInt32 inUserDataID, UInt32 inIndex, SInt64 inOffset,
+                                                UInt32 *ioUserDataSize, void *outUserData);
+OSStatus CharonTestAudioComponentValidate(AudioComponent inComponent, CFDictionaryRef inValidationParameters,
+                                          AudioComponentValidationResult *outValidationResult);
+OSStatus CharonTestAudioComponentValidateWithResults(AudioComponent inComponent, CFDictionaryRef inValidationParameters,
+                                                     void (^inCompletionBlock)(AudioComponentValidationResult, CFDictionaryRef _Nonnull));
+OSStatus CharonTestAudioConverterNewWithOptions(const AudioStreamBasicDescription *inSourceFormat,
+                                                const AudioStreamBasicDescription *inDestinationFormat,
+                                                AudioConverterOptions inOptions, AudioConverterRef *outAudioConverter);
+void CharonTestAudioConverterPrepare(UInt32 inFlags, void *ioReserved, void (^inCompletionBlock)(OSStatus));
+OSStatus CharonTestAudioConverterFillComplexBufferRealtimeSafe(AudioConverterRef inAudioConverter,
+                                                               AudioConverterComplexInputDataProcRealtimeSafe inInputDataProc,
+                                                               void *inInputDataProcUserData, UInt32 *ioOutputDataPacketSize,
+                                                               AudioBufferList *outOutputData,
+                                                               AudioStreamPacketDescription *outPacketDescription);
+OSStatus CharonTestAudioConverterFillComplexBufferWithPacketDependencies(AudioConverterRef inAudioConverter,
+                                                                         AudioConverterComplexInputDataProc inInputDataProc,
+                                                                         void *inInputDataProcUserData, UInt32 *ioOutputDataPacketSize,
+                                                                         AudioBufferList *outOutputData,
+                                                                         AudioStreamPacketDescription *outPacketDescriptions,
+                                                                         AudioStreamPacketDependencyDescription *outPacketDependencies);
+OSStatus CharonTestAudioFileWritePacketsWithDependencies(AudioFileID inAudioFile, Boolean inUseCache, UInt32 inNumBytes,
+                                                         const AudioStreamPacketDescription *inPacketDescriptions,
+                                                         const AudioStreamPacketDependencyDescription *inPacketDependencies,
+                                                         SInt64 inStartingPacket, UInt32 *ioNumPackets, const void *inBuffer);
+OSStatus CharonTestAudioQueueNewOutputWithDispatchQueue(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat,
+                                                        UInt32 inFlags, dispatch_queue_t inCallbackDispatchQueue,
+                                                        AudioQueueOutputCallbackBlock inCallbackBlock);
+OSStatus CharonTestAudioQueueNewInputWithDispatchQueue(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat,
+                                                       UInt32 inFlags, dispatch_queue_t inCallbackDispatchQueue,
+                                                       AudioQueueInputCallbackBlock inCallbackBlock);
 
 static AudioComponent genericOutput(void)
 {
@@ -314,15 +346,454 @@ static void checkMIDIList(void)
     }
 }
 
-int main(void)
+// The user data functions, on a WAV file with one 10-byte chunk ("0123456789") and no other. Each call is made on a fresh copy of
+// the same inputs, once through the host and once through the port, and the status, the size and the bytes written must match.
+typedef OSStatus (*Size64Fn)(AudioFileID, UInt32, UInt32, UInt64 *);
+typedef OSStatus (*AtOffsetFn)(AudioFileID, UInt32, UInt32, SInt64, UInt32 *, void *);
+
+static AudioFileID makeUserDataFile(const char *folder)
+{
+    NSString *path = [NSString stringWithFormat:@"%s/userdata.wav", folder];
+    NSURL *url = [NSURL fileURLWithPath:path];
+    AudioStreamBasicDescription format = {0};
+    format.mSampleRate = 44100;
+    format.mFormatID = kAudioFormatLinearPCM;
+    format.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
+    format.mChannelsPerFrame = 1;
+    format.mBitsPerChannel = 16;
+    format.mBytesPerFrame = 2;
+    format.mBytesPerPacket = 2;
+    format.mFramesPerPacket = 1;
+    AudioFileID file = NULL;
+    if (AudioFileCreateWithURL((__bridge CFURLRef)url, kAudioFileWAVEType, &format, kAudioFileFlags_EraseFile, &file) != noErr) {
+        printf("FAIL the user data file cannot be created at %s\n", path.UTF8String);
+        exit(1);
+    }
+    const char data[10] = "0123456789";
+    AudioFileSetUserData(file, 'Chrn', 0, 10, data);
+    AudioFileClose(file);
+    if (AudioFileOpenURL((__bridge CFURLRef)url, kAudioFileReadPermission, 0, &file) != noErr) {
+        printf("FAIL the user data file cannot be opened\n");
+        exit(1);
+    }
+    return file;
+}
+
+static void checkUserData(const char *folder)
+{
+    AudioFileID file = makeUserDataFile(folder);
+    Size64Fn hostSize64 = hostSymbol("AudioFileGetUserDataSize64");
+    AtOffsetFn hostAtOffset = hostSymbol("AudioFileGetUserDataAtOffset");
+
+    struct { UInt32 chunk; UInt32 index; } sizeCases[] = { { 'Chrn', 0 }, { 'Chrn', 3 }, { 'none', 0 } };
+    for (size_t i = 0; i < sizeof sizeCases / sizeof sizeCases[0]; i++) {
+        UInt64 portSize = 777, hostSize = 777;
+        OSStatus portStatus = CharonTestAudioFileGetUserDataSize64(file, sizeCases[i].chunk, sizeCases[i].index, &portSize);
+        OSStatus hostStatus = hostSize64(file, sizeCases[i].chunk, sizeCases[i].index, &hostSize);
+        char label[160];
+        snprintf(label, sizeof label, "AudioFileGetUserDataSize64, chunk %u index %u: the status is the host's", sizeCases[i].chunk, sizeCases[i].index);
+        check(portStatus == hostStatus, label);
+        snprintf(label, sizeof label, "AudioFileGetUserDataSize64, chunk %u index %u: the size is the host's", sizeCases[i].chunk, sizeCases[i].index);
+        check(portSize == hostSize, label);
+    }
+
+    // The offsets run from before the chunk to its end, with a request shorter than the chunk, longer than what is left, and empty.
+    SInt64 offsets[] = { -1, 0, 2, 6, 8, 10, 12 };
+    UInt32 sizes[] = { 0, 4, 32 };
+    for (size_t o = 0; o < sizeof offsets / sizeof offsets[0]; o++) {
+        for (size_t s = 0; s < sizeof sizes / sizeof sizes[0]; s++) {
+            uint8_t portBytes[32], hostBytes[32];
+            memset(portBytes, '.', sizeof portBytes);
+            memset(hostBytes, '.', sizeof hostBytes);
+            UInt32 portIO = sizes[s], hostIO = sizes[s];
+            OSStatus portStatus = CharonTestAudioFileGetUserDataAtOffset(file, 'Chrn', 0, offsets[o], &portIO, portBytes);
+            OSStatus hostStatus = hostAtOffset(file, 'Chrn', 0, offsets[o], &hostIO, hostBytes);
+            char label[200];
+            snprintf(label, sizeof label, "AudioFileGetUserDataAtOffset, offset %lld size %u: the status is the host's",
+                     offsets[o], sizes[s]);
+            check(portStatus == hostStatus, label);
+            snprintf(label, sizeof label, "AudioFileGetUserDataAtOffset, offset %lld size %u: the size written is the host's",
+                     offsets[o], sizes[s]);
+            check(portIO == hostIO, label);
+            snprintf(label, sizeof label, "AudioFileGetUserDataAtOffset, offset %lld size %u: the bytes are the host's",
+                     offsets[o], sizes[s]);
+            check(memcmp(portBytes, hostBytes, sizeof portBytes) == 0, label);
+        }
+    }
+    uint8_t portBytes[4], hostBytes[4];
+    UInt32 portIO = 4, hostIO = 4;
+    OSStatus portStatus = CharonTestAudioFileGetUserDataAtOffset(file, 'none', 0, 0, &portIO, portBytes);
+    OSStatus hostStatus = hostAtOffset(file, 'none', 0, 0, &hostIO, hostBytes);
+    check(portStatus == hostStatus && portIO == hostIO,
+          "AudioFileGetUserDataAtOffset, a missing chunk: the status and the size are the host's");
+    AudioFileClose(file);
+}
+
+typedef OSStatus (*ValidateFn)(AudioComponent, CFDictionaryRef, AudioComponentValidationResult *);
+typedef OSStatus (*ValidateResultsFn)(AudioComponent, CFDictionaryRef, void (^)(AudioComponentValidationResult, CFDictionaryRef _Nonnull));
+typedef OSStatus (*NewWithOptionsFn)(const AudioStreamBasicDescription *, const AudioStreamBasicDescription *, AudioConverterOptions, AudioConverterRef *);
+typedef void (*PrepareFn)(UInt32, void *, void (^)(OSStatus));
+typedef OSStatus (*RealtimeFillFn)(AudioConverterRef, AudioConverterComplexInputDataProcRealtimeSafe, void *, UInt32 *, AudioBufferList *,
+                                   AudioStreamPacketDescription *);
+typedef OSStatus (*DependenciesFillFn)(AudioConverterRef, AudioConverterComplexInputDataProc, void *, UInt32 *, AudioBufferList *,
+                                       AudioStreamPacketDescription *, AudioStreamPacketDependencyDescription *);
+typedef OSStatus (*WriteDependenciesFn)(AudioFileID, Boolean, UInt32, const AudioStreamPacketDescription *,
+                                        const AudioStreamPacketDependencyDescription *, SInt64, UInt32 *, const void *);
+typedef OSStatus (*FillFn)(AudioConverterRef, AudioConverterComplexInputDataProc, void *, UInt32 *, AudioBufferList *,
+                           AudioStreamPacketDescription *);
+typedef OSStatus (*QueueOutputFn)(AudioQueueRef *, const AudioStreamBasicDescription *, UInt32, dispatch_queue_t, AudioQueueOutputCallbackBlock);
+
+// AudioComponentValidate: the generic output is passed, with result 1 and an empty dictionary (the host's answer, and the port's).
+static void checkValidate(void)
+{
+    ValidateFn hostValidate = hostSymbol("AudioComponentValidate");
+    ValidateResultsFn hostValidateResults = hostSymbol("AudioComponentValidateWithResults");
+    AudioComponentValidationResult portResult = 0, hostResult = 0;
+    OSStatus portStatus = CharonTestAudioComponentValidate(genericOutput(), NULL, &portResult);
+    OSStatus hostStatus = hostValidate(genericOutput(), NULL, &hostResult);
+    check(portStatus == hostStatus && portResult == hostResult,
+          "AudioComponentValidate, the generic output: the status and the result are the host's");
+    check(hostResult == kAudioComponentValidationResult_Passed, "AudioComponentValidate, the generic output: the host passes it");
+
+    AudioComponentValidationResult unusedPort = 0, unusedHost = 0;
+    check(CharonTestAudioComponentValidate(NULL, NULL, &unusedPort) == hostValidate(NULL, NULL, &unusedHost),
+          "AudioComponentValidate, a NULL component: the status is the host's");
+
+    for (int side = 0; side < 2; side++) {
+        dispatch_semaphore_t done = dispatch_semaphore_create(0);
+        __block AudioComponentValidationResult result = 0;
+        __block BOOL onMain = YES;
+        __block NSNumber *dictionaryResult = nil;
+        void (^completion)(AudioComponentValidationResult, CFDictionaryRef _Nonnull) = ^(AudioComponentValidationResult r, CFDictionaryRef dict) {
+            result = r;
+            onMain = pthread_main_np();
+            dictionaryResult = ((__bridge NSDictionary *)dict)[@"Result"];
+            dispatch_semaphore_signal(done);
+        };
+        OSStatus status = side == 0 ? CharonTestAudioComponentValidateWithResults(genericOutput(), NULL, completion)
+                                    : hostValidateResults(genericOutput(), NULL, completion);
+        BOOL fired = dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC)) == 0;
+        char label[160];
+        snprintf(label, sizeof label, "%s AudioComponentValidateWithResults, the generic output: the block runs once, off the main thread",
+                 side == 0 ? "port" : "host");
+        check(status == noErr && fired && !onMain, label);
+        snprintf(label, sizeof label, "%s AudioComponentValidateWithResults, the generic output: passed, and the dictionary's Result is passed",
+                 side == 0 ? "port" : "host");
+        check(fired && result == kAudioComponentValidationResult_Passed && dictionaryResult.intValue == kAudioComponentValidationResult_Passed, label);
+    }
+}
+
+// A converter input: one callback's worth of 32-bit float samples, given once.
+typedef struct {
+    int given;
+    float samples[64];
+    UInt32 frames;
+} ConverterInput;
+
+static void resetInput(ConverterInput *input, UInt32 frames)
+{
+    memset(input, 0, sizeof *input);
+    input->frames = frames;
+    for (UInt32 i = 0; i < frames; i++) {
+        input->samples[i] = (float)i / 8.0f - 0.5f;
+    }
+}
+
+static OSStatus supplyConverterInput(AudioConverterRef converter, UInt32 *ioNumberDataPackets, AudioBufferList *ioData,
+                                     AudioStreamPacketDescription **outDataPacketDescription, void *inUserData)
+{
+    ConverterInput *input = inUserData;
+    if (input->given) {
+        *ioNumberDataPackets = 0;
+        ioData->mBuffers[0].mDataByteSize = 0;
+        return noErr;
+    }
+    input->given = 1;
+    ioData->mNumberBuffers = 1;
+    ioData->mBuffers[0].mNumberChannels = 1;
+    ioData->mBuffers[0].mData = input->samples;
+    ioData->mBuffers[0].mDataByteSize = input->frames * sizeof(float);
+    *ioNumberDataPackets = input->frames;
+    return noErr;
+}
+
+static OSStatus supplyConverterInputRealtime(AudioConverterRef converter, UInt32 *ioNumberDataPackets, AudioBufferList *ioData,
+                                             AudioStreamPacketDescription **outDataPacketDescription, void *inUserData)
+{
+    return supplyConverterInput(converter, ioNumberDataPackets, ioData, outDataPacketDescription, inUserData);
+}
+
+// The converters, on linear PCM (32-bit float to 16-bit integer), and the converter made for an ALAC encoder, which is not PCM.
+// Every call gets its own input, so the host's and the port's see the same bytes.
+static void checkConverters(void)
+{
+    NewWithOptionsFn hostNew = hostSymbol("AudioConverterNewWithOptions");
+    PrepareFn hostPrepare = hostSymbol("AudioConverterPrepare");
+    RealtimeFillFn hostRealtime = hostSymbol("AudioConverterFillComplexBufferRealtimeSafe");
+    DependenciesFillFn hostDependencies = hostSymbol("AudioConverterFillComplexBufferWithPacketDependencies");
+    FillFn hostFill = hostSymbol("AudioConverterFillComplexBuffer");
+
+    AudioStreamBasicDescription source = {0}, destination = {0}, alac = {0};
+    source.mSampleRate = 44100;
+    source.mFormatID = kAudioFormatLinearPCM;
+    source.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsPacked;
+    source.mChannelsPerFrame = 1;
+    source.mBitsPerChannel = 32;
+    source.mBytesPerFrame = 4;
+    source.mBytesPerPacket = 4;
+    source.mFramesPerPacket = 1;
+    destination = source;
+    destination.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+    destination.mBitsPerChannel = 16;
+    destination.mBytesPerFrame = 2;
+    destination.mBytesPerPacket = 2;
+    alac.mSampleRate = 44100;
+    alac.mFormatID = kAudioFormatAppleLossless;
+    alac.mChannelsPerFrame = 1;
+    alac.mFramesPerPacket = 4096;
+
+    // The option-free converter: the port's and the host's convert the same eight frames to the same bytes.
+    AudioConverterRef portConverter = NULL, hostConverter = NULL;
+    OSStatus portNew = CharonTestAudioConverterNewWithOptions(&source, &destination, 0, &portConverter);
+    OSStatus hostNewStatus = hostNew(&source, &destination, 0, &hostConverter);
+    check(portNew == hostNewStatus && portConverter != NULL && hostConverter != NULL,
+          "AudioConverterNewWithOptions, no options: the status is the host's and a converter is made");
+
+    ConverterInput portInput, hostInput;
+    SInt16 portOut[16], hostOut[16];
+    resetInput(&portInput, 8);
+    resetInput(&hostInput, 8);
+    memset(portOut, 0, sizeof portOut);
+    memset(hostOut, 0, sizeof hostOut);
+    AudioBufferList portList = { 1, { { 1, sizeof portOut, portOut } } };
+    AudioBufferList hostList = { 1, { { 1, sizeof hostOut, hostOut } } };
+    UInt32 portPackets = 8, hostPackets = 8;
+    OSStatus portFill = AudioConverterFillComplexBuffer(portConverter, supplyConverterInput, &portInput, &portPackets, &portList, NULL);
+    OSStatus hostFillStatus = hostFill(hostConverter, supplyConverterInput, &hostInput, &hostPackets, &hostList, NULL);
+    check(portFill == hostFillStatus && portPackets == hostPackets && memcmp(portOut, hostOut, sizeof portOut) == 0,
+          "the port's converter converts as the host's does, bit for bit");
+
+    // The unbuffered option: the status of making the converter is the host's. The host refuses FillComplexBuffer on the unbuffered
+    // converter; the port's converter is buffered and does not refuse (see the port's comment on AudioConverterNewWithOptions), so
+    // only the host's refusal is printed.
+    AudioConverterRef unbufferedPort = NULL, unbufferedHost = NULL;
+    OSStatus unbufferedPortStatus = CharonTestAudioConverterNewWithOptions(&source, &destination, kAudioConverterOption_Unbuffered, &unbufferedPort);
+    OSStatus unbufferedHostStatus = hostNew(&source, &destination, kAudioConverterOption_Unbuffered, &unbufferedHost);
+    check(unbufferedPortStatus == unbufferedHostStatus, "AudioConverterNewWithOptions, the unbuffered option: the status is the host's");
+    ConverterInput unbufferedInput;
+    resetInput(&unbufferedInput, 8);
+    UInt32 unbufferedPackets = 8;
+    OSStatus unbufferedFill = hostFill(unbufferedHost, supplyConverterInput, &unbufferedInput, &unbufferedPackets, &hostList, NULL);
+    printf("host: AudioConverterFillComplexBuffer on the unbuffered converter is %d (the port's converter is buffered)\n", (int)unbufferedFill);
+
+    // The prepare: the completion runs once with noErr, off the main thread, on both sides.
+    for (int side = 0; side < 2; side++) {
+        dispatch_semaphore_t done = dispatch_semaphore_create(0);
+        __block OSStatus status = -1;
+        __block BOOL onMain = YES;
+        void (^completion)(OSStatus) = ^(OSStatus s) {
+            status = s;
+            onMain = pthread_main_np();
+            dispatch_semaphore_signal(done);
+        };
+        if (side == 0) {
+            CharonTestAudioConverterPrepare(0, NULL, completion);
+        } else {
+            hostPrepare(0, NULL, completion);
+        }
+        BOOL fired = dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC)) == 0;
+        char label[160];
+        snprintf(label, sizeof label, "%s AudioConverterPrepare: the completion runs once with noErr, off the main thread",
+                 side == 0 ? "port" : "host");
+        check(fired && status == noErr && !onMain, label);
+    }
+
+    // The realtime-safe conversion of PCM to PCM is the host's, bit for bit.
+    ConverterInput portRealtimeInput, hostRealtimeInput;
+    resetInput(&portRealtimeInput, 8);
+    resetInput(&hostRealtimeInput, 8);
+    memset(portOut, 0, sizeof portOut);
+    memset(hostOut, 0, sizeof hostOut);
+    portPackets = 8;
+    hostPackets = 8;
+    AudioBufferList portRealtimeList = { 1, { { 1, sizeof portOut, portOut } } };
+    AudioBufferList hostRealtimeList = { 1, { { 1, sizeof hostOut, hostOut } } };
+    OSStatus portRealtime = CharonTestAudioConverterFillComplexBufferRealtimeSafe(portConverter, supplyConverterInputRealtime, &portRealtimeInput,
+                                                                                  &portPackets, &portRealtimeList, NULL);
+    OSStatus hostRealtimeStatus = hostRealtime(hostConverter, supplyConverterInputRealtime, &hostRealtimeInput, &hostPackets, &hostRealtimeList, NULL);
+    check(portRealtime == hostRealtimeStatus && portRealtime == noErr && memcmp(portOut, hostOut, sizeof portOut) == 0,
+          "AudioConverterFillComplexBufferRealtimeSafe, PCM to PCM: the status and the output are the host's, bit for bit");
+
+    // The realtime-safe conversion to ALAC, which is not PCM: the host refuses it with kAudioConverterErr_OperationNotSupported.
+    AudioConverterRef portEncoder = NULL, hostEncoder = NULL;
+    OSStatus portEncoderStatus = CharonTestAudioConverterNewWithOptions(&source, &alac, 0, &portEncoder);
+    OSStatus hostEncoderStatus = hostNew(&source, &alac, 0, &hostEncoder);
+    check(portEncoderStatus == hostEncoderStatus, "AudioConverterNewWithOptions, PCM to ALAC: the status is the host's");
+    UInt8 portBytes[65536], hostBytes[65536];
+    AudioStreamPacketDescription portDescriptions[1], hostDescriptions[1];
+    AudioBufferList portEncoded = { 1, { { 1, sizeof portBytes, portBytes } } };
+    AudioBufferList hostEncoded = { 1, { { 1, sizeof hostBytes, hostBytes } } };
+    ConverterInput portEncodeInput, hostEncodeInput;
+    resetInput(&portEncodeInput, 8);
+    resetInput(&hostEncodeInput, 8);
+    UInt32 portEncodedPackets = 1, hostEncodedPackets = 1;
+    OSStatus portEncode = CharonTestAudioConverterFillComplexBufferRealtimeSafe(portEncoder, supplyConverterInputRealtime, &portEncodeInput,
+                                                                                &portEncodedPackets, &portEncoded, portDescriptions);
+    OSStatus hostEncode = hostRealtime(hostEncoder, supplyConverterInputRealtime, &hostEncodeInput, &hostEncodedPackets, &hostEncoded, hostDescriptions);
+    check(portEncode == hostEncode && portEncode == kAudioConverterErr_OperationNotSupported,
+          "AudioConverterFillComplexBufferRealtimeSafe, PCM to ALAC: refused with kAudioConverterErr_OperationNotSupported, as the host refuses");
+
+    // The packet-dependency conversion of PCM: both arrays given, the output is the host's and the dependency array is left as it was
+    // (the host fills it only for a format with dependent packets). NULL descriptions are refused with -50 by both.
+    ConverterInput portDependencyInput, hostDependencyInput;
+    resetInput(&portDependencyInput, 8);
+    resetInput(&hostDependencyInput, 8);
+    memset(portOut, 0, sizeof portOut);
+    memset(hostOut, 0, sizeof hostOut);
+    portPackets = 8;
+    hostPackets = 8;
+    AudioBufferList portDependencyList = { 1, { { 1, sizeof portOut, portOut } } };
+    AudioBufferList hostDependencyList = { 1, { { 1, sizeof hostOut, hostOut } } };
+    AudioStreamPacketDependencyDescription portDeps[8], hostDeps[8];
+    AudioStreamPacketDescription descriptions[8];
+    memset(portDeps, 0x5A, sizeof portDeps);
+    memset(hostDeps, 0x5A, sizeof hostDeps);
+    OSStatus portDependencies = CharonTestAudioConverterFillComplexBufferWithPacketDependencies(portConverter, supplyConverterInput, &portDependencyInput,
+                                                                                                &portPackets, &portDependencyList, descriptions, portDeps);
+    OSStatus hostDependenciesStatus = hostDependencies(hostConverter, supplyConverterInput, &hostDependencyInput, &hostPackets, &hostDependencyList,
+                                                       descriptions, hostDeps);
+    check(portDependencies == hostDependenciesStatus && portDependencies == noErr && memcmp(portOut, hostOut, sizeof portOut) == 0,
+          "AudioConverterFillComplexBufferWithPacketDependencies, PCM: the status and the output are the host's, bit for bit");
+    check(portDeps[0].mIsIndependentlyDecodable == 0x5A5A5A5A && hostDeps[0].mIsIndependentlyDecodable == 0x5A5A5A5A,
+          "AudioConverterFillComplexBufferWithPacketDependencies, PCM: the dependencies are left as they were, on both sides");
+    ConverterInput portNullInput, hostNullInput;
+    resetInput(&portNullInput, 8);
+    resetInput(&hostNullInput, 8);
+    UInt32 portNullPackets = 8, hostNullPackets = 8;
+    OSStatus portNull = CharonTestAudioConverterFillComplexBufferWithPacketDependencies(portConverter, supplyConverterInput, &portNullInput,
+                                                                                        &portNullPackets, &portDependencyList, NULL, portDeps);
+    OSStatus hostNull = hostDependencies(hostConverter, supplyConverterInput, &hostNullInput, &hostNullPackets, &hostDependencyList, NULL, hostDeps);
+    check(portNull == hostNull && portNull == kAudio_ParamError,
+          "AudioConverterFillComplexBufferWithPacketDependencies, NULL descriptions: -50 on both sides");
+
+    AudioConverterDispose(portConverter);
+    AudioConverterDispose(hostConverter);
+    AudioConverterDispose(unbufferedHost);
+    AudioConverterDispose(portEncoder);
+    AudioConverterDispose(hostEncoder);
+}
+
+// AudioFileWritePacketsWithDependencies: the status and the packets written are the host's, on a PCM WAV file, with the dependency
+// array NULL and given.
+static void checkFileDependencies(const char *folder)
+{
+    WriteDependenciesFn hostWrite = hostSymbol("AudioFileWritePacketsWithDependencies");
+    AudioStreamBasicDescription format = {0};
+    format.mSampleRate = 44100;
+    format.mFormatID = kAudioFormatLinearPCM;
+    format.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
+    format.mChannelsPerFrame = 1;
+    format.mBitsPerChannel = 16;
+    format.mBytesPerFrame = 2;
+    format.mBytesPerPacket = 2;
+    format.mFramesPerPacket = 1;
+    SInt16 samples[4] = { 1, 2, 3, 4 };
+    AudioStreamPacketDependencyDescription dependencies[4];
+    memset(dependencies, 0, sizeof dependencies);
+    for (int side = 0; side < 2; side++) {
+        for (int withDependencies = 0; withDependencies < 2; withDependencies++) {
+            NSString *path = [NSString stringWithFormat:@"%s/dependencies-%d-%d.wav", folder, side, withDependencies];
+            AudioFileID file = NULL;
+            if (AudioFileCreateWithURL((__bridge CFURLRef)[NSURL fileURLWithPath:path], kAudioFileWAVEType, &format, kAudioFileFlags_EraseFile, &file) != noErr) {
+                printf("FAIL the dependency file cannot be created at %s\n", path.UTF8String);
+                exit(1);
+            }
+            UInt32 packets = 4;
+            const AudioStreamPacketDependencyDescription *deps = withDependencies ? dependencies : NULL;
+            OSStatus status = side == 0 ? CharonTestAudioFileWritePacketsWithDependencies(file, false, 8, NULL, deps, 0, &packets, samples)
+                                        : hostWrite(file, false, 8, NULL, deps, 0, &packets, samples);
+            AudioFileClose(file);
+            char label[200];
+            snprintf(label, sizeof label, "%s AudioFileWritePacketsWithDependencies, dependencies %s: the status and the packets are the host's",
+                     side == 0 ? "port" : "host", withDependencies ? "given" : "NULL");
+            check(status == noErr && packets == 4, label);
+        }
+    }
+}
+
+// The dispatch variants: a NULL dispatch queue is refused with -50 by both, and an output queue calls its block on the queue it was
+// given, off the main thread, when a buffer has played (the host's answer). The input variant is not run here (it needs a microphone).
+static void checkQueueDispatch(void)
+{
+    QueueOutputFn hostOutput = hostSymbol("AudioQueueNewOutputWithDispatchQueue");
+    AudioStreamBasicDescription format = {0};
+    format.mSampleRate = 44100;
+    format.mFormatID = kAudioFormatLinearPCM;
+    format.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
+    format.mChannelsPerFrame = 1;
+    format.mBitsPerChannel = 16;
+    format.mBytesPerFrame = 2;
+    format.mBytesPerPacket = 2;
+    format.mFramesPerPacket = 1;
+    AudioQueueRef nullPort = NULL, nullHost = NULL;
+    check(CharonTestAudioQueueNewOutputWithDispatchQueue(&nullPort, &format, 0, NULL, ^(AudioQueueRef q, AudioQueueBufferRef b) {})
+          == hostOutput(&nullHost, &format, 0, NULL, ^(AudioQueueRef q, AudioQueueBufferRef b) {}),
+          "AudioQueueNewOutputWithDispatchQueue, a NULL queue: the status is the host's");
+
+    for (int side = 0; side < 2; side++) {
+        dispatch_queue_t queue = dispatch_queue_create("charon.functions.queue", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_set_specific(queue, (__bridge const void *)queue, (void *)1, NULL);
+        dispatch_semaphore_t played = dispatch_semaphore_create(0);
+        __block BOOL onQueue = NO;
+        __block BOOL onMain = YES;
+        AudioQueueOutputCallbackBlock block = ^(AudioQueueRef q, AudioQueueBufferRef b) {
+            onQueue = dispatch_get_specific((__bridge const void *)queue) != NULL;
+            onMain = pthread_main_np();
+            dispatch_semaphore_signal(played);
+        };
+        AudioQueueRef aq = NULL;
+        OSStatus status = side == 0 ? CharonTestAudioQueueNewOutputWithDispatchQueue(&aq, &format, 0, queue, block)
+                                    : hostOutput(&aq, &format, 0, queue, block);
+        check(status == noErr, side == 0 ? "port AudioQueueNewOutputWithDispatchQueue: noErr" : "host AudioQueueNewOutputWithDispatchQueue: noErr (oracle)");
+        if (status == noErr) {
+            AudioQueueBufferRef buffer = NULL;
+            AudioQueueAllocateBuffer(aq, 2048, &buffer);
+            memset(buffer->mAudioData, 0, 2048);
+            buffer->mAudioDataByteSize = 2048;
+            AudioQueueEnqueueBuffer(aq, buffer, 0, NULL);
+            AudioQueueStart(aq, NULL);
+            BOOL fired = dispatch_semaphore_wait(played, dispatch_time(DISPATCH_TIME_NOW, 10 * NSEC_PER_SEC)) == 0;
+            AudioQueueStop(aq, true);
+            AudioQueueDispose(aq, true);
+            char label[200];
+            snprintf(label, sizeof label, "%s AudioQueueNewOutputWithDispatchQueue: the block runs on the queue it was given",
+                     side == 0 ? "port" : "host");
+            check(fired && onQueue, label);
+            snprintf(label, sizeof label, "%s AudioQueueNewOutputWithDispatchQueue: the block runs off the main thread",
+                     side == 0 ? "port" : "host");
+            check(fired && !onMain, label);
+        }
+    }
+}
+
+int main(int argc, const char *argv[])
 {
     @autoreleasepool {
+        if (argc != 2) {
+            printf("usage: functions <a folder for the files this test writes>\n");
+            return 2;
+        }
         checkLastActive();
         printHostIcon();
         checkExtensionLists();
         checkInstantiate();
         checkSoundCompletions();
         checkMIDIList();
+        checkUserData(argv[1]);
+        checkValidate();
+        checkConverters();
+        checkFileDependencies(argv[1]);
+        checkQueueDispatch();
         printf("checks=audiotoolbox-functions failures=%d\n", failures);
         return failures == 0 ? 0 : 1;
     }
