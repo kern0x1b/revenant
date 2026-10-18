@@ -27,6 +27,15 @@ comparison does tell a wrong answer apart.
 Not measured, and so not claimed: `!=` on an item that lacks the attribute; whitespace-only queries; escapes inside a
 quoted value; unquoted values; a single `=`; attribute names other than the ones the differential uses.
 
+## Where the class is carried
+
+The query reads the port's default store, `CharonSpotlightDefaultItems`, which `CSSearchableIndex.o` defines. Measured with
+`tools/symbol-first-release.lua` on the armv7 ladder: the release's own `CSSearchableIndex` is first exported at 9.0, so from
+9.0 the port's index is left out and its store is not there; the release's own `CSSearchQuery` is first exported at 10.0.1,
+the first held rung that exports it. The release has no query over the index it keeps from 9.0 on, so in the 9.0 band and
+below 10.0.1 the query is owed, and the registry carries the class below 9.0 only (minimum 6.0, maximum 9.0). From 10.0.1
+the release has the class itself.
+
 ## What a result carries
 
 - A result holds the attributes its `attributes` list names and nothing else: with `@[@"title"]` the title is there and the

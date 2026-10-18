@@ -6,8 +6,6 @@
 // against a double-quoted string in which * matches any run of characters, combined with && (binding tighter) and ||,
 // with parentheses. Anything else - free text, an operator the grammar does not have, an unfinished comparison - is an
 // invalid query, answered with CSSearchQueryErrorCodeInvalidQuery.
-NSString *const CSSearchQueryErrorDomain = @"CSSearchQueryErrorDomain";
-
 typedef BOOL (^CharonSearchPredicate)(CSSearchableItem *item);
 
 // A glob in which only * is special: the parts between stars must appear in order, the first as a prefix and the last as a

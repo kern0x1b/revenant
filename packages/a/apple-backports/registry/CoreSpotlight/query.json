@@ -6,8 +6,9 @@
       "kind": "class",
       "introduced": "10.0",
       "minimum": "6.0",
+      "maximum": "9.0",
       "status": "implemented",
-      "effect": "a query over the default index: the port's own store, not another application's. Its grammar is the one measured (attribute == and != against a quoted string, * as any run, && binding tighter than ||, parentheses); free text, contains and an unfinished comparison are invalid (CSSearchQueryErrorCodeInvalidQuery). The found handler gets all matches once, when there are some; foundItemCount and the completion error are set before the completion handler runs. A result carries only the fetched attributes. Owed: cancel timing, filterQueries, keyboardLanguage, protectionClasses, items of other applications, the error's user info (see the facts)",
+      "effect": "carried below 9.0 only, where the port's default store exists: from 9.0 the release's own index replaces it and the release has no query over that index, and from 10.0.1 the release has the class itself. A query over the default index: the port's own store, not another application's. Its grammar is the one measured (attribute == and != against a quoted string, * as any run, && binding tighter than ||, parentheses); free text, contains and an unfinished comparison are invalid (CSSearchQueryErrorCodeInvalidQuery). The found handler gets all matches once, when there are some; foundItemCount and the completion error are set before the completion handler runs. A result carries only the fetched attributes. Owed: cancel timing, filterQueries, keyboardLanguage, protectionClasses, items of other applications, the error's user info (see the facts)",
       "facts": "facts/CoreSpotlight/SearchQuery.md",
       "source": "the macOS CoreSpotlight framework of the host (tests/backports/host/corespotlight-query: 25 lines, identical on both sides after the store root is changed, with a planted control that differs on 2 lines); the rendered CoreSpotlight headers of the 26.2 SDK (spec/CoreSpotlight/declarations.tsv) for the declarations, with -[CSSearchQuery init] declared unavailable there"
     },
