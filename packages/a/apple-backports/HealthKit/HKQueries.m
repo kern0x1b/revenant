@@ -16,15 +16,14 @@
 @implementation HKSampleQuery {
     NSUInteger _limit;
     NSArray<NSSortDescriptor *> *_sortDescriptors;
-    void (^_resultsHandler)(NSArray<HKSample *> *, BOOL, NSError *);
-    NSUInteger _delivered;
+    void (^_resultsHandler)(HKSampleQuery *, NSArray<HKSample *> *, NSError *);
 }
 
 - (instancetype)initWithSampleType:(HKSampleType *)sampleType
                          predicate:(nullable NSPredicate *)predicate
                              limit:(NSUInteger)limit
                   sortDescriptors:(nullable NSArray<NSSortDescriptor *> *)sortDescriptors
-                     resultsHandler:(void (^)(NSArray<HKSample *> *_Nullable results, BOOL done, NSError *_Nullable error))resultsHandler
+                     resultsHandler:(void (^)(HKSampleQuery *query, NSArray<HKSample *> *_Nullable results, NSError *_Nullable error))resultsHandler
 {
     self = [super initWithCharonSampleType:sampleType];
     if (self) {
@@ -36,11 +35,8 @@
     return self;
 }
 
-// The batch a query delivers at a time. The release delivers in batches and the handler says when
-// the last one has come; a query of the whole store answers in one batch when the store holds no
-// more than this, and in as many as it takes above it.
-#define CHARON_HK_SAMPLE_BATCH 200
-
+// The handler is called once, when the query has finished, with the results or with the error, as the SDK's HKSampleQuery.h
+// documents; a query that failed has no results, so they are nil.
 - (void)charon_run
 {
     CharonHKStore *store = [CharonHKStore sharedStore];
@@ -55,35 +51,10 @@
                           sortDescriptors:_sortDescriptors
                             fromSequence:0
                                    error:&error];
-    if (!found) {
-        [self charon_perform:^{
-            if (self->_resultsHandler)
-                self->_resultsHandler(@[], YES, error);
-        }];
-        return;
-    }
-    NSUInteger delivered = 0;
-    while (delivered < found.count) {
-        NSRange range = NSMakeRange(delivered, MIN((NSUInteger)CHARON_HK_SAMPLE_BATCH, found.count - delivered));
-        NSArray *batch = [found subarrayWithRange:range];
-        BOOL last = NSMaxRange(range) >= found.count;
-        delivered = NSMaxRange(range);
-        [self charon_perform:^{
-            if (self->_resultsHandler)
-                self->_resultsHandler(batch, last, nil);
-        }];
-    }
-    if (!found.count) {
-        [self charon_perform:^{
-            if (self->_resultsHandler)
-                self->_resultsHandler(@[], YES, nil);
-        }];
-    }
-}
-
-- (NSUInteger)charon_deliveredCount
-{
-    return _delivered;
+    [self charon_perform:^{
+        if (self->_resultsHandler)
+            self->_resultsHandler(self, found, error);
+    }];
 }
 
 @end
