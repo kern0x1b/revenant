@@ -1,0 +1,17 @@
+{
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  },
+  "permissions": {
+    "deny": [
+      "Bash(git reset --hard *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git push --force-with-lease *)",
+      "Bash(git checkout -- *)",
+      "Bash(git clean -f *)"
+    ]
+  },
+  "autoMemoryEnabled": false
+}

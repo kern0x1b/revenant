@@ -1,0 +1,7 @@
+---
+# Keep WebKit's brace, indentation, namespace, and pointer/reference style.
+# The wrapping overrides use LLVM's more compact long-expression layout.
+BasedOnStyle: WebKit
+ColumnLimit: 80
+AlignOperands: Align
+BreakBeforeBinaryOperators: None

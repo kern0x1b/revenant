@@ -1,0 +1,95 @@
+# Shade
+
+**Charon's emulator for legacy iPhone OS and iOS userlands, on macOS arm64.**
+
+Shade boots a firmware's own userland — launchd, the daemons, SpringBoard and the
+applications — over an emulated XNU kernel, on a JIT-translated ARM CPU
+([Umbra](https://github.com/kern0x1b/umbra)). It exists so that software built for
+old iPhones, iPods and iPads can be started and tested on a Mac before it goes to
+a real device.
+
+## What it does
+
+- Emulates the devices in `shade profile --list`: iPhone 2G, 3G, 3GS, 4 and 4S,
+  iPod touch 1, 2 and 4, iPad and iPad 2.
+- Boots real firmware root filesystems from iPhone OS 3.0 through iOS 6.1.3 in
+  Charon's acceptance runs; the kernel ABIs it knows are listed by `shade abi`.
+- Draws the guest's OpenGL ES on a host Vulkan driver, plays its audio, delivers
+  touch and button input, and answers the guest's IOKit, Mach and BSD calls itself.
+- Publishes the hardware the firmware looks for — audio, baseband, display,
+  keybag — the way the real devices do; the iPhone 4S's Voice audio device is
+  described from a registry dump of a real one.
+- Runs a test program inside the guest and hands back its result; that is how
+  [Charon](https://github.com/kern0x1b/charon)'s `xmake emulate` uses it.
+
+## How it works
+
+`shade boot` loads the root filesystem and starts `launchd` as the guest's first
+process. The guest's CPU is translated to host code by Umbra; its system calls,
+Mach messages and IOKit requests are answered by Shade's own kernel model in
+`src/kernel`, `src/mach` and `src/device_state`. Frameworks the emulated hardware
+would serve — graphics, audio, telephony — are answered where they cross the
+boundary, in `src/graphics`, `src/media` and `src/telephony`.
+
+## Requirements
+
+- macOS on Apple silicon, CMake 3.24 or later, Ninja and a C++20 compiler.
+- OpenSSL, libpng, libjpeg, libplist; optionally SDL2 (a window) and FFmpeg
+  (compressed audio).
+- A Vulkan loader and driver, and `glslc`, to draw and to build the shaders; a CPU
+  driver such as SwiftShader is enough.
+- A root filesystem of the firmware to run, for example one unpacked by
+  Charon's `xmake firmware rootfs`.
+
+## Build
+
+```sh
+git submodule update --init
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+Options are `SHADE_ENABLE_SDL2`, `SHADE_ENABLE_VULKAN` and `SHADE_ENABLE_IPO`. The bundled
+Boost is 1.81.0 and needs no compiler flag with Apple clang 21.
+Through Charon the build is the `shade` package: `xmake emulate` builds and runs it.
+
+## Usage
+
+```sh
+build/shade profile --list
+build/shade boot --rootfs "$ROOTFS" --device iPhone4,1 --display headless --gles-backend software
+```
+
+`shade --help` lists every verb: `profile`, `abi`, `inspect`, `catalog`,
+`firmware prepare`, `disasm`, `boot`, `smoke` and `benchmark`. `--control-stdin`
+reads commands such as `status`, `threads NAME` and `snapshot PATH` from
+standard input while a guest runs, and `--gdb PORT` waits for a debugger; a guest
+runs slower than a device, so `--time-scale 10` makes its clocks run at a tenth of
+the host's, which the guest's own watchdogs need.
+
+## Repository layout
+
+| Path | Holds |
+| --- | --- |
+| `app/` | the `shade` program: verbs, live control, the desktop window |
+| `src/` | the library: kernel, Mach, device state, graphics, media, network, runtime |
+| `external/umbra` | the JIT core, a submodule |
+| `external/ext-boost` | the Boost headers it builds against, a submodule |
+| `external/vulkan-memory-allocator` | the Vulkan memory allocator, vendored |
+| `tools/` | guest-side probes and the boot logo script |
+
+## Documentation
+
+| Document | About |
+| --- | --- |
+| [AGENTS.md](AGENTS.md) | the contributor guide |
+| [CHANGELOG.md](CHANGELOG.md) | what changed |
+| [THIRD-PARTY.md](THIRD-PARTY.md) | what is bundled or linked, and under which license |
+
+## License
+
+MPL-2.0, see `LICENSE`. Required notices are in `NOTICE`, and what is bundled or
+linked is in `THIRD-PARTY.md`.
+
+Built with Claude (Anthropic). This project is developed with AI assistance,
+openly — see the commit history.

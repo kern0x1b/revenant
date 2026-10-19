@@ -1,0 +1,11 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.pdf binary
+*.a   binary
+*.dylib binary
+
+# Keep generated and vendored bulk out of language statistics and diffs
+external/**        linguist-vendored

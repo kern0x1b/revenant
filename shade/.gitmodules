@@ -1,0 +1,6 @@
+[submodule "external/umbra"]
+	path = external/umbra
+	url = https://github.com/kern0x1b/umbra.git
+[submodule "external/ext-boost"]
+	path = external/ext-boost
+	url = https://github.com/kern0x1b/shade-boost.git

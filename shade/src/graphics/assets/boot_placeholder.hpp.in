@@ -1,0 +1,10 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// Generated from the replaceable default PNG; no runtime asset path required.
+#pragma once
+
+namespace shade {
+inline constexpr unsigned char boot_placeholder_png[] { @BOOT_PLACEHOLDER_BYTES@ };
+}
